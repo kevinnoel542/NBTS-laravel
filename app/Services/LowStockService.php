@@ -8,6 +8,10 @@ use App\Models\LowStockAlert;
 
 class LowStockService
 {
+    public function __construct(private NotificationService $notificationService)
+    {
+    }
+
     public function evaluate(BloodInventory $inventory): ?LowStockAlert
     {
         if ($inventory->available_units >= $inventory->minimum_threshold) {
@@ -67,6 +71,14 @@ class LowStockService
         ]);
 
         $alert->update(['status' => 'campaign_created']);
+
+        $this->notificationService->notifyDonors(
+            $campaign->title,
+            'Urgent blood donation appeal for ' . $alert->blood_group . ' at ' . $center?->name . '.',
+            'emergency_campaign',
+            ['campaign_id' => $campaign->id, 'blood_group' => $alert->blood_group],
+            '/campaigns/' . $campaign->id,
+        );
 
         return $campaign;
     }

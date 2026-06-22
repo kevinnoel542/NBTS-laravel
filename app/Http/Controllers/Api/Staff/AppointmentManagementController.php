@@ -5,10 +5,15 @@ namespace App\Http\Controllers\Api\Staff;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\AppointmentResource;
 use App\Models\Appointment;
+use App\Services\NotificationService;
 use Illuminate\Http\Request;
 
 class AppointmentManagementController extends Controller
 {
+    public function __construct(private NotificationService $notificationService)
+    {
+    }
+
     public function confirm(Appointment $appointment, Request $request)
     {
         if (!$request->user()->can('appointments.manage')) {
@@ -24,6 +29,16 @@ class AppointmentManagementController extends Controller
             'confirmed_at' => now(),
             'handled_by' => $request->user()->id,
         ]);
+
+        $appointment->load(['user', 'bloodCenter']);
+        $this->notificationService->notifyUser(
+            $appointment->user,
+            'Appointment confirmed',
+            'Your appointment at ' . $appointment->bloodCenter?->name . ' is confirmed for ' . $appointment->scheduled_at->format('M d, Y H:i') . '.',
+            'appointment_confirmed',
+            ['appointment_id' => $appointment->id],
+            '/appointments/' . $appointment->id,
+        );
 
         return new AppointmentResource($appointment->load(['user', 'bloodCenter']));
     }
@@ -43,6 +58,16 @@ class AppointmentManagementController extends Controller
             'cancelled_at' => now(),
             'handled_by' => $request->user()->id,
         ]);
+
+        $appointment->load(['user', 'bloodCenter']);
+        $this->notificationService->notifyUser(
+            $appointment->user,
+            'Appointment cancelled',
+            'Your appointment at ' . $appointment->bloodCenter?->name . ' was cancelled by staff.',
+            'appointment_cancelled',
+            ['appointment_id' => $appointment->id],
+            '/appointments',
+        );
 
         return new AppointmentResource($appointment->load(['user', 'bloodCenter']));
     }

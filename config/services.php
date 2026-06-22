@@ -35,4 +35,11 @@ return [
         ],
     ],
 
+    'firebase' => [
+        'enabled' => env('FIREBASE_NOTIFICATIONS_ENABLED', false),
+        'server_key' => env('FIREBASE_SERVER_KEY'),
+        'project_id' => env('FIREBASE_PROJECT_ID'),
+        'credentials' => env('FIREBASE_CREDENTIALS'),
+    ],
+
 ];

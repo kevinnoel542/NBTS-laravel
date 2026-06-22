@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\AppointmentResource;
 use App\Services\AppointmentService;
+use App\Services\NotificationService;
 use App\Models\Appointment;
 use App\Models\BloodCenter;
 use Illuminate\Http\Request;
@@ -13,10 +14,12 @@ use Illuminate\Validation\ValidationException;
 class AppointmentController extends Controller
 {
     protected $appointmentService;
+    protected $notificationService;
 
-    public function __construct(AppointmentService $appointmentService)
+    public function __construct(AppointmentService $appointmentService, NotificationService $notificationService)
     {
         $this->appointmentService = $appointmentService;
+        $this->notificationService = $notificationService;
     }
 
     public function index(Request $request)
@@ -51,6 +54,16 @@ class AppointmentController extends Controller
             'user_id' => $request->user()->id
         ]));
 
+        $appointment->load('bloodCenter');
+        $this->notificationService->notifyUser(
+            $request->user(),
+            'Appointment booked',
+            'Your appointment at ' . $appointment->bloodCenter?->name . ' is booked for ' . $appointment->scheduled_at->format('M d, Y H:i') . '.',
+            'appointment_booked',
+            ['appointment_id' => $appointment->id],
+            '/appointments/' . $appointment->id,
+        );
+
         return new AppointmentResource($appointment->load(['user', 'bloodCenter']));
     }
 
@@ -82,6 +95,16 @@ class AppointmentController extends Controller
             'status' => 'pending',
             'rescheduled_at' => now(),
         ]);
+
+        $appointment->load('bloodCenter');
+        $this->notificationService->notifyUser(
+            $request->user(),
+            'Appointment rescheduled',
+            'Your appointment at ' . $appointment->bloodCenter?->name . ' was rescheduled to ' . $appointment->scheduled_at->format('M d, Y H:i') . '.',
+            'appointment_rescheduled',
+            ['appointment_id' => $appointment->id],
+            '/appointments/' . $appointment->id,
+        );
 
         return new AppointmentResource($appointment->load(['user', 'bloodCenter']));
     }
@@ -139,6 +162,16 @@ class AppointmentController extends Controller
             'status' => 'cancelled',
             'cancelled_at' => now(),
         ]);
+
+        $appointment->load('bloodCenter');
+        $this->notificationService->notifyUser(
+            $request->user(),
+            'Appointment cancelled',
+            'Your appointment at ' . $appointment->bloodCenter?->name . ' was cancelled.',
+            'appointment_cancelled',
+            ['appointment_id' => $appointment->id],
+            '/appointments',
+        );
 
         return new AppointmentResource($appointment->load(['user', 'bloodCenter']));
     }

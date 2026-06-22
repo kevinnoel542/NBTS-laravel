@@ -76,6 +76,11 @@ class User extends Authenticatable implements FilamentUser
         return $this->hasMany(DonorReward::class);
     }
 
+    public function userNotifications()
+    {
+        return $this->hasMany(UserNotification::class);
+    }
+
     public function canAccessPanel(Panel $panel): bool
     {
         return (bool) $this->is_active && $this->hasAnyRole([

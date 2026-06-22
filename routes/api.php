@@ -12,6 +12,7 @@ use App\Http\Controllers\Api\ArticleController;
 use App\Http\Controllers\Api\DonorCardController;
 use App\Http\Controllers\Api\EligibilityController;
 use App\Http\Controllers\Api\LoyaltyController;
+use App\Http\Controllers\Api\v1\NotificationController;
 use App\Http\Controllers\Api\Staff\AppointmentManagementController;
 use App\Http\Controllers\Api\Staff\DonationRecordingController;
 use App\Http\Controllers\Api\Staff\DonorLookupController;
@@ -102,7 +103,11 @@ Route::prefix('v1')->group(function () {
         });
 
         // Notifications
-        Route::post('/notifications/register-token', [\App\Http\Controllers\Api\v1\NotificationController::class, 'registerToken']);
+        Route::get('/notifications', [NotificationController::class, 'index']);
+        Route::get('/notifications/unread-count', [NotificationController::class, 'unreadCount']);
+        Route::post('/notifications/register-token', [NotificationController::class, 'registerToken']);
+        Route::post('/notifications/mark-all-read', [NotificationController::class, 'markAllAsRead']);
+        Route::post('/notifications/{notification}/read', [NotificationController::class, 'markAsRead']);
     });
 
 });
