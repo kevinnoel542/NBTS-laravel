@@ -22,7 +22,7 @@ class CampaignOverviewStats extends StatsOverviewWidget
                 ->description('Campaigns not started yet')
                 ->icon('heroicon-o-megaphone')
                 ->color('info'),
-            Stat::make('Active Campaigns', number_format(Campaign::whereIn('status', ['active', 'ongoing'])->count()))
+            Stat::make('Active Campaigns', number_format(Campaign::where('status', 'ongoing')->count()))
                 ->description('Campaigns currently running')
                 ->icon('heroicon-o-signal')
                 ->color('success'),

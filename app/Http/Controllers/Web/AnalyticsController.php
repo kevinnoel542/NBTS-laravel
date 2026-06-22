@@ -19,7 +19,7 @@ class AnalyticsController extends Controller
         $totalDonations = Donation::count();
         $totalVolume = Donation::sum('volume_ml') / 1000; // In Liters
         $livesSaved = $totalDonations * 3;
-        $activeCampaigns = Campaign::where('status', 'active')->count();
+        $activeCampaigns = Campaign::where('status', 'ongoing')->count();
         $availableUnits = BloodUnit::where('status', 'available')->count();
         $lowStockGroups = BloodInventory::whereColumn('available_units', '<', 'minimum_threshold')->count();
 

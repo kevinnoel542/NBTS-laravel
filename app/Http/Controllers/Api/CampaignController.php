@@ -11,7 +11,11 @@ class CampaignController extends Controller
 {
     public function index()
     {
-        $campaigns = Campaign::with('bloodCenter')->where('status', 'active')->latest()->get();
+        $campaigns = Campaign::with('bloodCenter')
+            ->whereIn('status', ['upcoming', 'ongoing'])
+            ->orderBy('start_date')
+            ->get();
+
         return CampaignResource::collection($campaigns);
     }
 

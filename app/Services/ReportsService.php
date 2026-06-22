@@ -18,7 +18,7 @@ class ReportsService
             'donations' => Donation::where('status', 'completed')->count(),
             'blood_units_available' => BloodUnit::where('status', 'available')->count(),
             'low_stock_groups' => BloodInventory::whereColumn('available_units', '<', 'minimum_threshold')->count(),
-            'active_campaigns' => Campaign::whereIn('status', ['active', 'ongoing', 'upcoming'])->count(),
+            'active_campaigns' => Campaign::whereIn('status', ['ongoing', 'upcoming'])->count(),
         ];
     }
 

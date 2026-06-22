@@ -10,7 +10,7 @@ class BloodCenterDirectoryController extends Controller
 {
     public function index(Request $request)
     {
-        $query = BloodCenter::where('status', 'active');
+        $query = BloodCenter::where('is_active', true);
 
         if ($request->has('search')) {
             $query->where(function($q) use ($request) {

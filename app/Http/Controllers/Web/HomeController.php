@@ -20,7 +20,7 @@ class HomeController extends Controller
             'lives_saved' => (Donation::where('status', 'completed')->count() + 4500) * 3,
         ];
 
-        $campaigns = Campaign::where('status', 'active')
+        $campaigns = Campaign::where('status', 'ongoing')
             ->with(['bloodCenter'])
             ->latest()
             ->take(3)

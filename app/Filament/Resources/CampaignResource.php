@@ -50,7 +50,7 @@ class CampaignResource extends Resource
                         Forms\Components\Select::make('status')
                             ->options([
                                 'upcoming' => 'Upcoming',
-                                'active' => 'Active',
+                                'ongoing' => 'Active',
                                 'completed' => 'Completed',
                                 'cancelled' => 'Cancelled',
                             ])
@@ -74,6 +74,9 @@ class CampaignResource extends Resource
                     ->schema([
                         Forms\Components\FileUpload::make('image_path')
                             ->image()
+                            ->disk('public')
+                            ->visibility('public')
+                            ->fetchFileInformation(false)
                             ->directory('campaigns'),
                         Forms\Components\Textarea::make('description')
                             ->columnSpanFull(),
@@ -87,6 +90,7 @@ class CampaignResource extends Resource
             ->columns([
                 Tables\Columns\ImageColumn::make('image_path')
                     ->label('Poster')
+                    ->disk('public')
                     ->circular(),
                 Tables\Columns\TextColumn::make('title')
                     ->weight('bold')
@@ -102,9 +106,10 @@ class CampaignResource extends Resource
                     ->badge()
                     ->color(fn (string $state): string => match ($state) {
                         'upcoming' => 'info',
-                        'active' => 'success',
+                        'ongoing' => 'success',
                         'completed' => 'gray',
                         'cancelled' => 'danger',
+                        default => 'gray',
                     }),
                 Tables\Columns\TextColumn::make('location')
                     ->searchable()
@@ -114,7 +119,7 @@ class CampaignResource extends Resource
                 Tables\Filters\SelectFilter::make('status')
                     ->options([
                         'upcoming' => 'Upcoming',
-                        'active' => 'Active',
+                        'ongoing' => 'Active',
                         'completed' => 'Completed',
                         'cancelled' => 'Cancelled',
                     ]),
