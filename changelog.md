@@ -1,0 +1,107 @@
+# Changelog - Blood Donation Platform
+
+All notable changes to this project will be documented in this file.
+
+## [Unreleased] - 2026-03-16
+
+### Added
+- **Phase 9 Blood Unit and Inventory Management**:
+    - Added blood units with unit number, lifecycle status, collection date, expiry date, and current location.
+    - Added blood inventory totals by center and blood group.
+    - Added inventory adjustments for auditable inventory changes.
+    - Completed donations now create available blood units and increment inventory.
+    - Added unit status transitions, manual inventory adjustment, and due-expiry handling.
+    - Added Filament resources for blood units, blood inventory, and inventory adjustments.
+- **Phase 10 Low Stock and Emergency Campaigns**:
+    - Added low stock alerts by center and blood group.
+    - Inventory changes now create or resolve low stock alerts.
+    - Added emergency campaign creation from low-stock alerts.
+    - Added Filament resource for low stock alerts.
+- **Phase 12 Reports and Analytics**:
+    - Added `ReportsService` for summary, donation, and inventory reports.
+    - Added staff report APIs for summary, donations, and inventory.
+    - Added inventory metrics to the public analytics controller.
+- **Phase 5 Eligibility Engine**:
+    - Added eligibility status fields to donor profiles.
+    - Added `eligibility_records` for staff/admin screening history.
+    - Added `deferrals` for temporary and permanent donor deferrals.
+    - Added `EligibilityService` for age, weight, active deferral, and recent donation checks.
+    - Donation recording now blocks completed donations for ineligible donors.
+    - Added donor eligibility API and staff eligibility/deferral APIs.
+    - Added Filament resources for eligibility records and deferrals.
+- **Phase 6 Digital Donor Card**:
+    - Expanded donor card QR payload with issue timestamp.
+    - Added eligibility status to donor card stats.
+- **Phase 7 Loyalty Program**:
+    - Added badges, donor badges, rewards, donor rewards, and leaderboards tables/models.
+    - Added `LoyaltyService` to award badges/rewards after completed donations.
+    - Added default seeded badges and rewards.
+    - Added donor loyalty and leaderboard APIs.
+    - Added Filament resources for badges, rewards, and leaderboards.
+- **Phase 2 Donor API and Mobile Support**:
+    - Added donor card API with donor ID and QR payload.
+    - Added donor profile data to authenticated profile responses.
+    - Fixed profile update to use `phone` instead of `phone_number`.
+- **Phase 3 Appointment and Walk-In System**:
+    - Added donor appointment cancellation endpoint.
+    - Added staff appointment confirmation and cancellation endpoints.
+    - Added workflow fields on appointments: `confirmed_at`, `cancelled_at`, and `handled_by`.
+    - Added walk-in donation support using nullable appointment links and `donation_type`.
+- **Phase 4 Donation Recording System**:
+    - Added staff donor search by donor ID, QR payload donor ID, phone, name, or email.
+    - Added staff donation recording endpoint backed by `DonationRecordingService`.
+    - Added blood group verification endpoint.
+    - Added donation fields: `donation_type`, `recorded_by`, and `blood_group_verified`.
+    - Donation completion now updates appointment status, donor last donation date, donor profile total donations, next eligible date, and blood group verification state.
+- **Phase 1 Foundation**:
+    - Installed `spatie/laravel-permission`.
+    - Published Spatie permission config and migrations.
+    - Added roles: `super_admin`, `nbts_admin`, `center_manager`, `center_staff`, and `donor`.
+    - Added permissions for users, roles, donors, centers, center staff, appointments, donations, campaigns, inventory, and reports.
+    - Added `donor_profiles` table/model for donor IDs, blood group verification state, eligibility date, and donation totals.
+    - Added `center_staff` table/model for assigning staff and managers to blood centers.
+    - Added Filament resources for roles, permissions, donor profiles, and center staff assignments.
+    - Seeded `admin@nbts.com` as `super_admin`.
+- Added planning documents under `delete/`:
+    - `version.md`
+    - `phase.md`
+    - `task.md`
+- **Project Structure**: Established high-level architecture using Repositories (`app/Repositories`) and Services (`app/Services`).
+- **Database Architecture**: Implemented core entities and relationships:
+    - `Users` (extended with donor fields)
+    - `BloodCenters`
+    - `Appointments`
+    - `Donations`
+    - `Campaigns`
+- **Authentication**: Set up Laravel Sanctum for API-based authentication and standard session auth for web.
+- **API Layer**:
+    - Created API Resources for `User`, `BloodCenter`, `Appointment`, and `Donation`.
+    - Implemented `AuthController` for donor registration and login.
+    - Implemented `BloodCenterController` for center discovery.
+    - Implemented `AppointmentController` for booking management.
+    - Implemented `DonationController` for history tracking.
+- Added Filament v3 for a professional administrative dashboard.
+- Integrated Redis (predis) for caching and background queue processing.
+- Installed and configured Tailwind CSS v4 and Alpine.js for modern frontend development.
+- Migrated admin functionality to Filament Resources (BloodCenters, Appointments, Donations, Campaigns, Users).
+- Implemented dynamic status badges and relationship management in the admin panel.
+- Created default administrative user (admin@nbts.com).
+- Configured environment for optimized cache and session handling via Redis.
+- Resolved IDE warnings by standardizing imports and installing `laravel-ide-helper`.
+- Optimized codebase by removing obsolete manual admin routes and controllers.
+- **Admin Dashboard**:
+    - Initial UI implementation with premium Vanilla CSS.
+    - Dashboard layout with sidebar and statistics overview.
+    - `DashboardController` and web routes.
+- **Admin Management UI**:
+    - Dynamic Dashboard with real-time statistics (Donors, Centers, Appointments, Volume).
+    - Recent appointments overview on dashboard.
+    - Full CRUD for Blood Centers with validation.
+- **Seeding**: Created `BloodCenterSeeder` with sample Nairobi and Mombasa locations.
+
+### Changed
+- Refactored `User` model to include donor properties (blood group, phone, etc.).
+- Updated `User` model to use Spatie roles for Filament panel access.
+- Updated Filament user management to use the real `phone` field and assign Spatie roles.
+- Configured `.env` for MySQL database `nbts`.
+- Installed Laravel API scaffolding.
