@@ -25,13 +25,17 @@ class DonorCardResource extends JsonResource
                 'blood_group' => $user?->blood_group,
                 'blood_group_verified' => (bool) $this->blood_group_verified,
                 'region' => $user?->region,
+                'preferred_center' => $this->preferredCenter?->name,
             ],
             'stats' => [
                 'total_donations' => $this->total_donations,
                 'last_donation' => $user?->last_donation,
                 'next_eligible_donation_date' => $this->next_eligible_donation_date,
                 'eligibility_status' => $this->eligibility_status,
+                'loyalty_points' => $this->loyalty_points,
+                'loyalty_tier' => $this->loyalty_tier,
             ],
+            'qr_expires_at' => now()->addDay()->toISOString(),
         ];
     }
 }

@@ -11,6 +11,7 @@ class DonorProfile extends Model
 
     protected $fillable = [
         'user_id',
+        'preferred_center_id',
         'donor_id',
         'blood_group_status',
         'blood_group_verified',
@@ -21,6 +22,14 @@ class DonorProfile extends Model
         'last_eligibility_checked_at',
         'eligibility_notes',
         'total_donations',
+        'loyalty_points',
+        'loyalty_tier',
+        'emergency_contact_name',
+        'emergency_contact_phone',
+        'push_notifications_enabled',
+        'sms_reminders_enabled',
+        'share_anonymized_data',
+        'language',
     ];
 
     protected function casts(): array
@@ -30,6 +39,9 @@ class DonorProfile extends Model
             'blood_group_verified_at' => 'datetime',
             'next_eligible_donation_date' => 'date',
             'last_eligibility_checked_at' => 'datetime',
+            'push_notifications_enabled' => 'boolean',
+            'sms_reminders_enabled' => 'boolean',
+            'share_anonymized_data' => 'boolean',
         ];
     }
 
@@ -41,5 +53,10 @@ class DonorProfile extends Model
     public function verifier()
     {
         return $this->belongsTo(User::class, 'blood_group_verified_by');
+    }
+
+    public function preferredCenter()
+    {
+        return $this->belongsTo(BloodCenter::class, 'preferred_center_id');
     }
 }

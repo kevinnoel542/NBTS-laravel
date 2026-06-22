@@ -8,6 +8,7 @@ use App\Http\Controllers\Api\BloodCenterController;
 use App\Http\Controllers\Api\AppointmentController;
 use App\Http\Controllers\Api\DonationController;
 use App\Http\Controllers\Api\CampaignController;
+use App\Http\Controllers\Api\ArticleController;
 use App\Http\Controllers\Api\DonorCardController;
 use App\Http\Controllers\Api\EligibilityController;
 use App\Http\Controllers\Api\LoyaltyController;
@@ -43,6 +44,8 @@ Route::prefix('v1')->group(function () {
     // Public mobile lookup routes
     Route::get('/campaigns', [CampaignController::class, 'index']);
     Route::get('/campaigns/{id}', [CampaignController::class, 'show']);
+    Route::get('/articles', [ArticleController::class, 'index']);
+    Route::get('/articles/{id}', [ArticleController::class, 'show']);
     Route::get('/blood-centers', [BloodCenterController::class, 'index']);
     Route::get('/blood-centers/{id}', [BloodCenterController::class, 'show']);
 
@@ -64,13 +67,16 @@ Route::prefix('v1')->group(function () {
 
         // Donation History
         Route::get('/donations', [DonationController::class, 'index']);
+        Route::get('/donations/summary', [DonationController::class, 'summary']);
 
         // Appointments
         Route::get('/appointments', [AppointmentController::class, 'index']);
         Route::get('/appointments/upcoming', [AppointmentController::class, 'upcoming']);
         Route::post('/appointments', [AppointmentController::class, 'store']);
         Route::get('/appointments/{id}', [AppointmentController::class, 'show']);
+        Route::put('/appointments/{id}', [AppointmentController::class, 'update']);
         Route::post('/appointments/{id}/cancel', [AppointmentController::class, 'cancel']);
+        Route::get('/blood-centers/{bloodCenter}/available-slots', [AppointmentController::class, 'availableSlots']);
 
         // Staff Operations
         Route::prefix('staff')->group(function () {

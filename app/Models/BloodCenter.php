@@ -16,10 +16,26 @@ class BloodCenter extends Model
         'city',
         'phone',
         'email',
+        'opening_hours',
+        'services',
+        'capacity_label',
+        'estimated_wait_minutes',
+        'center_type',
+        'image_path',
         'latitude',
         'longitude',
         'is_active',
     ];
+
+    protected function casts(): array
+    {
+        return [
+            'services' => 'array',
+            'is_active' => 'boolean',
+            'latitude' => 'decimal:8',
+            'longitude' => 'decimal:8',
+        ];
+    }
 
     public function appointments()
     {

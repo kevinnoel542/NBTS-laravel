@@ -11,6 +11,8 @@ class DonorProfileResource extends JsonResource
     {
         return [
             'id' => $this->id,
+            'preferred_center_id' => $this->preferred_center_id,
+            'preferred_center' => $this->preferredCenter?->name,
             'donor_id' => $this->donor_id,
             'blood_group_status' => $this->blood_group_status,
             'blood_group_verified' => (bool) $this->blood_group_verified,
@@ -20,6 +22,14 @@ class DonorProfileResource extends JsonResource
             'last_eligibility_checked_at' => $this->last_eligibility_checked_at,
             'eligibility_notes' => $this->eligibility_notes,
             'total_donations' => $this->total_donations,
+            'loyalty_points' => $this->loyalty_points,
+            'loyalty_tier' => $this->loyalty_tier,
+            'emergency_contact_name' => $this->emergency_contact_name,
+            'emergency_contact_phone' => $this->emergency_contact_phone,
+            'push_notifications_enabled' => $this->push_notifications_enabled,
+            'sms_reminders_enabled' => $this->sms_reminders_enabled,
+            'share_anonymized_data' => $this->share_anonymized_data,
+            'language' => $this->language,
         ];
     }
 }

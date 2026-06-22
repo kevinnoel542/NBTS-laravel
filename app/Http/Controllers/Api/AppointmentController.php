@@ -5,7 +5,10 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\AppointmentResource;
 use App\Services\AppointmentService;
+use App\Models\Appointment;
+use App\Models\BloodCenter;
 use Illuminate\Http\Request;
+use Illuminate\Validation\ValidationException;
 
 class AppointmentController extends Controller
 {
@@ -25,7 +28,13 @@ class AppointmentController extends Controller
     public function upcoming(Request $request)
     {
         $appointments = $this->appointmentService->getUserUpcomingAppointments($request->user()->id);
-        return AppointmentResource::collection($appointments->load(['user', 'bloodCenter']));
+        $appointment = $appointments->first();
+
+        if (!$appointment) {
+            return response()->json(['data' => null]);
+        }
+
+        return new AppointmentResource($appointment->load(['user', 'bloodCenter']));
     }
 
     public function store(Request $request)
@@ -36,11 +45,71 @@ class AppointmentController extends Controller
             'notes' => 'nullable|string',
         ]);
 
+        $this->validateAppointmentSlot($request->user()->id, (int) $request->blood_center_id, $request->scheduled_at);
+
         $appointment = $this->appointmentService->bookAppointment(array_merge($request->all(), [
             'user_id' => $request->user()->id
         ]));
 
         return new AppointmentResource($appointment->load(['user', 'bloodCenter']));
+    }
+
+    public function update($id, Request $request)
+    {
+        $appointment = $this->appointmentService->getAppointmentDetails($id);
+
+        if (!$appointment || $appointment->user_id !== $request->user()->id) {
+            return response()->json(['message' => 'Appointment not found'], 404);
+        }
+
+        if (in_array($appointment->status, ['completed', 'cancelled'], true)) {
+            return response()->json(['message' => 'This appointment cannot be rescheduled'], 422);
+        }
+
+        $data = $request->validate([
+            'blood_center_id' => 'sometimes|exists:blood_centers,id',
+            'scheduled_at' => 'required|date|after:now',
+            'notes' => 'nullable|string',
+        ]);
+
+        $bloodCenterId = (int) ($data['blood_center_id'] ?? $appointment->blood_center_id);
+        $this->validateAppointmentSlot($request->user()->id, $bloodCenterId, $data['scheduled_at'], $appointment->id);
+
+        $appointment->update([
+            'blood_center_id' => $bloodCenterId,
+            'scheduled_at' => $data['scheduled_at'],
+            'notes' => $data['notes'] ?? $appointment->notes,
+            'status' => 'pending',
+            'rescheduled_at' => now(),
+        ]);
+
+        return new AppointmentResource($appointment->load(['user', 'bloodCenter']));
+    }
+
+    public function availableSlots(BloodCenter $bloodCenter, Request $request)
+    {
+        $data = $request->validate([
+            'date' => 'required|date|after_or_equal:today',
+        ]);
+
+        $date = \Illuminate\Support\Carbon::parse($data['date']);
+        $slots = collect(['08:00', '09:30', '11:00', '13:00', '14:30', '16:00'])
+            ->map(function (string $time) use ($date, $bloodCenter) {
+                $scheduledAt = $date->copy()->setTimeFromTimeString($time);
+                $booked = Appointment::where('blood_center_id', $bloodCenter->id)
+                    ->where('scheduled_at', $scheduledAt)
+                    ->whereIn('status', ['pending', 'confirmed'])
+                    ->exists();
+
+                return [
+                    'time' => $time,
+                    'scheduled_at' => $scheduledAt->toISOString(),
+                    'available' => $scheduledAt->isFuture() && !$booked && $bloodCenter->is_active,
+                ];
+            })
+            ->values();
+
+        return response()->json(['data' => $slots]);
     }
 
     public function show($id, Request $request)
@@ -72,5 +141,41 @@ class AppointmentController extends Controller
         ]);
 
         return new AppointmentResource($appointment->load(['user', 'bloodCenter']));
+    }
+
+    private function validateAppointmentSlot(int $userId, int $bloodCenterId, string $scheduledAt, ?int $ignoreAppointmentId = null): void
+    {
+        $center = BloodCenter::findOrFail($bloodCenterId);
+
+        if (!$center->is_active) {
+            throw ValidationException::withMessages([
+                'blood_center_id' => ['This blood center is not accepting appointments.'],
+            ]);
+        }
+
+        $scheduled = \Illuminate\Support\Carbon::parse($scheduledAt);
+
+        $duplicateUserAppointment = Appointment::where('user_id', $userId)
+            ->whereIn('status', ['pending', 'confirmed'])
+            ->when($ignoreAppointmentId, fn ($query) => $query->where('id', '!=', $ignoreAppointmentId))
+            ->exists();
+
+        if ($duplicateUserAppointment) {
+            throw ValidationException::withMessages([
+                'scheduled_at' => ['You already have an active appointment. Cancel or reschedule it first.'],
+            ]);
+        }
+
+        $slotTaken = Appointment::where('blood_center_id', $bloodCenterId)
+            ->where('scheduled_at', $scheduled)
+            ->whereIn('status', ['pending', 'confirmed'])
+            ->when($ignoreAppointmentId, fn ($query) => $query->where('id', '!=', $ignoreAppointmentId))
+            ->exists();
+
+        if ($slotTaken) {
+            throw ValidationException::withMessages([
+                'scheduled_at' => ['This appointment slot is already booked.'],
+            ]);
+        }
     }
 }

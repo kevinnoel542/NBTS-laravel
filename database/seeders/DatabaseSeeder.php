@@ -21,6 +21,7 @@ class DatabaseSeeder extends Seeder
             RolePermissionSeeder::class,
             BloodCenterSeeder::class,
             LoyaltySeeder::class,
+            ArticleSeeder::class,
             DemoDataSeeder::class,
         ]);
     }

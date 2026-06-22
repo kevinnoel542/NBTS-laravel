@@ -17,6 +17,7 @@ class Appointment extends Model
         'status',
         'confirmed_at',
         'cancelled_at',
+        'rescheduled_at',
         'handled_by',
         'notes',
     ];
@@ -27,6 +28,7 @@ class Appointment extends Model
             'scheduled_at' => 'datetime',
             'confirmed_at' => 'datetime',
             'cancelled_at' => 'datetime',
+            'rescheduled_at' => 'datetime',
         ];
     }
 

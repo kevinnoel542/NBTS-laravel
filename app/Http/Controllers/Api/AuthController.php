@@ -19,7 +19,7 @@ class AuthController extends Controller
             'phone' => 'required|string|unique:users',
             'password' => 'required|string|min:8|confirmed',
             'blood_group' => 'required|string|in:A+,A-,B+,B-,AB+,AB-,O+,O-',
-            'gender' => 'required|string|in:Male,Female,Other',
+            'gender' => 'required|string|in:male,female,other,Male,Female,Other',
             'region' => 'required|string',
             'date_of_birth' => 'required|date',
         ]);
@@ -46,7 +46,7 @@ class AuthController extends Controller
 
         return response()->json([
             'token' => $token,
-            'user' => new UserResource($user),
+            'user' => new UserResource($user->load(['donorProfile.preferredCenter', 'donations'])),
         ], 201);
     }
 
@@ -77,7 +77,7 @@ class AuthController extends Controller
 
         return response()->json([
             'token' => $token,
-            'user' => new UserResource($user),
+            'user' => new UserResource($user->load(['donorProfile.preferredCenter', 'donations'])),
         ]);
     }
 
@@ -90,7 +90,7 @@ class AuthController extends Controller
 
     public function profile(Request $request)
     {
-        return new UserResource($request->user()->load('donorProfile'));
+        return new UserResource($request->user()->load(['donorProfile.preferredCenter', 'donations']));
     }
 
     public function updateProfile(Request $request)
@@ -105,11 +105,39 @@ class AuthController extends Controller
             'date_of_birth' => 'sometimes|date',
             'region' => 'sometimes|string',
             'address' => 'sometimes|string',
+            'preferred_center_id' => 'sometimes|nullable|exists:blood_centers,id',
+            'emergency_contact_name' => 'sometimes|nullable|string|max:255',
+            'emergency_contact_phone' => 'sometimes|nullable|string|max:255',
+            'push_notifications_enabled' => 'sometimes|boolean',
+            'sms_reminders_enabled' => 'sometimes|boolean',
+            'share_anonymized_data' => 'sometimes|boolean',
+            'language' => 'sometimes|string|in:English,Swahili',
         ]);
 
-        $user->update($data);
+        $profileData = collect($data)->only([
+            'preferred_center_id',
+            'emergency_contact_name',
+            'emergency_contact_phone',
+            'push_notifications_enabled',
+            'sms_reminders_enabled',
+            'share_anonymized_data',
+            'language',
+        ])->all();
 
-        return new UserResource($user->load('donorProfile'));
+        $userData = collect($data)->except(array_keys($profileData))->all();
+
+        $user->update($userData);
+
+        if ($profileData !== []) {
+            $user->donorProfile()->updateOrCreate(
+                ['user_id' => $user->id],
+                array_merge([
+                    'donor_id' => $user->donorProfile?->donor_id ?? $this->generateDonorId(),
+                ], $profileData)
+            );
+        }
+
+        return new UserResource($user->load(['donorProfile.preferredCenter', 'donations']));
     }
 
     private function generateDonorId(): string

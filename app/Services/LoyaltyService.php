@@ -15,6 +15,23 @@ class LoyaltyService
     {
         $donor->loadMissing('donorProfile');
         $totalDonations = (int) ($donor->donorProfile?->total_donations ?? 0);
+        $points = $totalDonations * 100;
+        $tier = match (true) {
+            $totalDonations >= 10 => 'Platinum',
+            $totalDonations >= 5 => 'Gold',
+            $totalDonations >= 2 => 'Silver',
+            $totalDonations >= 1 => 'Bronze',
+            default => 'Pending',
+        };
+
+        $donor->donorProfile()->updateOrCreate(
+            ['user_id' => $donor->id],
+            [
+                'donor_id' => $donor->donorProfile?->donor_id ?? $this->generateDonorId(),
+                'loyalty_points' => $points,
+                'loyalty_tier' => $tier,
+            ]
+        );
 
         Badge::where('is_active', true)
             ->where('donation_threshold', '<=', $totalDonations)
@@ -55,5 +72,14 @@ class LoyaltyService
                     ]
                 );
             });
+    }
+
+    private function generateDonorId(): string
+    {
+        do {
+            $donorId = 'DNR-' . now()->format('Y') . '-' . str_pad((string) random_int(1, 999999), 6, '0', STR_PAD_LEFT);
+        } while (\App\Models\DonorProfile::where('donor_id', $donorId)->exists());
+
+        return $donorId;
     }
 }
