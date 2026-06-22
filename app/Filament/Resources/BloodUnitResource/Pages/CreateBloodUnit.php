@@ -8,5 +8,7 @@ use Filament\Resources\Pages\CreateRecord;
 
 class CreateBloodUnit extends CreateRecord
 {
+    use \App\Filament\Resources\Concerns\RedirectsToResourceIndex;
+
     protected static string $resource = BloodUnitResource::class;
 }

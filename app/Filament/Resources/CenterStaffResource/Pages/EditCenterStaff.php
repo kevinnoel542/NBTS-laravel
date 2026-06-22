@@ -8,6 +8,8 @@ use Filament\Resources\Pages\EditRecord;
 
 class EditCenterStaff extends EditRecord
 {
+    use \App\Filament\Resources\Concerns\RedirectsToResourceIndex;
+
     protected static string $resource = CenterStaffResource::class;
 
     protected function getHeaderActions(): array

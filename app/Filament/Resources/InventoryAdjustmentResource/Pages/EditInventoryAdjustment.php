@@ -8,6 +8,8 @@ use Filament\Resources\Pages\EditRecord;
 
 class EditInventoryAdjustment extends EditRecord
 {
+    use \App\Filament\Resources\Concerns\RedirectsToResourceIndex;
+
     protected static string $resource = InventoryAdjustmentResource::class;
 
     protected function getHeaderActions(): array

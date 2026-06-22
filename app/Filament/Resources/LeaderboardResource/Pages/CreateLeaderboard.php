@@ -8,5 +8,7 @@ use Filament\Resources\Pages\CreateRecord;
 
 class CreateLeaderboard extends CreateRecord
 {
+    use \App\Filament\Resources\Concerns\RedirectsToResourceIndex;
+
     protected static string $resource = LeaderboardResource::class;
 }

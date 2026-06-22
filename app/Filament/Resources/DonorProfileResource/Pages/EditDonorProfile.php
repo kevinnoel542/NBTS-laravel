@@ -8,6 +8,8 @@ use Filament\Resources\Pages\EditRecord;
 
 class EditDonorProfile extends EditRecord
 {
+    use \App\Filament\Resources\Concerns\RedirectsToResourceIndex;
+
     protected static string $resource = DonorProfileResource::class;
 
     protected function getHeaderActions(): array

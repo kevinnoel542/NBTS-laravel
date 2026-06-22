@@ -8,6 +8,8 @@ use Filament\Resources\Pages\EditRecord;
 
 class EditBloodCenter extends EditRecord
 {
+    use \App\Filament\Resources\Concerns\RedirectsToResourceIndex;
+
     protected static string $resource = BloodCenterResource::class;
 
     protected function getHeaderActions(): array

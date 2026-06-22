@@ -9,6 +9,8 @@ use Illuminate\Database\Eloquent\Model;
 
 class CreateDonation extends CreateRecord
 {
+    use \App\Filament\Resources\Concerns\RedirectsToResourceIndex;
+
     protected static string $resource = DonationResource::class;
 
     protected function handleRecordCreation(array $data): Model

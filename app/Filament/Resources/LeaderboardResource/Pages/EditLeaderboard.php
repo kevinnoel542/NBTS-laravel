@@ -8,6 +8,8 @@ use Filament\Resources\Pages\EditRecord;
 
 class EditLeaderboard extends EditRecord
 {
+    use \App\Filament\Resources\Concerns\RedirectsToResourceIndex;
+
     protected static string $resource = LeaderboardResource::class;
 
     protected function getHeaderActions(): array
