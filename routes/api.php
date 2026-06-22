@@ -82,6 +82,7 @@ Route::prefix('v1')->group(function () {
         // Staff Operations
         Route::prefix('staff')->group(function () {
             Route::get('/donors/search', [DonorLookupController::class, 'index']);
+            Route::post('/donors/scan', [DonorLookupController::class, 'scan']);
             Route::get('/donors/{donor}', [DonorLookupController::class, 'show']);
             Route::post('/donors/{donor}/eligibility-check', [EligibilityManagementController::class, 'check']);
             Route::post('/donors/{donor}/deferrals', [EligibilityManagementController::class, 'defer']);

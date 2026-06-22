@@ -39,6 +39,14 @@ class UserResource extends Resource
                 Forms\Components\Section::make('Profile Information')
                     ->description('Basic identity and contact details.')
                     ->schema([
+                        Forms\Components\FileUpload::make('profile_photo_path')
+                            ->label('Profile Photo')
+                            ->image()
+                            ->disk('public')
+                            ->visibility('public')
+                            ->directory('profile-photos')
+                            ->imageEditor()
+                            ->columnSpanFull(),
                         Forms\Components\TextInput::make('name')
                             ->required()
                             ->maxLength(255),
@@ -96,6 +104,10 @@ class UserResource extends Resource
     {
         return $table
             ->columns([
+                Tables\Columns\ImageColumn::make('profile_photo_path')
+                    ->label('Photo')
+                    ->disk('public')
+                    ->circular(),
                 Tables\Columns\TextColumn::make('name')
                     ->weight('bold')
                     ->searchable()

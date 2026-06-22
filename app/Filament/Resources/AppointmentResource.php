@@ -116,6 +116,11 @@ class AppointmentResource extends Resource
                     ->relationship('bloodCenter', 'name'),
             ])
             ->actions([
+                Tables\Actions\Action::make('track')
+                    ->label('Track')
+                    ->icon('heroicon-o-eye')
+                    ->color('info')
+                    ->url(fn (Appointment $record): string => static::getUrl('view', ['record' => $record])),
                 Tables\Actions\EditAction::make(),
                 Tables\Actions\DeleteAction::make(),
             ])
@@ -138,6 +143,7 @@ class AppointmentResource extends Resource
         return [
             'index' => Pages\ListAppointments::route('/'),
             'create' => Pages\CreateAppointment::route('/create'),
+            'view' => Pages\ViewAppointment::route('/{record}'),
             'edit' => Pages\EditAppointment::route('/{record}/edit'),
         ];
     }

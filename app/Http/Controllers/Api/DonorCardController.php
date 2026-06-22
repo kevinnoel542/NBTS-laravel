@@ -5,18 +5,22 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\DonorCardResource;
 use App\Models\DonorProfile;
+use App\Services\DonorQrCodeService;
 use Illuminate\Http\Request;
 
 class DonorCardController extends Controller
 {
-    public function show(Request $request)
+    public function show(Request $request, DonorQrCodeService $qrCodeService)
     {
         $profile = $request->user()->donorProfile()->firstOrCreate([], [
             'donor_id' => $this->generateDonorId(),
             'blood_group_status' => $request->user()->blood_group ? 'user_selected' : 'unknown',
         ]);
 
-        return new DonorCardResource($profile->load('user'));
+        $qr = $qrCodeService->makePayload($profile);
+
+        return (new DonorCardResource($profile->load(['user', 'preferredCenter'])))
+            ->withQrPayload($qr['payload'], $qr['expires_at']->toISOString());
     }
 
     private function generateDonorId(): string

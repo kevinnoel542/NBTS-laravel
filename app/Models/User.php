@@ -32,6 +32,7 @@ class User extends Authenticatable implements FilamentUser
         'region',
         'last_donation',
         'address',
+        'profile_photo_path',
         'role',
         'is_active',
     ];

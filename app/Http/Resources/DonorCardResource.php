@@ -7,18 +7,25 @@ use Illuminate\Http\Resources\Json\JsonResource;
 
 class DonorCardResource extends JsonResource
 {
+    private ?string $qrPayload = null;
+
+    private ?string $qrExpiresAt = null;
+
+    public function withQrPayload(string $payload, string $expiresAt): static
+    {
+        $this->qrPayload = $payload;
+        $this->qrExpiresAt = $expiresAt;
+
+        return $this;
+    }
+
     public function toArray(Request $request): array
     {
         $user = $this->user;
 
         return [
             'donor_id' => $this->donor_id,
-            'qr_payload' => [
-                'type' => 'nbts_donor_card',
-                'version' => 1,
-                'donor_id' => $this->donor_id,
-                'issued_at' => now()->toISOString(),
-            ],
+            'qr_payload' => $this->qrPayload,
             'donor' => [
                 'name' => $user?->name,
                 'phone' => $user?->phone,
@@ -35,7 +42,7 @@ class DonorCardResource extends JsonResource
                 'loyalty_points' => $this->loyalty_points,
                 'loyalty_tier' => $this->loyalty_tier,
             ],
-            'qr_expires_at' => now()->addDay()->toISOString(),
+            'qr_expires_at' => $this->qrExpiresAt,
         ];
     }
 }
