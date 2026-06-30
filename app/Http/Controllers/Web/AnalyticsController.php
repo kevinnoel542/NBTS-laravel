@@ -31,11 +31,12 @@ class AnalyticsController extends Controller
 
         // Monthly Trends (Last 6 months)
         $monthlyTrends = Donation::select(
+                DB::raw('DATE_FORMAT(donation_date, "%Y-%m") as month_key'),
                 DB::raw('DATE_FORMAT(donation_date, "%b") as month'),
                 DB::raw('count(*) as total')
             )
-            ->groupBy('month')
-            ->orderBy('donation_date', 'asc')
+            ->groupBy('month_key', 'month')
+            ->orderBy('month_key', 'asc')
             ->limit(6)
             ->get();
 

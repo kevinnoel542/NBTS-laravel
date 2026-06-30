@@ -2,7 +2,9 @@
 
 namespace App\Filament\Pages;
 
+use App\Models\FCMToken;
 use App\Models\User;
+use App\Models\UserNotification;
 use App\Services\NotificationService;
 use Filament\Forms;
 use Filament\Forms\Concerns\InteractsWithForms;
@@ -24,7 +26,7 @@ class SendNotification extends Page implements HasForms
 
     protected static ?string $title = 'Send Notification';
 
-    protected static ?int $navigationSort = 90;
+    protected static ?int $navigationSort = 40;
 
     protected static string $view = 'filament.pages.send-notification';
 
@@ -40,6 +42,7 @@ class SendNotification extends Page implements HasForms
         $this->form->fill([
             'audience' => 'all_donors',
             'type' => 'custom',
+            'priority' => 'normal',
         ]);
     }
 
@@ -58,6 +61,7 @@ class SendNotification extends Page implements HasForms
                             ->rows(5)
                             ->maxLength(500),
                         Forms\Components\Select::make('type')
+                            ->label('Category')
                             ->options([
                                 'custom' => 'Custom',
                                 'campaign' => 'Campaign',
@@ -67,9 +71,17 @@ class SendNotification extends Page implements HasForms
                             ])
                             ->default('custom')
                             ->required(),
+                        Forms\Components\Select::make('priority')
+                            ->options([
+                                'normal' => 'Normal',
+                                'high' => 'High',
+                                'urgent' => 'Urgent',
+                            ])
+                            ->default('normal')
+                            ->required(),
                         Forms\Components\TextInput::make('action_url')
                             ->label('App action path')
-                            ->placeholder('/campaigns/12')
+                            ->placeholder('/campaigns/12, /appointments, /donor-card')
                             ->maxLength(255),
                     ])
                     ->columns(2),
@@ -131,6 +143,15 @@ class SendNotification extends Page implements HasForms
                             ->required(fn (Forms\Get $get): bool => $get('audience') === 'selected_users'),
                     ])
                     ->columns(2),
+
+                Forms\Components\Section::make('Delivery Safety')
+                    ->schema([
+                        Forms\Components\Toggle::make('confirm_send')
+                            ->label('I confirm this message is ready to send')
+                            ->helperText('The message will be saved in the app notification list for each selected recipient and pushed to devices with registered tokens.')
+                            ->accepted()
+                            ->required(),
+                    ]),
             ])
             ->statePath('data');
     }
@@ -155,7 +176,12 @@ class SendNotification extends Page implements HasForms
                 $data['title'],
                 $data['body'],
                 $data['type'] ?? 'custom',
-                ['source' => 'admin_custom'],
+                [
+                    'source' => 'admin_custom',
+                    'priority' => $data['priority'] ?? 'normal',
+                    'audience' => $data['audience'] ?? 'all_donors',
+                    'blood_group' => $data['blood_group'] ?? null,
+                ],
                 $data['action_url'] ?? null,
             );
         }
@@ -169,7 +195,49 @@ class SendNotification extends Page implements HasForms
         $this->form->fill([
             'audience' => $data['audience'] ?? 'all_donors',
             'type' => 'custom',
+            'priority' => 'normal',
+            'confirm_send' => false,
         ]);
+    }
+
+    public function getRecipientEstimateProperty(): int
+    {
+        $data = $this->form->getRawState();
+
+        return (clone $this->recipientQuery($data))->count();
+    }
+
+    public function getPushReadyEstimateProperty(): int
+    {
+        $data = $this->form->getRawState();
+
+        return (clone $this->recipientQuery($data))
+            ->whereHas('fcmTokens')
+            ->count();
+    }
+
+    public function getRecentNotificationsProperty()
+    {
+        return UserNotification::query()
+            ->with('user')
+            ->latest()
+            ->limit(8)
+            ->get();
+    }
+
+    public function getFirebaseStatusProperty(): array
+    {
+        $credentials = config('services.firebase.credentials');
+        $fullPath = $credentials
+            ? (str_starts_with($credentials, '/') ? $credentials : base_path($credentials))
+            : null;
+
+        return [
+            'enabled' => (bool) config('services.firebase.enabled'),
+            'project_id' => config('services.firebase.project_id'),
+            'credentials_found' => $fullPath ? is_file($fullPath) : false,
+            'registered_tokens' => FCMToken::count(),
+        ];
     }
 
     private function recipientQuery(array $data): Builder

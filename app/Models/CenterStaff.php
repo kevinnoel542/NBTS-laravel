@@ -34,4 +34,9 @@ class CenterStaff extends Model
     {
         return $this->belongsTo(BloodCenter::class);
     }
+
+    public function getPositionLabelAttribute(): string
+    {
+        return str($this->position)->replace('_', ' ')->title()->toString();
+    }
 }

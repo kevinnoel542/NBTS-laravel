@@ -14,7 +14,10 @@ class RewardResource extends JsonResource
             'name' => $this->name,
             'slug' => $this->slug,
             'description' => $this->description,
-            'donation_threshold' => $this->donation_threshold,
+            'donation_threshold' => (int) $this->donation_threshold,
+            'threshold_label' => $this->donation_threshold . ' donations',
+            'is_active' => (bool) $this->is_active,
+            'status_label' => $this->status_label,
         ];
     }
 }

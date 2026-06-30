@@ -38,4 +38,9 @@ class EligibilityRecord extends Model
     {
         return $this->belongsTo(User::class, 'checked_by');
     }
+
+    public function getStatusLabelAttribute(): string
+    {
+        return str($this->status)->replace('_', ' ')->title()->toString();
+    }
 }

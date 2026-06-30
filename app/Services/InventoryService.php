@@ -66,9 +66,9 @@ class InventoryService
         });
     }
 
-    public function manualAdjust(int $bloodCenterId, string $bloodGroup, int $quantityDelta, string $reason, ?User $adjustedBy = null, ?string $notes = null): BloodInventory
+    public function manualAdjust(int $bloodCenterId, string $bloodGroup, int $quantityDelta, string $reason, ?User $adjustedBy = null, ?string $notes = null, ?int $bloodUnitId = null): BloodInventory
     {
-        return DB::transaction(function () use ($bloodCenterId, $bloodGroup, $quantityDelta, $reason, $adjustedBy, $notes): BloodInventory {
+        return DB::transaction(function () use ($bloodCenterId, $bloodGroup, $quantityDelta, $reason, $adjustedBy, $notes, $bloodUnitId): BloodInventory {
             $inventory = $this->inventoryRow($bloodCenterId, $bloodGroup);
             $newAvailable = $inventory->available_units + $quantityDelta;
 
@@ -82,6 +82,7 @@ class InventoryService
 
             InventoryAdjustment::create([
                 'blood_center_id' => $bloodCenterId,
+                'blood_unit_id' => $bloodUnitId,
                 'blood_group' => $bloodGroup,
                 'quantity_delta' => $quantityDelta,
                 'reason' => $reason,

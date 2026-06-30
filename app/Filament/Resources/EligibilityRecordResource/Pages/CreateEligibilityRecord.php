@@ -11,4 +11,11 @@ class CreateEligibilityRecord extends CreateRecord
     use \App\Filament\Resources\Concerns\RedirectsToResourceIndex;
 
     protected static string $resource = EligibilityRecordResource::class;
+
+    protected function mutateFormDataBeforeCreate(array $data): array
+    {
+        $data['checked_by'] ??= auth()->id();
+
+        return $data;
+    }
 }

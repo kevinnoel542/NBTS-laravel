@@ -34,7 +34,7 @@ class LoyaltyController extends Controller
     {
         $loyaltyService->refreshLeaderboard();
 
-        $rows = Leaderboard::with('user')
+        $rows = Leaderboard::with('user.donorProfile')
             ->where('period', 'all_time')
             ->orderBy('rank')
             ->limit(50)

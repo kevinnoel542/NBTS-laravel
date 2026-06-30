@@ -55,7 +55,7 @@ Route::prefix('v1')->group(function () {
         Route::post('/logout', [AuthController::class, 'logout']);
 
         Route::get('/user', function (Request $request) {
-            return new \App\Http\Resources\UserResource($request->user()->load('donorProfile'));
+            return new \App\Http\Resources\UserResource($request->user()->load(['roles', 'donorProfile.preferredCenter', 'donations']));
         });
 
         // Profile Management
@@ -92,6 +92,7 @@ Route::prefix('v1')->group(function () {
             Route::post('/donations', [DonationRecordingController::class, 'store']);
             Route::post('/donations/{donation}/verify-blood-group', [DonationRecordingController::class, 'verifyBloodGroup']);
             Route::get('/inventory', [InventoryController::class, 'inventory']);
+            Route::get('/inventory-adjustments', [InventoryController::class, 'adjustments']);
             Route::get('/blood-units', [InventoryController::class, 'units']);
             Route::post('/blood-units/{unit}/transition', [InventoryController::class, 'transitionUnit']);
             Route::post('/inventory/adjust', [InventoryController::class, 'adjust']);

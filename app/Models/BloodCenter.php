@@ -71,4 +71,16 @@ class BloodCenter extends Model
     {
         return $this->hasMany(LowStockAlert::class);
     }
+
+    public function getWaitTimeLabelAttribute(): ?string
+    {
+        return $this->estimated_wait_minutes === null
+            ? null
+            : $this->estimated_wait_minutes . ' min wait';
+    }
+
+    public function getStatusLabelAttribute(): string
+    {
+        return $this->is_active ? 'Open to donors' : 'Inactive';
+    }
 }

@@ -102,7 +102,7 @@
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <h2 class="text-2xl font-black text-slate-900 italic uppercase mb-12">More Locations</h2>
             <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
-                @foreach(\App\Models\BloodCenter::where('id', '!=', $center->id)->where('status', 'active')->take(4)->get() as $other)
+                @foreach(\App\Models\BloodCenter::where('id', '!=', $center->id)->where('is_active', true)->take(4)->get() as $other)
                 <a href="{{ route('centers.show', $other) }}" class="group">
                     <div class="bg-white p-8 rounded-3xl border border-slate-200 group-hover:border-red-600 transition-all hover:shadow-xl group-hover:-translate-y-1">
                         <h4 class="font-black italic uppercase text-slate-900 text-sm mb-2 truncate">{{ $other->name }}</h4>

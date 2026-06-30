@@ -82,6 +82,11 @@ class User extends Authenticatable implements FilamentUser
         return $this->hasMany(UserNotification::class);
     }
 
+    public function fcmTokens()
+    {
+        return $this->hasMany(FCMToken::class);
+    }
+
     public function canAccessPanel(Panel $panel): bool
     {
         return (bool) $this->is_active && $this->hasAnyRole([
@@ -112,6 +117,9 @@ class User extends Authenticatable implements FilamentUser
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'date_of_birth' => 'date',
+            'last_donation' => 'date',
+            'is_active' => 'boolean',
         ];
     }
 }

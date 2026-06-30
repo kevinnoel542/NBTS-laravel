@@ -46,4 +46,31 @@ class Deferral extends Model
     {
         return $this->belongsTo(User::class, 'lifted_by');
     }
+
+    public function getTypeLabelAttribute(): string
+    {
+        return str($this->type)->title()->toString();
+    }
+
+    public function getStatusLabelAttribute(): string
+    {
+        if (!$this->is_active) {
+            return 'Lifted';
+        }
+
+        if ($this->type === 'temporary' && $this->ends_at && $this->ends_at->isPast()) {
+            return 'Expired';
+        }
+
+        return 'Active';
+    }
+
+    public function getDaysRemainingAttribute(): ?int
+    {
+        if ($this->type !== 'temporary' || !$this->ends_at || !$this->is_active) {
+            return null;
+        }
+
+        return max(0, now()->startOfDay()->diffInDays($this->ends_at, false));
+    }
 }

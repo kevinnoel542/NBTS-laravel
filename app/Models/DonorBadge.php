@@ -20,4 +20,9 @@ class DonorBadge extends Model
     {
         return $this->belongsTo(Badge::class);
     }
+
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
 }

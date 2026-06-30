@@ -1,0 +1,515 @@
+{
+  "direction": "TB",
+  "nodes": [
+    {
+      "id": "public_visitors",
+      "label": "Public visitors",
+      "group": "Channels",
+      "width": 150,
+      "height": 60
+    },
+    {
+      "id": "donor_mobile_app",
+      "label": "Donor mobile app",
+      "group": "Channels",
+      "width": 160,
+      "height": 60
+    },
+    {
+      "id": "staff_tools",
+      "label": "Staff tools",
+      "group": "Channels",
+      "width": 140,
+      "height": 60
+    },
+    {
+      "id": "admin_users",
+      "label": "Admin users",
+      "group": "Channels",
+      "width": 140,
+      "height": 60
+    },
+    {
+      "id": "public_website",
+      "label": "Public website - Blade + Web controllers",
+      "group": "Laravel Application/Entry points",
+      "style": "rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;",
+      "width": 210,
+      "height": 70
+    },
+    {
+      "id": "api_v1",
+      "label": "Mobile API - /api/v1 controllers + resources",
+      "group": "Laravel Application/Entry points",
+      "style": "rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;",
+      "width": 220,
+      "height": 70
+    },
+    {
+      "id": "staff_api",
+      "label": "Staff API - /api/v1/staff controllers",
+      "group": "Laravel Application/Entry points",
+      "style": "rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;",
+      "width": 220,
+      "height": 70
+    },
+    {
+      "id": "filament_admin",
+      "label": "Filament admin panel - /admin resources + widgets",
+      "group": "Laravel Application/Entry points",
+      "style": "rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;",
+      "width": 230,
+      "height": 70
+    },
+    {
+      "id": "auth_permissions",
+      "label": "Auth and access control - Sanctum + Spatie roles",
+      "group": "Laravel Application/Security",
+      "style": "rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;",
+      "width": 230,
+      "height": 70
+    },
+    {
+      "id": "public_content",
+      "label": "Public content - Centers, campaigns, articles, analytics",
+      "group": "Domain services",
+      "style": "rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;",
+      "width": 250,
+      "height": 70
+    },
+    {
+      "id": "appointment_service",
+      "label": "Appointment service - Book, confirm, cancel, slots",
+      "group": "Domain services",
+      "style": "rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;",
+      "width": 240,
+      "height": 70
+    },
+    {
+      "id": "eligibility_service",
+      "label": "Eligibility service - Age, weight, deferrals, 90 day rule",
+      "group": "Domain services",
+      "style": "rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;",
+      "width": 260,
+      "height": 70
+    },
+    {
+      "id": "donor_qr_service",
+      "label": "Donor QR service - Donor card payload and scan verify",
+      "group": "Domain services",
+      "style": "rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;",
+      "width": 250,
+      "height": 70
+    },
+    {
+      "id": "donation_recording",
+      "label": "Donation recording service - Completed donation orchestration",
+      "group": "Domain services",
+      "style": "rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;",
+      "width": 270,
+      "height": 70
+    },
+    {
+      "id": "inventory_service",
+      "label": "Inventory service - Blood units, stock, adjustments, expiry",
+      "group": "Domain services",
+      "style": "rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;",
+      "width": 270,
+      "height": 70
+    },
+    {
+      "id": "low_stock_service",
+      "label": "Low stock service - Alerts and emergency campaigns",
+      "group": "Domain services",
+      "style": "rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;",
+      "width": 250,
+      "height": 70
+    },
+    {
+      "id": "loyalty_service",
+      "label": "Loyalty service - Badges, rewards, leaderboard",
+      "group": "Domain services",
+      "style": "rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;",
+      "width": 240,
+      "height": 70
+    },
+    {
+      "id": "reports_service",
+      "label": "Reports service - Summary, donations, inventory",
+      "group": "Domain services",
+      "style": "rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontColor=#333333;",
+      "width": 240,
+      "height": 70
+    },
+    {
+      "id": "notification_service",
+      "label": "Notification service - In-app notifications + push dispatch",
+      "group": "Domain services",
+      "style": "rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;",
+      "width": 270,
+      "height": 70
+    },
+    {
+      "id": "firebase_fcm",
+      "label": "Firebase Cloud Messaging - External push provider",
+      "group": "External systems",
+      "style": "rounded=1;whiteSpace=wrap;html=1;dashed=1;fillColor=#f5f5f5;strokeColor=#666666;fontColor=#333333;",
+      "width": 250,
+      "height": 70
+    },
+    {
+      "id": "identity_tables",
+      "label": "Identity data - users, donor_profiles, center_staff",
+      "group": "Data store/Core records",
+      "style": "shape=cylinder3;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;",
+      "width": 250,
+      "height": 90
+    },
+    {
+      "id": "operations_tables",
+      "label": "Donation operations - appointments, donations, eligibility_records, deferrals",
+      "group": "Data store/Core records",
+      "style": "shape=cylinder3;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;",
+      "width": 310,
+      "height": 100
+    },
+    {
+      "id": "inventory_tables",
+      "label": "Inventory data - blood_centers, blood_units, blood_inventory, inventory_adjustments",
+      "group": "Data store/Core records",
+      "style": "shape=cylinder3;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;",
+      "width": 330,
+      "height": 100
+    },
+    {
+      "id": "campaign_tables",
+      "label": "Campaign and alert data - campaigns, articles, low_stock_alerts",
+      "group": "Data store/Core records",
+      "style": "shape=cylinder3;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;",
+      "width": 300,
+      "height": 90
+    },
+    {
+      "id": "loyalty_tables",
+      "label": "Loyalty data - badges, donor_badges, rewards, donor_rewards, leaderboards",
+      "group": "Data store/Core records",
+      "style": "shape=cylinder3;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;",
+      "width": 340,
+      "height": 100
+    },
+    {
+      "id": "notification_tables",
+      "label": "Notification data - user_notifications, f_c_m_tokens",
+      "group": "Data store/Core records",
+      "style": "shape=cylinder3;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;",
+      "width": 280,
+      "height": 90
+    },
+    {
+      "id": "framework_tables",
+      "label": "Laravel infrastructure - personal_access_tokens, roles, permissions, jobs, cache, sessions",
+      "group": "Data store/Infrastructure records",
+      "style": "shape=cylinder3;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontColor=#333333;",
+      "width": 350,
+      "height": 100
+    },
+    {
+      "id": "queues_cache",
+      "label": "Queue and cache runtime - Laravel queue, cache, Redis capable",
+      "group": "Runtime infrastructure",
+      "style": "rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontColor=#333333;",
+      "width": 260,
+      "height": 70
+    },
+    {
+      "id": "vite_assets",
+      "label": "Frontend assets - Vite, Tailwind, Alpine, Axios",
+      "group": "Runtime infrastructure",
+      "style": "rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontColor=#333333;",
+      "width": 260,
+      "height": 70
+    }
+  ],
+  "edges": [
+    {
+      "source": "public_visitors",
+      "target": "public_website",
+      "label": "browse website"
+    },
+    {
+      "source": "donor_mobile_app",
+      "target": "api_v1",
+      "label": "HTTPS JSON"
+    },
+    {
+      "source": "staff_tools",
+      "target": "staff_api",
+      "label": "protected API"
+    },
+    {
+      "source": "admin_users",
+      "target": "filament_admin",
+      "label": "admin UI"
+    },
+    {
+      "source": "api_v1",
+      "target": "auth_permissions",
+      "label": "Sanctum token"
+    },
+    {
+      "source": "staff_api",
+      "target": "auth_permissions",
+      "label": "Sanctum + permissions"
+    },
+    {
+      "source": "filament_admin",
+      "target": "auth_permissions",
+      "label": "panel access + permissions"
+    },
+    {
+      "source": "public_website",
+      "target": "public_content",
+      "label": "list pages"
+    },
+    {
+      "source": "api_v1",
+      "target": "public_content",
+      "label": "lookups"
+    },
+    {
+      "source": "api_v1",
+      "target": "appointment_service",
+      "label": "donor appointments"
+    },
+    {
+      "source": "api_v1",
+      "target": "eligibility_service",
+      "label": "eligibility status"
+    },
+    {
+      "source": "api_v1",
+      "target": "donor_qr_service",
+      "label": "donor card"
+    },
+    {
+      "source": "api_v1",
+      "target": "loyalty_service",
+      "label": "loyalty + leaderboard"
+    },
+    {
+      "source": "api_v1",
+      "target": "notification_service",
+      "label": "notification routes"
+    },
+    {
+      "source": "staff_api",
+      "target": "donor_qr_service",
+      "label": "scan donor"
+    },
+    {
+      "source": "staff_api",
+      "target": "eligibility_service",
+      "label": "check, defer, lift"
+    },
+    {
+      "source": "staff_api",
+      "target": "appointment_service",
+      "label": "confirm/cancel"
+    },
+    {
+      "source": "staff_api",
+      "target": "donation_recording",
+      "label": "record donation"
+    },
+    {
+      "source": "staff_api",
+      "target": "inventory_service",
+      "label": "units + stock"
+    },
+    {
+      "source": "staff_api",
+      "target": "low_stock_service",
+      "label": "emergency campaign"
+    },
+    {
+      "source": "staff_api",
+      "target": "reports_service",
+      "label": "reports"
+    },
+    {
+      "source": "filament_admin",
+      "target": "public_content",
+      "label": "manage centers/campaigns"
+    },
+    {
+      "source": "filament_admin",
+      "target": "appointment_service",
+      "label": "manage appointments"
+    },
+    {
+      "source": "filament_admin",
+      "target": "donation_recording",
+      "label": "manage donations"
+    },
+    {
+      "source": "filament_admin",
+      "target": "inventory_service",
+      "label": "manage inventory"
+    },
+    {
+      "source": "filament_admin",
+      "target": "loyalty_service",
+      "label": "manage loyalty"
+    },
+    {
+      "source": "donation_recording",
+      "target": "eligibility_service",
+      "label": "assert eligible"
+    },
+    {
+      "source": "donation_recording",
+      "target": "appointment_service",
+      "label": "mark completed"
+    },
+    {
+      "source": "donation_recording",
+      "target": "loyalty_service",
+      "label": "award after completion"
+    },
+    {
+      "source": "donation_recording",
+      "target": "inventory_service",
+      "label": "create blood unit"
+    },
+    {
+      "source": "inventory_service",
+      "target": "low_stock_service",
+      "label": "evaluate thresholds"
+    },
+    {
+      "source": "low_stock_service",
+      "target": "notification_service",
+      "label": "notify donors"
+    },
+    {
+      "source": "notification_service",
+      "target": "firebase_fcm",
+      "label": "push message"
+    },
+    {
+      "source": "notification_service",
+      "target": "queues_cache",
+      "label": "cache FCM token"
+    },
+    {
+      "source": "auth_permissions",
+      "target": "identity_tables",
+      "label": "users + roles"
+    },
+    {
+      "source": "auth_permissions",
+      "target": "framework_tables",
+      "label": "tokens, roles, permissions"
+    },
+    {
+      "source": "public_content",
+      "target": "campaign_tables",
+      "label": "read/write campaigns"
+    },
+    {
+      "source": "public_content",
+      "target": "inventory_tables",
+      "label": "read centers"
+    },
+    {
+      "source": "appointment_service",
+      "target": "operations_tables",
+      "label": "appointments"
+    },
+    {
+      "source": "appointment_service",
+      "target": "inventory_tables",
+      "label": "center slots"
+    },
+    {
+      "source": "eligibility_service",
+      "target": "operations_tables",
+      "label": "records + deferrals"
+    },
+    {
+      "source": "eligibility_service",
+      "target": "identity_tables",
+      "label": "donor profile status"
+    },
+    {
+      "source": "donor_qr_service",
+      "target": "identity_tables",
+      "label": "donor profile"
+    },
+    {
+      "source": "donation_recording",
+      "target": "operations_tables",
+      "label": "donation record"
+    },
+    {
+      "source": "donation_recording",
+      "target": "identity_tables",
+      "label": "last donation + blood group"
+    },
+    {
+      "source": "inventory_service",
+      "target": "inventory_tables",
+      "label": "units + stock + adjustments"
+    },
+    {
+      "source": "low_stock_service",
+      "target": "campaign_tables",
+      "label": "alerts + emergency campaign"
+    },
+    {
+      "source": "loyalty_service",
+      "target": "loyalty_tables",
+      "label": "awards + ranks"
+    },
+    {
+      "source": "loyalty_service",
+      "target": "identity_tables",
+      "label": "points + tier"
+    },
+    {
+      "source": "notification_service",
+      "target": "notification_tables",
+      "label": "store/read notifications"
+    },
+    {
+      "source": "reports_service",
+      "target": "identity_tables",
+      "label": "donor count"
+    },
+    {
+      "source": "reports_service",
+      "target": "operations_tables",
+      "label": "donations"
+    },
+    {
+      "source": "reports_service",
+      "target": "inventory_tables",
+      "label": "inventory status"
+    },
+    {
+      "source": "reports_service",
+      "target": "campaign_tables",
+      "label": "campaigns + alerts"
+    },
+    {
+      "source": "public_website",
+      "target": "vite_assets",
+      "label": "compiled assets"
+    },
+    {
+      "source": "filament_admin",
+      "target": "vite_assets",
+      "label": "panel assets"
+    }
+  ]
+}

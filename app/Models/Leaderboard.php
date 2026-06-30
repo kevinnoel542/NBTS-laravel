@@ -15,4 +15,9 @@ class Leaderboard extends Model
     {
         return $this->belongsTo(User::class);
     }
+
+    public function getPeriodLabelAttribute(): string
+    {
+        return str($this->period)->replace('_', ' ')->title()->toString();
+    }
 }

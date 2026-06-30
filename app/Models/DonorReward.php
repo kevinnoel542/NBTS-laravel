@@ -23,4 +23,9 @@ class DonorReward extends Model
     {
         return $this->belongsTo(Reward::class);
     }
+
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
 }

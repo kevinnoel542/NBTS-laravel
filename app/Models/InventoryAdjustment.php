@@ -33,4 +33,17 @@ class InventoryAdjustment extends Model
     {
         return $this->belongsTo(User::class, 'adjusted_by');
     }
+
+    public function getDirectionAttribute(): string
+    {
+        if ($this->quantity_delta > 0) {
+            return 'increase';
+        }
+
+        if ($this->quantity_delta < 0) {
+            return 'decrease';
+        }
+
+        return 'no_change';
+    }
 }

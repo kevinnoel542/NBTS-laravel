@@ -1,0 +1,19 @@
+<?php
+
+namespace App\Filament\Resources\LowStockAlertResource\Pages;
+
+use App\Filament\Resources\LowStockAlertResource;
+use Filament\Actions;
+use Filament\Resources\Pages\ViewRecord;
+
+class ViewLowStockAlert extends ViewRecord
+{
+    protected static string $resource = LowStockAlertResource::class;
+
+    protected function getHeaderActions(): array
+    {
+        return [
+            Actions\EditAction::make(),
+        ];
+    }
+}

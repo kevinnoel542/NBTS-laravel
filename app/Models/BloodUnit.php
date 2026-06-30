@@ -44,4 +44,37 @@ class BloodUnit extends Model
     {
         return $this->belongsTo(BloodCenter::class);
     }
+
+    public function handler()
+    {
+        return $this->belongsTo(User::class, 'handled_by');
+    }
+
+    public function getDaysToExpiryAttribute(): ?int
+    {
+        if (! $this->expiry_date) {
+            return null;
+        }
+
+        return now()->startOfDay()->diffInDays($this->expiry_date, false);
+    }
+
+    public function getExpiryStatusAttribute(): string
+    {
+        $days = $this->days_to_expiry;
+
+        if ($days === null) {
+            return 'unknown';
+        }
+
+        if ($days < 0) {
+            return 'expired';
+        }
+
+        if ($days <= 7) {
+            return 'expiring_soon';
+        }
+
+        return 'valid';
+    }
 }

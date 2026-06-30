@@ -46,7 +46,7 @@ class AuthController extends Controller
 
         return response()->json([
             'token' => $token,
-            'user' => new UserResource($user->load(['donorProfile.preferredCenter', 'donations'])),
+            'user' => new UserResource($user->load(['roles', 'donorProfile.preferredCenter', 'donations'])),
         ], 201);
     }
 
@@ -77,7 +77,7 @@ class AuthController extends Controller
 
         return response()->json([
             'token' => $token,
-            'user' => new UserResource($user->load(['donorProfile.preferredCenter', 'donations'])),
+            'user' => new UserResource($user->load(['roles', 'donorProfile.preferredCenter', 'donations'])),
         ]);
     }
 
@@ -90,7 +90,7 @@ class AuthController extends Controller
 
     public function profile(Request $request)
     {
-        return new UserResource($request->user()->load(['donorProfile.preferredCenter', 'donations']));
+        return new UserResource($request->user()->load(['roles', 'donorProfile.preferredCenter', 'donations']));
     }
 
     public function updateProfile(Request $request)
@@ -137,7 +137,7 @@ class AuthController extends Controller
             );
         }
 
-        return new UserResource($user->load(['donorProfile.preferredCenter', 'donations']));
+        return new UserResource($user->load(['roles', 'donorProfile.preferredCenter', 'donations']));
     }
 
     private function generateDonorId(): string

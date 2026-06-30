@@ -9,12 +9,12 @@ class BloodCenterRepository
 {
     public function all(): Collection
     {
-        return BloodCenter::all();
+        return BloodCenter::withCount(['appointments', 'donations', 'campaigns', 'inventory', 'lowStockAlerts'])->get();
     }
 
     public function find(int $id): ?BloodCenter
     {
-        return BloodCenter::find($id);
+        return BloodCenter::withCount(['appointments', 'donations', 'campaigns', 'inventory', 'lowStockAlerts'])->find($id);
     }
 
     public function create(array $data): BloodCenter
@@ -38,6 +38,8 @@ class BloodCenterRepository
 
     public function getActive(): Collection
     {
-        return BloodCenter::where('is_active', true)->get();
+        return BloodCenter::withCount(['appointments', 'donations', 'campaigns', 'inventory', 'lowStockAlerts'])
+            ->where('is_active', true)
+            ->get();
     }
 }

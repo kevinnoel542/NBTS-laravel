@@ -24,6 +24,8 @@ class AppointmentResource extends Resource
 
     protected static ?string $navigationGroup = 'Operations';
 
+    protected static ?int $navigationSort = 10;
+
     protected static ?string $viewPermission = 'appointments.view';
 
     protected static ?string $createPermission = 'appointments.manage';

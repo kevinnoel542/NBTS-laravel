@@ -21,4 +21,14 @@ class Reward extends Model
     {
         return ['is_active' => 'boolean'];
     }
+
+    public function donorRewards()
+    {
+        return $this->hasMany(DonorReward::class);
+    }
+
+    public function getStatusLabelAttribute(): string
+    {
+        return $this->is_active ? 'Active' : 'Inactive';
+    }
 }

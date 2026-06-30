@@ -26,6 +26,7 @@ class NotificationService
             $sent = $this->sendPushToUser($user, $title, $body, $data + [
                 'notification_id' => (string) $notification->id,
                 'type' => $type,
+                'action_url' => (string) ($actionUrl ?? ''),
             ]);
 
             if ($sent) {

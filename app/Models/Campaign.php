@@ -24,6 +24,14 @@ class Campaign extends Model
         'low_stock_alert_id',
     ];
 
+    protected function casts(): array
+    {
+        return [
+            'start_date' => 'datetime',
+            'end_date' => 'datetime',
+        ];
+    }
+
     public function bloodCenter()
     {
         return $this->belongsTo(BloodCenter::class);

@@ -11,4 +11,11 @@ class CreateDeferral extends CreateRecord
     use \App\Filament\Resources\Concerns\RedirectsToResourceIndex;
 
     protected static string $resource = DeferralResource::class;
+
+    protected function mutateFormDataBeforeCreate(array $data): array
+    {
+        $data['created_by'] ??= auth()->id();
+
+        return $data;
+    }
 }
