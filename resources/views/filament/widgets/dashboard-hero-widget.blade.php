@@ -1,28 +1,30 @@
 <x-filament-widgets::widget>
     <section class="nbts-dashboard-hero">
-        <div class="nbts-dashboard-hero__glow" aria-hidden="true"></div>
+        <div class="nbts-dashboard-hero__texture" aria-hidden="true"></div>
 
         <div class="nbts-dashboard-hero__grid">
             <div class="nbts-dashboard-hero__content">
+                <div class="nbts-dashboard-hero__eyebrow">
+                    <span class="nbts-dashboard-hero__signal"></span>
+                    Command center
+                    <span>{{ $generatedAt }}</span>
+                </div>
+
                 <div>
                     <div class="nbts-dashboard-hero__badges">
-                        <span class="nbts-dashboard-hero__badge">
-                            NBTS Command Center
-                        </span>
-
-                        @foreach ($roles as $role)
-                            <span class="nbts-dashboard-hero__badge nbts-dashboard-hero__badge--muted">
-                                {{ $role }}
-                            </span>
-                        @endforeach
+                        @forelse ($roles as $role)
+                            <span class="nbts-dashboard-hero__badge">{{ $role }}</span>
+                        @empty
+                            <span class="nbts-dashboard-hero__badge">Workspace access</span>
+                        @endforelse
                     </div>
 
                     <h2 class="nbts-dashboard-hero__title">
-                        Welcome back, {{ $user?->name ?? 'Team Member' }}
+                        {{ $user?->name ?? 'Team Member' }}
                     </h2>
 
                     <p class="nbts-dashboard-hero__copy">
-                        Monitor donation activity, appointment flow, and blood availability from one permission-aware workspace.
+                        Review today&apos;s appointment flow, confirmed donations, blood availability, and the work queues your role can handle.
                     </p>
                 </div>
 
@@ -39,28 +41,28 @@
             </div>
 
             <div class="nbts-dashboard-hero__stats">
-                <div class="nbts-dashboard-hero__stat">
-                    <span>Today</span>
+                <div class="nbts-dashboard-hero__stat nbts-dashboard-hero__stat--featured">
+                    <span>Today&apos;s appointments</span>
                     <strong>{{ number_format($summary['todayAppointments']) }}</strong>
-                    <small>Appointments</small>
+                    <small>Booked for staff review</small>
                 </div>
 
                 <div class="nbts-dashboard-hero__stat">
-                    <span>Today</span>
+                    <span>Today&apos;s donations</span>
                     <strong>{{ number_format($summary['todayDonations']) }}</strong>
-                    <small>Donations</small>
+                    <small>Completed records</small>
                 </div>
 
                 <div class="nbts-dashboard-hero__stat">
-                    <span>Stock</span>
+                    <span>Available stock</span>
                     <strong>{{ number_format($summary['availableUnits']) }}</strong>
-                    <small>Available units</small>
+                    <small>Units ready for issue</small>
                 </div>
 
                 <div class="nbts-dashboard-hero__stat nbts-dashboard-hero__stat--risk">
-                    <span>Risk</span>
+                    <span>Stock risk</span>
                     <strong>{{ number_format($summary['lowStockGroups']) }}</strong>
-                    <small>Low stock groups</small>
+                    <small>Groups below threshold</small>
                 </div>
             </div>
         </div>

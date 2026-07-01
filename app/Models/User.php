@@ -35,6 +35,8 @@ class User extends Authenticatable implements FilamentUser
         'profile_photo_path',
         'role',
         'is_active',
+        'firebase_uid',
+        'firebase_provider',
     ];
 
     public function appointments()

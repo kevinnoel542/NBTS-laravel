@@ -1,114 +1,137 @@
 @extends('layouts.app')
 
+@section('title', $campaign->title . ' - NBTS Campaign')
+@section('meta_description', 'View NBTS campaign details, dates, location, center, target blood group, and mobile app participation guidance.')
+
 @section('content')
-<div class="bg-white min-h-screen">
-    <!-- Campaign Hero -->
-    <div class="relative h-[600px] overflow-hidden">
-        <img src="https://images.unsplash.com/photo-1579154341098-e4e158cc7f55?q=80&w=2000&auto=format&fit=crop" class="w-full h-full object-cover">
-        <div class="absolute inset-0 bg-gradient-to-t from-slate-900 via-slate-900/60 to-transparent"></div>
-        
-        <div class="absolute bottom-0 left-0 w-full pb-20">
-            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <a href="{{ route('campaigns.index') }}" class="inline-flex items-center text-red-500 font-black uppercase tracking-[0.2em] text-[10px] italic mb-8 hover:text-white transition-colors group">
-                    <svg class="w-4 h-4 mr-2 group-hover:-translate-x-2 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M10 19l-7-7m0 0l7-7m-7 7h18" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>
-                    Back to Campaigns
+@php
+    $fallbackImage = asset('images/web/nbts-donation-hero.png');
+    $image = $campaign->image_path ? asset('storage/' . $campaign->image_path) : $fallbackImage;
+    $statusLabels = ['upcoming' => 'Upcoming', 'ongoing' => 'Active', 'completed' => 'Completed', 'cancelled' => 'Cancelled'];
+@endphp
+
+<section class="page-hero">
+    <div class="section-shell hero-grid">
+        <div class="reveal">
+            <a href="{{ route('campaigns.index') }}" class="filter-chip mb-6">&larr; Back to campaigns</a>
+            <span class="kicker">{{ $statusLabels[$campaign->status] ?? ucfirst($campaign->status ?? 'Campaign') }}</span>
+            <h1 class="hero-title mt-6">{{ $campaign->title }}</h1>
+            <p class="web-copy mt-7">{{ $campaign->description }}</p>
+            <div class="hero-actions">
+                <a href="{{ route('download') }}" class="magnetic-btn">
+                    <span>Join in App</span>
+                    <span class="btn-orb" aria-hidden="true">&rarr;</span>
                 </a>
-                <div class="max-w-3xl">
-                    <span class="px-6 py-2 bg-red-600 text-white text-[10px] font-black uppercase tracking-[0.3em] rounded-full shadow-2xl italic mb-8 inline-block ring ring-red-500 ring-offset-4 ring-offset-slate-900 uppercase italic tracking-widest">{{ $campaign->status }}</span>
-                    <h1 class="text-6xl md:text-8xl font-black text-white tracking-tighter italic uppercase leading-[0.85] mb-8">
-                        {{ $campaign->title }}
-                    </h1>
-                    <div class="flex items-center text-slate-300 space-x-8 text-sm font-bold uppercase tracking-[0.2em] italic">
-                         <div class="flex items-center">
-                            <svg class="w-6 h-6 mr-3 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-                            {{ $campaign->bloodCenter->name ?? 'Mobile Drive' }}
-                        </div>
-                        <div class="flex items-center">
-                            <svg class="w-6 h-6 mr-3 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-                            Until {{ \Carbon\Carbon::parse($campaign->end_date)->format('M d, Y') }}
-                        </div>
-                    </div>
+                <a href="{{ route('centers.index') }}" class="secondary-btn">Find Centers</a>
+            </div>
+        </div>
+        <div class="bezel reveal">
+            <div class="bezel-core">
+                <div class="image-frame">
+                    <img src="{{ $image }}" alt="{{ $campaign->title }}">
                 </div>
             </div>
         </div>
     </div>
+</section>
 
-    <!-- Campaign Content -->
-    <div class="py-24 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="grid grid-cols-1 lg:grid-cols-12 gap-20">
-            <!-- Details -->
-            <div class="lg:col-span-8 space-y-16">
-                <div>
-                   <h2 class="text-4xl font-black text-slate-900 italic uppercase mb-10 pb-4 border-b-8 border-red-600 inline-block uppercase italic tracking-tighter leading-none">Campaign <span class="text-red-600">Overview.</span></h2>
-                   <p class="text-xl text-slate-600 font-medium italic leading-relaxed">
-                       {{ $campaign->description }}
-                   </p>
+<section class="soft-band">
+    <div class="section-shell detail-shell">
+        <div class="space-y-6">
+            <article class="premium-card reveal">
+                <div class="card-body">
+                    <h2 class="section-title">Campaign details</h2>
+                    <p class="web-copy mt-5">Use this information to understand where the campaign is happening and what type of donors NBTS is mobilizing.</p>
+                    <div class="meta-grid mt-8">
+                        <div class="meta-tile">
+                            <span>Starts</span>
+                            <strong>{{ optional($campaign->start_date)->format('M d, Y g:i A') ?? 'TBA' }}</strong>
+                        </div>
+                        <div class="meta-tile">
+                            <span>Ends</span>
+                            <strong>{{ optional($campaign->end_date)->format('M d, Y g:i A') ?? 'TBA' }}</strong>
+                        </div>
+                        <div class="meta-tile">
+                            <span>Location</span>
+                            <strong>{{ $campaign->location ?? ($campaign->bloodCenter->address ?? 'Not listed') }}</strong>
+                        </div>
+                        <div class="meta-tile">
+                            <span>Campaign type</span>
+                            <strong>{{ str($campaign->campaign_type ?? 'standard')->headline() }}</strong>
+                        </div>
+                        <div class="meta-tile">
+                            <span>Target blood group</span>
+                            <strong>{{ $campaign->target_blood_group ?? 'All groups' }}</strong>
+                        </div>
+                        <div class="meta-tile">
+                            <span>Center</span>
+                            <strong>{{ $campaign->bloodCenter->name ?? 'Mobile drive' }}</strong>
+                        </div>
+                    </div>
                 </div>
+            </article>
 
-                <!-- Impact/Goal Card -->
-                <div class="bg-slate-900 rounded-[3rem] p-12 text-white relative overflow-hidden">
-                    <div class="absolute -right-20 -bottom-20 w-80 h-80 bg-red-600/20 rounded-full blur-[100px]"></div>
-                    <div class="relative z-10">
-                        <div class="flex justify-between items-end mb-8">
-                            <div>
-                                <h3 class="text-sm font-black text-red-500 uppercase tracking-widest italic mb-2">Current Progress</h3>
-                                <div class="text-5xl font-black italic tracking-tighter leading-none uppercase italic tracking-widest">742 <span class="text-slate-500 text-2xl uppercase font-black italic">Units</span></div>
-                            </div>
-                            <div class="text-right">
-                                <h3 class="text-sm font-black text-slate-500 uppercase tracking-widest italic mb-2">Target Goal</h3>
-                                <div class="text-3xl font-black italic tracking-tighter uppercase italic tracking-widest">1,000 <span class="text-slate-500 text-lg uppercase font-black italic">Units</span></div>
-                            </div>
-                        </div>
-                        <div class="w-full bg-slate-800 h-6 rounded-full overflow-hidden shadow-inner p-1">
-                             <div class="h-full bg-gradient-to-r from-red-700 to-red-500 rounded-full shadow-lg" style="width: 74%"></div>
-                        </div>
-                        <p class="text-[10px] text-slate-500 font-bold uppercase tracking-[0.3em] italic mt-6 text-center">Help us recover the remaining 258 units to meet our regional target.</p>
+            <article class="premium-card reveal">
+                <div class="card-body">
+                    <h2 class="text-3xl font-extrabold tracking-tight">How to participate</h2>
+                    <div class="story-list mt-6">
+                        @foreach([
+                            'Download or open the NBTS mobile app.',
+                            'Confirm your donor profile and eligibility information.',
+                            'Choose this campaign or its blood center when booking.',
+                            'Arrive with a valid ID and follow staff screening instructions.',
+                        ] as $item)
+                            <div class="story-row">{{ $item }}</div>
+                        @endforeach
                     </div>
                 </div>
-                
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-                    <div class="text-center p-8 bg-slate-50 rounded-[2rem] border border-slate-100">
-                         <div class="text-3xl font-black text-slate-900 italic mb-2 uppercase italic tracking-widest">240+</div>
-                         <p class="text-[10px] text-slate-400 font-bold uppercase tracking-widest italic tracking-widest">Lives Saved</p>
-                    </div>
-                    <div class="text-center p-8 bg-red-50 rounded-[2rem] border border-red-100">
-                         <div class="text-3xl font-black text-red-600 italic mb-2 uppercase italic tracking-widest">85</div>
-                         <p class="text-[10px] text-red-400 font-bold uppercase tracking-widest italic tracking-widest">New Donors</p>
-                    </div>
-                    <div class="text-center p-8 bg-slate-50 rounded-[2rem] border border-slate-100">
-                         <div class="text-3xl font-black text-slate-900 italic mb-2 uppercase italic tracking-widest">12</div>
-                         <p class="text-[10px] text-slate-400 font-bold uppercase tracking-widest italic tracking-widest">Days Left</p>
-                    </div>
+            </article>
+        </div>
+
+        <aside class="space-y-6">
+            <div class="bezel reveal">
+                <div class="bezel-core card-body">
+                    <h2 class="text-3xl font-extrabold tracking-tight">Join through the app</h2>
+                    <p class="mt-4 text-sm leading-6 text-[var(--muted)]">The app keeps your profile, appointment, eligibility, QR card, and donation history together.</p>
+                    <a href="{{ route('download') }}" class="magnetic-btn mt-6 w-full">
+                        <span>Download App</span>
+                        <span class="btn-orb" aria-hidden="true">&rarr;</span>
+                    </a>
                 </div>
             </div>
 
-            <!-- Sidebar CTA -->
-            <div class="lg:col-span-4 space-y-8">
-                <div class="sticky top-24">
-                    <div class="bg-red-600 rounded-[3rem] p-12 text-white shadow-3xl shadow-red-100 relative overflow-hidden group">
-                        <div class="absolute inset-0 bg-slate-900 translate-y-full group-hover:translate-y-0 transition-transform duration-500 -z-0"></div>
-                        <div class="relative z-10">
-                            <span class="text-[10px] font-black uppercase tracking-[0.3em] italic mb-6 block opacity-80 uppercase italic tracking-widest leading-none">Mobilization Hub</span>
-                            <h3 class="text-4xl font-black italic uppercase leading-[0.9] mb-8 uppercase italic tracking-tighter leading-none">Join the <br>Mission.</h3>
-                            <p class="font-medium italic text-sm leading-relaxed mb-10 opacity-90">To participate in this campaign and book your screening, please use the NBTS mobile app.</p>
-                            
-                            <div class="space-y-4">
-                                <a href="{{ route('download') }}" class="block text-center py-5 bg-white text-red-600 group-hover:bg-red-600 group-hover:text-white font-black uppercase tracking-widest italic text-xs rounded-2xl shadow-xl transition-all active:scale-95 uppercase italic tracking-widest">Download Mobile App</a>
-                            </div>
-                            
-                            <div class="mt-12 pt-12 border-t border-white/20">
-                                <div class="flex items-center space-x-4">
-                                    <div class="w-12 h-12 bg-white/10 rounded-xl flex items-center justify-center">
-                                         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h2M4 8h2m12 0h2M4 6h18M4 18h18" stroke-width="2"/></svg>
-                                    </div>
-                                    <div class="text-[10px] font-black uppercase tracking-widest italic leading-relaxed">Scan QR code at <br>registration point</div>
-                                </div>
-                            </div>
-                        </div>
+            @if($campaign->bloodCenter)
+                <a href="{{ route('centers.show', $campaign->bloodCenter) }}" class="premium-card reveal block no-underline">
+                    <div class="card-body">
+                        <span class="status-pill">{{ $campaign->bloodCenter->status_label }}</span>
+                        <h2 class="mt-4 text-2xl font-extrabold tracking-tight text-[var(--ink)]">{{ $campaign->bloodCenter->name }}</h2>
+                        <p class="mt-3 text-sm leading-6 text-[var(--muted)]">{{ $campaign->bloodCenter->address }}</p>
                     </div>
-                </div>
+                </a>
+            @endif
+        </aside>
+    </div>
+</section>
+
+@if($relatedCampaigns->isNotEmpty())
+    <section class="split-band">
+        <div class="section-shell">
+            <h2 class="section-title reveal">Related campaigns</h2>
+            <div class="grid gap-5 md:grid-cols-3 mt-10">
+                @foreach($relatedCampaigns as $related)
+                    <a href="{{ route('campaigns.show', $related) }}" class="premium-card reveal no-underline">
+                        <div class="image-frame" style="aspect-ratio: 16 / 10;">
+                            <img src="{{ $related->image_path ? asset('storage/' . $related->image_path) : $fallbackImage }}" alt="{{ $related->title }}">
+                        </div>
+                        <div class="card-body">
+                            <span class="status-pill">{{ $statusLabels[$related->status] ?? ucfirst($related->status ?? 'Campaign') }}</span>
+                            <h3 class="mt-4 text-xl font-extrabold leading-tight text-[var(--ink)]">{{ $related->title }}</h3>
+                            <p class="mt-3 line-clamp-2 text-sm leading-6 text-[var(--muted)]">{{ $related->bloodCenter->name ?? 'Mobile drive' }}</p>
+                        </div>
+                    </a>
+                @endforeach
             </div>
         </div>
-    </div>
-</div>
+    </section>
+@endif
 @endsection

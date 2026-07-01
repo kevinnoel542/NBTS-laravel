@@ -12,7 +12,14 @@ class ViewUser extends ViewRecord
 
     protected function getHeaderActions(): array
     {
+        $record = $this->getRecord();
+
         return [
+            Actions\Action::make('profile_photo')
+                ->label('')
+                ->view('filament.resources.user-resource.actions.header-avatar', [
+                    'record' => $record,
+                ]),
             Actions\EditAction::make(),
         ];
     }

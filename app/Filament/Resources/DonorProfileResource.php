@@ -44,132 +44,151 @@ class DonorProfileResource extends Resource
     {
         return $form
             ->schema([
-                Forms\Components\Section::make('Donor Identity')
-                    ->description('Connect the donor account to its donor profile and home center.')
+                Forms\Components\Grid::make(12)
+                    ->extraAttributes(['class' => 'nbts-donor-profile-edit'])
                     ->schema([
-                        Forms\Components\Select::make('user_id')
-                            ->label('Donor Account')
-                            ->relationship('user', 'name')
-                            ->searchable()
-                            ->preload()
-                            ->required(),
-                        Forms\Components\TextInput::make('donor_id')
-                            ->label('Donor ID')
-                            ->required()
-                            ->unique(ignoreRecord: true)
-                            ->maxLength(255),
-                        Forms\Components\Select::make('preferred_center_id')
-                            ->label('Preferred Center')
-                            ->relationship('preferredCenter', 'name')
-                            ->searchable()
-                            ->preload(),
-                        Forms\Components\Select::make('language')
-                            ->options([
-                                'en' => 'English',
-                                'sw' => 'Swahili',
+                        Forms\Components\Section::make('Donor identity')
+                            ->description('Account link, donor ID, home center, and app language.')
+                            ->extraAttributes(['class' => 'nbts-donor-profile-edit__panel nbts-donor-profile-edit__panel--identity'])
+                            ->schema([
+                                Forms\Components\Select::make('user_id')
+                                    ->label('Donor account')
+                                    ->relationship('user', 'name')
+                                    ->searchable()
+                                    ->preload()
+                                    ->required()
+                                    ->columnSpanFull(),
+                                Forms\Components\TextInput::make('donor_id')
+                                    ->label('Donor ID')
+                                    ->required()
+                                    ->unique(ignoreRecord: true)
+                                    ->maxLength(255),
+                                Forms\Components\Select::make('preferred_center_id')
+                                    ->label('Preferred center')
+                                    ->relationship('preferredCenter', 'name')
+                                    ->searchable()
+                                    ->preload(),
+                                Forms\Components\Select::make('language')
+                                    ->options([
+                                        'en' => 'English',
+                                        'sw' => 'Swahili',
+                                    ])
+                                    ->default('en'),
+                                Forms\Components\TextInput::make('total_donations')
+                                    ->numeric()
+                                    ->integer()
+                                    ->minValue(0)
+                                    ->default(0)
+                                    ->required(),
+                                Forms\Components\TextInput::make('loyalty_points')
+                                    ->numeric()
+                                    ->integer()
+                                    ->minValue(0)
+                                    ->default(0),
+                                Forms\Components\Select::make('loyalty_tier')
+                                    ->options([
+                                        'bronze' => 'Bronze',
+                                        'silver' => 'Silver',
+                                        'gold' => 'Gold',
+                                        'platinum' => 'Platinum',
+                                    ])
+                                    ->default('bronze'),
                             ])
-                            ->default('en'),
-                    ])
-                    ->columns(4),
-
-                Forms\Components\Section::make('Blood Group Verification')
-                    ->description('Track whether the donor blood group was selected by the donor or verified by staff.')
-                    ->schema([
-                        Forms\Components\Select::make('blood_group_status')
-                            ->options([
-                                'unknown' => 'Unknown',
-                                'user_selected' => 'User Selected',
-                                'staff_verified' => 'Staff Verified',
+                            ->columns([
+                                'default' => 1,
+                                'md' => 2,
                             ])
-                            ->default('unknown')
-                            ->required(),
-                        Forms\Components\Toggle::make('blood_group_verified')
-                            ->label('Verified')
-                            ->default(false),
-                        Forms\Components\DateTimePicker::make('blood_group_verified_at')
-                            ->label('Verified At')
-                            ->seconds(false)
-                            ->native(false),
-                        Forms\Components\Select::make('blood_group_verified_by')
-                            ->label('Verified By')
-                            ->relationship('verifier', 'name')
-                            ->searchable()
-                            ->preload(),
-                    ])
-                    ->columns(4),
+                            ->columnSpan([
+                                'default' => 12,
+                                'xl' => 4,
+                            ]),
 
-                Forms\Components\Section::make('Eligibility')
-                    ->description('Use these fields when staff review whether a donor can donate now.')
-                    ->schema([
-                        Forms\Components\Select::make('eligibility_status')
-                            ->options([
-                                'unknown' => 'Unknown',
-                                'eligible' => 'Eligible',
-                                'temporarily_deferred' => 'Temporarily Deferred',
-                                'permanently_deferred' => 'Permanently Deferred',
-                            ])
-                            ->default('unknown'),
-                        Forms\Components\DatePicker::make('next_eligible_donation_date')
-                            ->label('Next Eligible Date')
-                            ->native(false),
-                        Forms\Components\DateTimePicker::make('last_eligibility_checked_at')
-                            ->label('Last Checked')
-                            ->seconds(false)
-                            ->native(false),
-                        Forms\Components\Textarea::make('eligibility_notes')
-                            ->rows(3)
-                            ->columnSpanFull(),
-                    ])
-                    ->columns(3),
+                        Forms\Components\Group::make([
+                            Forms\Components\Section::make('Medical and eligibility')
+                                ->description('Blood verification and current eligibility status.')
+                                ->extraAttributes(['class' => 'nbts-donor-profile-edit__panel'])
+                                ->schema([
+                                    Forms\Components\Select::make('blood_group_status')
+                                        ->label('Blood group status')
+                                        ->options([
+                                            'unknown' => 'Unknown',
+                                            'user_selected' => 'User Selected',
+                                            'staff_verified' => 'Staff Verified',
+                                        ])
+                                        ->default('unknown')
+                                        ->required(),
+                                    Forms\Components\Toggle::make('blood_group_verified')
+                                        ->label('Verified')
+                                        ->default(false),
+                                    Forms\Components\DateTimePicker::make('blood_group_verified_at')
+                                        ->label('Verified at')
+                                        ->seconds(false)
+                                        ->native(false),
+                                    Forms\Components\Select::make('blood_group_verified_by')
+                                        ->label('Verified by')
+                                        ->relationship('verifier', 'name')
+                                        ->searchable()
+                                        ->preload(),
+                                    Forms\Components\Select::make('eligibility_status')
+                                        ->label('Eligibility status')
+                                        ->options([
+                                            'unknown' => 'Unknown',
+                                            'eligible' => 'Eligible',
+                                            'temporarily_deferred' => 'Temporarily Deferred',
+                                            'permanently_deferred' => 'Permanently Deferred',
+                                        ])
+                                        ->default('unknown'),
+                                    Forms\Components\DatePicker::make('next_eligible_donation_date')
+                                        ->label('Next eligible date')
+                                        ->native(false),
+                                    Forms\Components\DateTimePicker::make('last_eligibility_checked_at')
+                                        ->label('Last checked')
+                                        ->seconds(false)
+                                        ->native(false),
+                                    Forms\Components\Textarea::make('eligibility_notes')
+                                        ->label('Eligibility notes')
+                                        ->rows(3)
+                                        ->columnSpanFull(),
+                                ])
+                                ->columns([
+                                    'default' => 1,
+                                    'md' => 2,
+                                    'xl' => 4,
+                                ]),
 
-                Forms\Components\Section::make('Donation & Loyalty')
-                    ->description('Summary numbers used by the mobile app, donor card, and loyalty screens.')
-                    ->schema([
-                        Forms\Components\TextInput::make('total_donations')
-                            ->numeric()
-                            ->integer()
-                            ->minValue(0)
-                            ->default(0)
-                            ->required(),
-                        Forms\Components\TextInput::make('loyalty_points')
-                            ->numeric()
-                            ->integer()
-                            ->minValue(0)
-                            ->default(0),
-                        Forms\Components\Select::make('loyalty_tier')
-                            ->options([
-                                'bronze' => 'Bronze',
-                                'silver' => 'Silver',
-                                'gold' => 'Gold',
-                                'platinum' => 'Platinum',
-                            ])
-                            ->default('bronze'),
-                    ])
-                    ->columns(3),
-
-                Forms\Components\Section::make('Emergency Contact')
-                    ->schema([
-                        Forms\Components\TextInput::make('emergency_contact_name')
-                            ->maxLength(255),
-                        Forms\Components\TextInput::make('emergency_contact_phone')
-                            ->tel()
-                            ->maxLength(255),
-                    ])
-                    ->columns(2),
-
-                Forms\Components\Section::make('App Preferences')
-                    ->schema([
-                        Forms\Components\Toggle::make('push_notifications_enabled')
-                            ->label('Push Notifications')
-                            ->default(true),
-                        Forms\Components\Toggle::make('sms_reminders_enabled')
-                            ->label('SMS Reminders')
-                            ->default(true),
-                        Forms\Components\Toggle::make('share_anonymized_data')
-                            ->label('Share Anonymized Data')
-                            ->default(false),
-                    ])
-                    ->columns(3),
+                            Forms\Components\Section::make('Contact and app preferences')
+                                ->description('Emergency contact and donor communication settings.')
+                                ->extraAttributes(['class' => 'nbts-donor-profile-edit__panel'])
+                                ->schema([
+                                    Forms\Components\TextInput::make('emergency_contact_name')
+                                        ->label('Emergency contact')
+                                        ->maxLength(255),
+                                    Forms\Components\TextInput::make('emergency_contact_phone')
+                                        ->label('Emergency phone')
+                                        ->tel()
+                                        ->maxLength(255),
+                                    Forms\Components\Toggle::make('push_notifications_enabled')
+                                        ->label('Push notifications')
+                                        ->default(true),
+                                    Forms\Components\Toggle::make('sms_reminders_enabled')
+                                        ->label('SMS reminders')
+                                        ->default(true),
+                                    Forms\Components\Toggle::make('share_anonymized_data')
+                                        ->label('Share anonymized data')
+                                        ->default(false),
+                                ])
+                                ->columns([
+                                    'default' => 1,
+                                    'md' => 2,
+                                    'xl' => 5,
+                                ]),
+                        ])
+                            ->extraAttributes(['class' => 'nbts-donor-profile-edit__stack'])
+                            ->columnSpan([
+                                'default' => 12,
+                                'xl' => 8,
+                            ]),
+                    ]),
             ]);
     }
 

@@ -39,6 +39,7 @@ Route::prefix('v1')->group(function () {
     Route::prefix('auth')->group(function () {
         Route::post('/register', [AuthController::class, 'register']);
         Route::post('/login', [AuthController::class, 'login']);
+        Route::post('/firebase', [AuthController::class, 'firebase']);
         Route::post('/logout', [AuthController::class, 'logout'])->middleware('auth:sanctum');
     });
 
@@ -73,6 +74,7 @@ Route::prefix('v1')->group(function () {
         // Appointments
         Route::get('/appointments', [AppointmentController::class, 'index']);
         Route::get('/appointments/upcoming', [AppointmentController::class, 'upcoming']);
+        Route::get('/appointments/slots', [AppointmentController::class, 'slots']);
         Route::post('/appointments', [AppointmentController::class, 'store']);
         Route::get('/appointments/{id}', [AppointmentController::class, 'show']);
         Route::put('/appointments/{id}', [AppointmentController::class, 'update']);

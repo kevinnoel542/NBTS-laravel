@@ -9,6 +9,7 @@ use App\Services\NotificationService;
 use App\Models\Appointment;
 use App\Models\BloodCenter;
 use Illuminate\Http\Request;
+use Illuminate\Support\Carbon;
 use Illuminate\Validation\ValidationException;
 
 class AppointmentController extends Controller
@@ -109,30 +110,32 @@ class AppointmentController extends Controller
         return new AppointmentResource($appointment->load(['user', 'bloodCenter']));
     }
 
+    public function slots(Request $request)
+    {
+        $data = $request->validate([
+            'center_id' => 'required|exists:blood_centers,id',
+            'date' => 'required|date|after_or_equal:today',
+        ]);
+
+        $bloodCenter = BloodCenter::findOrFail($data['center_id']);
+        $date = Carbon::parse($data['date'], config('app.timezone'));
+
+        return response()->json([
+            'data' => $this->buildAppointmentSlots($bloodCenter, $date),
+        ]);
+    }
+
     public function availableSlots(BloodCenter $bloodCenter, Request $request)
     {
         $data = $request->validate([
             'date' => 'required|date|after_or_equal:today',
         ]);
 
-        $date = \Illuminate\Support\Carbon::parse($data['date']);
-        $slots = collect(['08:00', '09:30', '11:00', '13:00', '14:30', '16:00'])
-            ->map(function (string $time) use ($date, $bloodCenter) {
-                $scheduledAt = $date->copy()->setTimeFromTimeString($time);
-                $booked = Appointment::where('blood_center_id', $bloodCenter->id)
-                    ->where('scheduled_at', $scheduledAt)
-                    ->whereIn('status', ['pending', 'confirmed'])
-                    ->exists();
+        $date = Carbon::parse($data['date'], config('app.timezone'));
 
-                return [
-                    'time' => $time,
-                    'scheduled_at' => $scheduledAt->toISOString(),
-                    'available' => $scheduledAt->isFuture() && !$booked && $bloodCenter->is_active,
-                ];
-            })
-            ->values();
-
-        return response()->json(['data' => $slots]);
+        return response()->json([
+            'data' => $this->buildAppointmentSlots($bloodCenter, $date),
+        ]);
     }
 
     public function show($id, Request $request)
@@ -210,5 +213,44 @@ class AppointmentController extends Controller
                 'scheduled_at' => ['This appointment slot is already booked.'],
             ]);
         }
+    }
+
+    private function buildAppointmentSlots(BloodCenter $bloodCenter, Carbon $date)
+    {
+        return collect(['08:00', '09:30', '11:00', '13:00', '14:30', '16:00'])
+            ->map(function (string $time) use ($date, $bloodCenter) {
+                $scheduledAt = $date->copy()->setTimeFromTimeString($time);
+                $booked = Appointment::where('blood_center_id', $bloodCenter->id)
+                    ->where('scheduled_at', $scheduledAt)
+                    ->whereIn('status', ['pending', 'confirmed'])
+                    ->exists();
+
+                $available = $scheduledAt->isFuture() && ! $booked && $bloodCenter->is_active;
+                $reason = null;
+
+                if (! $bloodCenter->is_active) {
+                    $reason = 'Center closed';
+                } elseif (! $scheduledAt->isFuture()) {
+                    $reason = 'Past time';
+                } elseif ($booked) {
+                    $reason = 'Full';
+                }
+
+                return [
+                    'time' => $time,
+                    'slot_time' => $time,
+                    'start_time' => $time,
+                    'scheduled_time' => $scheduledAt->toDateTimeString(),
+                    'scheduled_at' => $scheduledAt->toISOString(),
+                    'starts_at' => $scheduledAt->toISOString(),
+                    'available' => $available,
+                    'is_available' => $available,
+                    'open' => $available,
+                    'reason' => $reason,
+                    'message' => $reason,
+                    'status_label' => $available ? 'Available' : $reason,
+                ];
+            })
+            ->values();
     }
 }

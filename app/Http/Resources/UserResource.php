@@ -14,9 +14,22 @@ class UserResource extends JsonResource
      */
     public function toArray($request): array
     {
+        $profileComplete = collect([
+            $this->phone,
+            $this->blood_group,
+            $this->gender,
+            $this->region,
+            $this->date_of_birth,
+        ])->every(fn ($value): bool => filled($value));
+
         $totalVolume = $this->relationLoaded('donations')
             ? $this->donations->where('status', 'completed')->sum('volume_ml')
             : $this->donations()->where('status', 'completed')->sum('volume_ml');
+        $profilePhotoUrl = $this->profile_photo_path
+            ? (str_starts_with($this->profile_photo_path, 'http://') || str_starts_with($this->profile_photo_path, 'https://')
+                ? $this->profile_photo_path
+                : asset('storage/' . $this->profile_photo_path))
+            : null;
 
         return [
             'id' => $this->id,
@@ -24,11 +37,15 @@ class UserResource extends JsonResource
             'phone' => $this->phone,
             'email' => $this->email,
             'profile_photo_path' => $this->profile_photo_path,
-            'profile_photo_url' => $this->profile_photo_path ? asset('storage/' . $this->profile_photo_path) : null,
+            'profile_photo_url' => $profilePhotoUrl,
             'role' => $this->role,
             'role_label' => str($this->role ?: 'donor')->title()->toString(),
             'roles' => $this->whenLoaded('roles', fn () => $this->roles->pluck('name')->values()),
             'is_active' => (bool) $this->is_active,
+            'profile_complete' => $profileComplete,
+            'is_profile_complete' => $profileComplete,
+            'donor_profile_complete' => $profileComplete,
+            'profileComplete' => $profileComplete,
             'blood_group' => $this->blood_group,
             'gender' => $this->gender ? ucfirst($this->gender) : null,
             'gender_value' => $this->gender,

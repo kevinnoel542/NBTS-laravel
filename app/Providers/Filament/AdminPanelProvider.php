@@ -2,14 +2,10 @@
 
 namespace App\Providers\Filament;
 
-use App\Filament\Widgets\AdminOverviewStats;
 use App\Filament\Widgets\BloodGroupInventoryChart;
-use App\Filament\Widgets\CampaignOverviewStats;
 use App\Filament\Widgets\DashboardHeroWidget;
+use App\Filament\Widgets\DashboardWorkspaceWidget;
 use App\Filament\Widgets\DonationTrendChart;
-use App\Filament\Widgets\InventoryOverviewStats;
-use App\Filament\Widgets\LoyaltyOverviewStats;
-use App\Filament\Widgets\OperationsOverviewStats;
 use Filament\Enums\ThemeMode;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\AuthenticateSession;
@@ -92,11 +88,7 @@ class AdminPanelProvider extends PanelProvider
             ])
             ->widgets([
                 DashboardHeroWidget::class,
-                AdminOverviewStats::class,
-                OperationsOverviewStats::class,
-                InventoryOverviewStats::class,
-                CampaignOverviewStats::class,
-                LoyaltyOverviewStats::class,
+                DashboardWorkspaceWidget::class,
                 DonationTrendChart::class,
                 BloodGroupInventoryChart::class,
             ])

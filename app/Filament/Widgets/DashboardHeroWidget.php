@@ -35,6 +35,7 @@ class DashboardHeroWidget extends Widget
                 'availableUnits' => BloodUnit::where('status', 'available')->count(),
                 'lowStockGroups' => BloodInventory::whereColumn('available_units', '<', 'minimum_threshold')->count(),
             ],
+            'generatedAt' => now()->format('M d, Y h:i A'),
             'actions' => $this->quickActions(),
         ];
     }

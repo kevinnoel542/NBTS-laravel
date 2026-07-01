@@ -1,54 +1,129 @@
 @extends('layouts.app')
 
+@section('title', 'Donation Campaigns - NBTS')
+@section('meta_description', 'Browse NBTS blood donation campaigns by status, location, center, dates, target blood group, and campaign type.')
+
 @section('content')
-<div class="bg-slate-50 min-h-screen pt-12 pb-24">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="mb-16 text-center">
-            <h1 class="text-4xl font-black text-slate-900 tracking-tight italic uppercase">Campaigns</h1>
-            <p class="text-slate-500 font-medium italic mt-2">Join our latest drives and help us reach the goal.</p>
+@php
+    $fallbackImage = asset('images/web/nbts-donation-hero.png');
+    $statuses = ['upcoming' => 'Upcoming', 'ongoing' => 'Active', 'completed' => 'Completed', 'cancelled' => 'Cancelled'];
+    $selectedStatus = request('status') === 'active' ? 'ongoing' : request('status');
+@endphp
+
+<section class="page-hero">
+    <div class="section-shell hero-grid">
+        <div class="reveal">
+            <span class="kicker">Donation campaigns</span>
+            <h1 class="hero-title mt-6">Join the drives that need donors now.</h1>
+            <p class="web-copy mt-7">Browse campaigns by status, location, target blood group, and center. Use the app to participate.</p>
         </div>
-
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-12">
-            @forelse($campaigns as $campaign)
-                <div class="bg-white rounded-[2.5rem] overflow-hidden shadow-sm hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-2 border border-slate-100 group">
-                    <div class="aspect-w-16 aspect-h-9 relative overflow-hidden h-64">
-                        <img src="{{ $campaign->image_path ? asset('storage/' . $campaign->image_path) : 'https://images.unsplash.com/photo-1579154341098-e4e158cc7f55?q=80&w=1000&auto=format&fit=crop' }}" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700 font-sans antialiased">
-                        <div class="absolute top-6 left-6">
-                            <span class="px-4 py-1.5 bg-red-600 text-white text-[10px] font-black uppercase tracking-[0.2em] rounded-full shadow-xl italic ring ring-red-500 ring-offset-2">{{ $campaign->status }}</span>
+        <div class="bezel reveal">
+            <div class="bezel-core">
+                <div class="image-frame">
+                    <img src="{{ $fallbackImage }}" alt="Blood donation campaign inside a modern center">
+                </div>
+                <div class="card-body">
+                    <div class="metric-rail">
+                        <div class="metric-item">
+                            <span class="metric-value">{{ number_format($campaigns->total()) }}</span>
+                            <span class="metric-label">Campaigns found</span>
                         </div>
-                    </div>
-                    <div class="p-10">
-                        <a href="{{ route('campaigns.show', $campaign) }}">
-                            <h3 class="text-2xl font-black text-slate-900 italic tracking-tight mb-4 uppercase hover:text-red-600 transition-colors">{{ $campaign->title }}</h3>
-                        </a>
-                        <p class="text-slate-500 text-sm font-medium mb-8 line-clamp-2 leading-relaxed italic">{{ $campaign->description }}</p>
-                        
-                        <div class="space-y-4 mb-8">
-                            <div class="flex items-center text-[10px] font-black text-slate-400 uppercase tracking-widest italic">
-                                <svg class="w-4 h-4 mr-3 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-                                {{ $campaign->bloodCenter->name ?? 'Mobile Drive' }}
-                            </div>
-                            <div class="flex items-center text-[10px] font-black text-slate-400 uppercase tracking-widest italic">
-                                <svg class="w-4 h-4 mr-3 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-                                Ends {{ \Carbon\Carbon::parse($campaign->end_date)->format('M d, Y') }}
-                            </div>
+                        <div class="metric-item">
+                            <span class="metric-value">App</span>
+                            <span class="metric-label">Join channel</span>
                         </div>
-                        
-                        <div class="w-full bg-slate-100 h-2.5 rounded-full overflow-hidden mb-8 shadow-inner">
-                             <div class="bg-gradient-to-r from-red-600 to-red-400 h-full rounded-full transition-all duration-1000" style="width: 65%"></div>
+                        <div class="metric-item">
+                            <span class="metric-value">Live</span>
+                            <span class="metric-label">Status tracking</span>
                         </div>
-
-                        <a href="{{ route('download') }}" class="block text-center py-4 bg-slate-900 text-white font-black uppercase tracking-widest italic text-[10px] rounded-2xl hover:bg-red-600 transition-all shadow-xl shadow-slate-200 active:scale-95 group-hover:bg-red-600 group-hover:shadow-red-100">Download App to Join</a>
                     </div>
                 </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="soft-band">
+    <div class="section-shell">
+        <form action="{{ route('campaigns.index') }}" method="GET" class="form-panel reveal" role="search">
+            <label class="sr-only" for="campaign-search">Search campaigns</label>
+            <input id="campaign-search" type="search" name="search" value="{{ request('search') }}" placeholder="Search by title, location, or description">
+            @if(request('status'))
+                <input type="hidden" name="status" value="{{ request('status') }}">
+            @endif
+            <button type="submit" class="magnetic-btn">
+                <span>Search</span>
+                <span class="btn-orb" aria-hidden="true">&rarr;</span>
+            </button>
+        </form>
+
+        <div class="filter-row mt-6 reveal">
+            <a href="{{ route('campaigns.index', request('search') ? ['search' => request('search')] : []) }}" class="filter-chip {{ $selectedStatus ? '' : 'is-active' }}">All</a>
+            @foreach($statuses as $value => $label)
+                <a href="{{ route('campaigns.index', array_filter(['search' => request('search'), 'status' => $value])) }}" class="filter-chip {{ $selectedStatus === $value ? 'is-active' : '' }}">{{ $label }}</a>
+            @endforeach
+            @if(request('search') || request('status'))
+                <a href="{{ route('campaigns.index') }}" class="filter-chip">Clear filters</a>
+            @endif
+        </div>
+
+        <div class="grid gap-6 md:grid-cols-2 lg:grid-cols-3 mt-12">
+            @forelse($campaigns as $campaign)
+                <article class="premium-card reveal">
+                    <div class="image-frame" style="aspect-ratio: 16 / 10;">
+                        <img src="{{ $campaign->image_path ? asset('storage/' . $campaign->image_path) : $fallbackImage }}" alt="{{ $campaign->title }}">
+                    </div>
+                    <div class="card-body">
+                        <span class="status-pill">{{ $statuses[$campaign->status] ?? ucfirst($campaign->status ?? 'Campaign') }}</span>
+                        <a href="{{ route('campaigns.show', $campaign) }}" class="block mt-4 no-underline">
+                            <h2 class="text-2xl font-extrabold leading-tight tracking-tight text-[var(--ink)] hover:text-[var(--accent)]">{{ $campaign->title }}</h2>
+                        </a>
+                        <p class="mt-3 line-clamp-2 text-sm leading-6 text-[var(--muted)]">{{ $campaign->description }}</p>
+
+                        <div class="meta-grid mt-6">
+                            <div class="meta-tile">
+                                <span>Center</span>
+                                <strong>{{ $campaign->bloodCenter->name ?? 'Mobile drive' }}</strong>
+                            </div>
+                            <div class="meta-tile">
+                                <span>Location</span>
+                                <strong>{{ $campaign->location ?? ($campaign->bloodCenter->city ?? 'Not listed') }}</strong>
+                            </div>
+                            <div class="meta-tile">
+                                <span>Starts</span>
+                                <strong>{{ optional($campaign->start_date)->format('M d, Y') ?? 'TBA' }}</strong>
+                            </div>
+                            <div class="meta-tile">
+                                <span>Blood group</span>
+                                <strong>{{ $campaign->target_blood_group ?? 'All groups' }}</strong>
+                            </div>
+                        </div>
+
+                        <div class="action-row">
+                            <a href="{{ route('campaigns.show', $campaign) }}" class="secondary-btn">View Details</a>
+                            <a href="{{ route('download') }}" class="magnetic-btn">
+                                <span>Join</span>
+                                <span class="btn-orb" aria-hidden="true">&rarr;</span>
+                            </a>
+                        </div>
+                    </div>
+                </article>
             @empty
-                <div class="col-span-full py-24 text-center italic text-slate-400 font-medium">No active campaigns available at the moment. Check back later!</div>
+                <div class="premium-card reveal md:col-span-2 lg:col-span-3">
+                    <div class="card-body text-center">
+                        <h2 class="text-3xl font-extrabold">No campaigns found</h2>
+                        <p class="web-copy mx-auto mt-4">Try another search term or status filter.</p>
+                        <div class="hero-actions justify-center">
+                            <a href="{{ route('campaigns.index') }}" class="secondary-btn">Show All Campaigns</a>
+                        </div>
+                    </div>
+                </div>
             @endforelse
         </div>
 
-        <div class="mt-16">
+        <div class="mt-14">
             {{ $campaigns->links() }}
         </div>
     </div>
-</div>
+</section>
 @endsection

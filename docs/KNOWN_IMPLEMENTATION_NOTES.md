@@ -6,19 +6,11 @@ These are not explanations of how the project should work. They are notes about 
 
 ## Blood Center Active Field
 
-The `blood_centers` table has an `is_active` field.
+The `blood_centers` table uses `is_active`.
 
-The `BloodCenter` model also uses `is_active`.
+The API now returns active centers through the blood center service and resource.
 
-But the public centers controller uses:
-
-`where('status', 'active')`
-
-That means the centers page may fail or return wrong data unless the database also has a `status` column.
-
-Expected fix:
-
-Use `where('is_active', true)` for active blood centers.
+Keep using `is_active` for center availability.
 
 ## Blood Center Phone Field
 
@@ -34,32 +26,47 @@ Expected fix:
 
 Use `phone` in the views, or add an accessor named `phone_number`.
 
-## Campaign Active Status
+## Campaign Status
 
-The `campaigns` table originally defines these statuses:
+The `campaigns` table uses these statuses:
 
 - `upcoming`
 - `ongoing`
 - `completed`
 - `cancelled`
 
-Some controllers use:
+The mobile API returns campaigns with status:
 
-`where('status', 'active')`
+- `upcoming`
+- `ongoing`
 
-Those queries may not return campaigns unless the database has records with `active` status or later migrations changed the allowed values.
+The API resource also exposes `is_active=true` when the status is `ongoing`.
 
-Expected fix:
+Do not add a separate `active` status unless the migrations, admin forms, API filters, and Flutter app are updated together.
 
-Use the same status names everywhere. For example, use `ongoing` for active campaigns, or update the schema and forms to support `active`.
+## Firebase Login
 
-## Campaign List Difference
+The Flutter app posts Google/Firebase login data to:
 
-The public website campaigns page lists all campaigns.
+`POST /api/v1/auth/firebase`
 
-The mobile API campaign list only returns campaigns with status `active`.
+Laravel now has this route.
 
-Because of the status mismatch above, the mobile API may return an empty campaign list.
+Laravel needs this `.env` value:
+
+`FIREBASE_PROJECT_ID=nbts-d567e`
+
+Without it, Firebase token verification will fail.
+
+## Mobile API Documentation
+
+The mobile API contract is documented in:
+
+`docs/MOBILE_APP_API.md`
+
+The backend/mobile sync checklist is documented in:
+
+`docs/MOBILE_BACKEND_SYNC_CHECKLIST.md`
 
 ## Admin And API Use The Same Data
 
@@ -91,4 +98,3 @@ There are no detailed tests yet for:
 - Admin permissions.
 
 These areas are important because they contain the main business rules.
-

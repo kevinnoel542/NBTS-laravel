@@ -12,6 +12,7 @@ The project is a Laravel web and API system for blood donation work. It helps do
 - [Public Website Pages](PUBLIC_WEBSITE_PAGES.md): Every public page and what it shows.
 - [Admin Panel Pages](ADMIN_PANEL_PAGES.md): Every admin dashboard page and what staff use it for.
 - [Mobile App API](MOBILE_APP_API.md): The API routes used by the mobile app and staff tools.
+- [Mobile Backend Sync Checklist](MOBILE_BACKEND_SYNC_CHECKLIST.md): What to check when Laravel and Flutter need to stay aligned.
 - [Data And Database](DATA_AND_DATABASE.md): The main database records and how they connect.
 - [Main Workflows](MAIN_WORKFLOWS.md): Step by step explanation of the important actions.
 - [Setup And Development](SETUP_AND_DEVELOPMENT.md): How the project is built and how to run it.

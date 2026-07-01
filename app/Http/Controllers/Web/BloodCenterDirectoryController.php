@@ -12,10 +12,11 @@ class BloodCenterDirectoryController extends Controller
     {
         $query = BloodCenter::where('is_active', true);
 
-        if ($request->has('search')) {
+        if ($request->filled('search')) {
             $query->where(function($q) use ($request) {
                 $q->where('name', 'like', '%' . $request->search . '%')
-                  ->orWhere('address', 'like', '%' . $request->search . '%');
+                  ->orWhere('address', 'like', '%' . $request->search . '%')
+                  ->orWhere('city', 'like', '%' . $request->search . '%');
             });
         }
 
@@ -26,6 +27,12 @@ class BloodCenterDirectoryController extends Controller
 
     public function show(BloodCenter $center)
     {
-        return view('web.centers.show', compact('center'));
+        $relatedCenters = BloodCenter::whereKeyNot($center->id)
+            ->where('is_active', true)
+            ->latest()
+            ->take(4)
+            ->get();
+
+        return view('web.centers.show', compact('center', 'relatedCenters'));
     }
 }

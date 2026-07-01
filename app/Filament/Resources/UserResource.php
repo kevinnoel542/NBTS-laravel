@@ -4,6 +4,14 @@ namespace App\Filament\Resources;
 
 use App\Filament\Resources\Concerns\RequiresResourcePermission;
 use App\Filament\Resources\UserResource\Pages;
+use App\Filament\Resources\UserResource\RelationManagers\AppointmentsRelationManager;
+use App\Filament\Resources\UserResource\RelationManagers\DeferralsRelationManager;
+use App\Filament\Resources\UserResource\RelationManagers\DonationsRelationManager;
+use App\Filament\Resources\UserResource\RelationManagers\DonorBadgesRelationManager;
+use App\Filament\Resources\UserResource\RelationManagers\DonorRewardsRelationManager;
+use App\Filament\Resources\UserResource\RelationManagers\EligibilityRecordsRelationManager;
+use App\Filament\Resources\UserResource\RelationManagers\FcmTokensRelationManager;
+use App\Filament\Resources\UserResource\RelationManagers\UserNotificationsRelationManager;
 use App\Models\User;
 use Filament\Forms;
 use Filament\Forms\Form;
@@ -68,12 +76,23 @@ class UserResource extends Resource
                             ->tel()
                             ->maxLength(255),
                         Forms\Components\TextInput::make('password')
+                            ->label('New Password')
                             ->password()
                             ->revealable()
                             ->dehydrated(fn ($state) => filled($state))
                             ->required(fn (string $context): bool => $context === 'create')
+                            ->confirmed()
+                            ->minLength(8)
                             ->maxLength(255)
-                            ->helperText('Leave blank when editing to keep the current password.'),
+                            ->helperText('Passwords are hidden for security. Leave this blank when editing to keep the current password.'),
+                        Forms\Components\TextInput::make('password_confirmation')
+                            ->label('Confirm New Password')
+                            ->password()
+                            ->revealable()
+                            ->dehydrated(false)
+                            ->required(fn (Forms\Get $get, string $context): bool => $context === 'create' || filled($get('password')))
+                            ->maxLength(255)
+                            ->helperText('Only needed when setting a new password.'),
                     ])
                     ->columns(2),
 
@@ -247,100 +266,196 @@ class UserResource extends Resource
     {
         return $infolist
             ->schema([
-                Infolists\Components\Section::make('Account Summary')
+                Infolists\Components\Grid::make(12)
+                    ->extraAttributes(['class' => 'nbts-user-duo'])
                     ->schema([
-                        Infolists\Components\ImageEntry::make('profile_photo_path')
-                            ->label('Photo')
-                            ->disk('public')
-                            ->circular()
-                            ->height(72),
-                        Infolists\Components\TextEntry::make('name')
-                            ->label('Name')
-                            ->weight('bold'),
-                        Infolists\Components\TextEntry::make('email')
-                            ->label('Email')
-                            ->copyable(),
-                        Infolists\Components\TextEntry::make('phone')
-                            ->label('Phone')
-                            ->placeholder('No phone'),
-                        Infolists\Components\IconEntry::make('is_active')
-                            ->label('Active')
-                            ->boolean(),
-                        Infolists\Components\TextEntry::make('roles.name')
-                            ->label('Roles')
-                            ->badge()
-                            ->separator(', '),
-                    ])
-                    ->columns(3),
+                        Infolists\Components\Section::make('Account overview')
+                            ->description('Identity, access, login method, and recent activity.')
+                            ->extraAttributes(['class' => 'nbts-user-panel nbts-user-panel--side'])
+                            ->schema([
+                                Infolists\Components\TextEntry::make('name')
+                                    ->label('Full name')
+                                    ->weight('bold')
+                                    ->copyable(),
+                                Infolists\Components\TextEntry::make('email')
+                                    ->label('Email')
+                                    ->placeholder('No email registered')
+                                    ->copyable(),
+                                Infolists\Components\TextEntry::make('phone')
+                                    ->label('Phone')
+                                    ->placeholder('No phone')
+                                    ->copyable(),
+                                Infolists\Components\TextEntry::make('account_state')
+                                    ->label('Account state')
+                                    ->state(fn (User $record): string => $record->is_active ? 'Active account' : 'Inactive account')
+                                    ->badge()
+                                    ->color(fn (User $record): string => $record->is_active ? 'success' : 'danger'),
+                                Infolists\Components\TextEntry::make('profile_completion_status')
+                                    ->label('Mobile profile')
+                                    ->state(fn (User $record): string => collect([
+                                        $record->phone,
+                                        $record->blood_group,
+                                        $record->gender,
+                                        $record->region,
+                                        $record->date_of_birth,
+                                    ])->every(fn ($value): bool => filled($value)) ? 'Complete' : 'Needs completion')
+                                    ->badge()
+                                    ->color(fn (string $state): string => $state === 'Complete' ? 'success' : 'warning'),
+                                Infolists\Components\TextEntry::make('roles.name')
+                                    ->label('Roles')
+                                    ->badge()
+                                    ->separator(', ')
+                                    ->placeholder('No roles assigned'),
+                                Infolists\Components\TextEntry::make('firebase_provider')
+                                    ->label('Provider')
+                                    ->badge()
+                                    ->formatStateUsing(fn (?string $state): string => match ($state) {
+                                        'google.com', 'google' => 'Google',
+                                        'apple.com', 'apple' => 'Apple',
+                                        default => $state ? str($state)->title()->toString() : 'Password login',
+                                    })
+                                    ->color(fn (?string $state): string => $state ? 'info' : 'gray'),
+                                Infolists\Components\Grid::make(2)
+                                    ->extraAttributes(['class' => 'nbts-user-panel__metrics'])
+                                    ->schema([
+                                        Infolists\Components\TextEntry::make('donations_count')
+                                            ->label('Donations')
+                                            ->state(fn (User $record): int => $record->donations_count ?? $record->donations()->count())
+                                            ->weight('bold'),
+                                        Infolists\Components\TextEntry::make('appointments_count')
+                                            ->label('Appointments')
+                                            ->state(fn (User $record): int => $record->appointments_count ?? $record->appointments()->count())
+                                            ->weight('bold'),
+                                        Infolists\Components\TextEntry::make('fcm_tokens_count')
+                                            ->label('Devices')
+                                            ->state(fn (User $record): int => $record->fcm_tokens_count ?? $record->fcmTokens()->count())
+                                            ->weight('bold'),
+                                        Infolists\Components\TextEntry::make('donorProfile.loyalty_points')
+                                            ->label('Points')
+                                            ->placeholder('0')
+                                            ->weight('bold'),
+                                    ]),
+                            ])
+                            ->columns([
+                                'default' => 1,
+                                'md' => 2,
+                                'xl' => 2,
+                            ])
+                            ->columnSpan([
+                                'default' => 12,
+                                'xl' => 4,
+                            ]),
 
-                Infolists\Components\Section::make('Donor Details')
-                    ->schema([
-                        Infolists\Components\TextEntry::make('donorProfile.donor_id')
-                            ->label('Donor ID')
-                            ->placeholder('No donor profile'),
-                        Infolists\Components\TextEntry::make('blood_group')
-                            ->label('Blood Group')
-                            ->badge()
-                            ->color('danger')
-                            ->placeholder('Unknown'),
-                        Infolists\Components\TextEntry::make('donorProfile.blood_group_status')
-                            ->label('Blood Status')
-                            ->badge()
-                            ->formatStateUsing(fn (?string $state): string => str($state ?: 'unknown')->replace('_', ' ')->title()->toString()),
-                        Infolists\Components\TextEntry::make('donorProfile.preferredCenter.name')
-                            ->label('Preferred Center')
-                            ->placeholder('No preferred center'),
-                        Infolists\Components\TextEntry::make('donorProfile.next_eligible_donation_date')
-                            ->label('Next Eligible')
-                            ->date()
-                            ->placeholder('Not set'),
-                        Infolists\Components\TextEntry::make('last_donation')
-                            ->label('Last Donation')
-                            ->date()
-                            ->placeholder('No donation recorded'),
-                    ])
-                    ->columns(3),
+                        Infolists\Components\Group::make([
+                            Infolists\Components\Section::make('Donor readiness')
+                                ->description('Blood identity, preferred center, and eligibility timing.')
+                                ->extraAttributes(['class' => 'nbts-user-panel nbts-user-panel--main'])
+                                ->schema([
+                                    Infolists\Components\TextEntry::make('donorProfile.donor_id')
+                                        ->label('Donor ID')
+                                        ->placeholder('No donor profile')
+                                        ->copyable(),
+                                    Infolists\Components\TextEntry::make('blood_group')
+                                        ->label('Blood group')
+                                        ->badge()
+                                        ->color('danger')
+                                        ->placeholder('Unknown'),
+                                    Infolists\Components\TextEntry::make('donorProfile.blood_group_status')
+                                        ->label('Blood status')
+                                        ->badge()
+                                        ->formatStateUsing(fn (?string $state): string => str($state ?: 'unknown')->replace('_', ' ')->title()->toString())
+                                        ->color(fn (?string $state): string => match ($state) {
+                                            'verified' => 'success',
+                                            'user_selected' => 'warning',
+                                            default => 'gray',
+                                        }),
+                                    Infolists\Components\TextEntry::make('donorProfile.preferredCenter.name')
+                                        ->label('Preferred center')
+                                        ->placeholder('No preferred center'),
+                                    Infolists\Components\TextEntry::make('donorProfile.next_eligible_donation_date')
+                                        ->label('Next eligible')
+                                        ->date()
+                                        ->placeholder('Not set'),
+                                    Infolists\Components\TextEntry::make('last_donation')
+                                        ->label('Last donation')
+                                        ->date()
+                                        ->placeholder('No donation recorded'),
+                                ])
+                                ->columns([
+                                    'default' => 1,
+                                    'md' => 2,
+                                    'xl' => 3,
+                                ]),
 
-                Infolists\Components\Section::make('Activity')
-                    ->schema([
-                        Infolists\Components\TextEntry::make('donations_count')
-                            ->label('Donation Records'),
-                        Infolists\Components\TextEntry::make('appointments_count')
-                            ->label('Appointments'),
-                        Infolists\Components\TextEntry::make('fcm_tokens_count')
-                            ->label('Registered Devices'),
-                        Infolists\Components\TextEntry::make('donorProfile.loyalty_points')
-                            ->label('Loyalty Points')
-                            ->placeholder('0'),
-                        Infolists\Components\TextEntry::make('donorProfile.loyalty_tier')
-                            ->label('Loyalty Tier')
-                            ->badge()
-                            ->formatStateUsing(fn (?string $state): string => str($state ?: 'bronze')->title()->toString()),
-                    ])
-                    ->columns(5),
-
-                Infolists\Components\Section::make('Personal Details')
-                    ->schema([
-                        Infolists\Components\TextEntry::make('gender')
-                            ->formatStateUsing(fn (?string $state): string => $state ? str($state)->title()->toString() : 'Not set'),
-                        Infolists\Components\TextEntry::make('date_of_birth')
-                            ->label('Date of Birth')
-                            ->date()
-                            ->placeholder('Not set'),
-                        Infolists\Components\TextEntry::make('region')
-                            ->placeholder('No region'),
-                        Infolists\Components\TextEntry::make('address')
-                            ->placeholder('No address recorded')
-                            ->columnSpanFull(),
-                    ])
-                    ->columns(3),
+                            Infolists\Components\Section::make('Contact and mobile')
+                                ->description('Personal details, emergency contact, and app preferences.')
+                                ->extraAttributes(['class' => 'nbts-user-panel nbts-user-panel--main'])
+                                ->schema([
+                                    Infolists\Components\TextEntry::make('gender')
+                                        ->label('Gender')
+                                        ->formatStateUsing(fn (?string $state): string => $state ? str($state)->title()->toString() : 'Not set'),
+                                    Infolists\Components\TextEntry::make('date_of_birth')
+                                        ->label('Date of birth')
+                                        ->date()
+                                        ->placeholder('Not set'),
+                                    Infolists\Components\TextEntry::make('region')
+                                        ->label('Region')
+                                        ->placeholder('No region'),
+                                    Infolists\Components\TextEntry::make('donorProfile.language')
+                                        ->label('Language')
+                                        ->badge()
+                                        ->formatStateUsing(fn (?string $state): string => $state === 'sw' ? 'Swahili' : 'English'),
+                                    Infolists\Components\TextEntry::make('address')
+                                        ->label('Address')
+                                        ->placeholder('No address recorded'),
+                                    Infolists\Components\TextEntry::make('donorProfile.emergency_contact_name')
+                                        ->label('Emergency contact')
+                                        ->placeholder('No emergency contact'),
+                                    Infolists\Components\TextEntry::make('donorProfile.emergency_contact_phone')
+                                        ->label('Emergency phone')
+                                        ->placeholder('No emergency phone')
+                                        ->copyable(),
+                                    Infolists\Components\IconEntry::make('donorProfile.push_notifications_enabled')
+                                        ->label('Push')
+                                        ->boolean(),
+                                    Infolists\Components\IconEntry::make('donorProfile.sms_reminders_enabled')
+                                        ->label('SMS')
+                                        ->boolean(),
+                                    Infolists\Components\IconEntry::make('donorProfile.share_anonymized_data')
+                                        ->label('Data sharing')
+                                        ->boolean(),
+                                    Infolists\Components\TextEntry::make('firebase_uid')
+                                        ->label('Firebase UID')
+                                        ->placeholder('Not linked')
+                                        ->copyable()
+                                        ->limit(28),
+                                ])
+                                ->columns([
+                                    'default' => 1,
+                                    'md' => 2,
+                                    'xl' => 4,
+                                ]),
+                        ])
+                            ->extraAttributes(['class' => 'nbts-user-stack'])
+                            ->columnSpan([
+                                'default' => 12,
+                                'xl' => 8,
+                            ]),
+                    ]),
             ]);
     }
 
     public static function getRelations(): array
     {
         return [
-            //
+            DonationsRelationManager::class,
+            AppointmentsRelationManager::class,
+            EligibilityRecordsRelationManager::class,
+            DeferralsRelationManager::class,
+            DonorBadgesRelationManager::class,
+            DonorRewardsRelationManager::class,
+            UserNotificationsRelationManager::class,
+            FcmTokensRelationManager::class,
         ];
     }
 

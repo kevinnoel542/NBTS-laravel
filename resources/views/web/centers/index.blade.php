@@ -1,66 +1,128 @@
 @extends('layouts.app')
 
+@section('title', 'Blood Centers - NBTS')
+@section('meta_description', 'Search NBTS blood centers, view opening hours, services, wait time, contact details, and app booking guidance.')
+
 @section('content')
-<div class="bg-slate-50 min-h-screen pt-12 pb-24">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="mb-16 text-center">
-            <h1 class="text-4xl font-black text-slate-900 tracking-tight italic uppercase">Blood Centers</h1>
-            <p class="text-slate-500 font-medium italic mt-2">Find a center near you and join the heroes saving lives.</p>
-        </div>
+@php
+    $centerImage = asset('images/web/nbts-center-care.png');
+@endphp
 
-        <!-- Search Bar -->
-        <div class="max-w-xl mx-auto mb-16 px-4">
-            <form action="{{ route('centers.index') }}" method="GET" class="relative group">
-                <input type="text" name="search" value="{{ request('search') }}" placeholder="Search by name or address..." class="w-full bg-white border border-slate-100 rounded-3xl px-8 py-5 shadow-2xl shadow-slate-200 focus:outline-none focus:ring-2 focus:ring-red-600 transition-all font-medium italic">
-                <button type="submit" class="absolute right-4 top-1/2 -translate-y-1/2 p-3 bg-red-600 text-white rounded-2xl hover:bg-red-700 transition-colors shadow-lg shadow-red-200 active:scale-95">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-                </button>
-            </form>
+<section class="page-hero">
+    <div class="section-shell hero-grid">
+        <div class="reveal">
+            <span class="kicker">Blood centers</span>
+            <h1 class="hero-title mt-6">Find a donation center that is ready for you.</h1>
+            <p class="web-copy mt-7">Search active NBTS locations, see services, opening details, and use the app to book a visit.</p>
         </div>
-
-        <!-- Grid -->
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            @forelse($centers as $center)
-                <div class="bg-white rounded-3xl overflow-hidden border border-slate-100 shadow-sm hover:shadow-2xl hover:-translate-y-2 transition-all duration-500 group">
-                    <div class="h-40 bg-slate-900 relative overflow-hidden">
-                        <img src="https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d?q=80&w=800&auto=format&fit=crop" class="w-full h-full object-cover opacity-40 group-hover:scale-110 transition-transform duration-700">
-                        <div class="absolute bottom-4 left-6">
-                            <span class="px-3 py-1 bg-red-600 text-white text-[10px] font-black uppercase tracking-widest rounded-lg shadow-lg italic">{{ $center->status }}</span>
+        <div class="bezel reveal">
+            <div class="bezel-core">
+                <div class="image-frame">
+                    <img src="{{ $centerImage }}" alt="Clean blood donation center prepared for donors">
+                </div>
+                <div class="card-body">
+                    <div class="metric-rail">
+                        <div class="metric-item">
+                            <span class="metric-value">{{ number_format($centers->total()) }}</span>
+                            <span class="metric-label">Active centers shown</span>
                         </div>
-                    </div>
-                    <div class="p-8">
-                        <a href="{{ route('centers.show', $center) }}">
-                            <h3 class="text-2xl font-black text-slate-900 italic tracking-tight mb-2 uppercase hover:text-red-600 transition-colors">{{ $center->name }}</h3>
-                        </a>
-                        <p class="text-slate-500 text-sm font-medium mb-6 line-clamp-2 italic leading-relaxed">{{ $center->address }}</p>
-                        
-                        <div class="space-y-4 pt-6 border-t border-slate-50 mb-8">
-                            <div class="flex items-center text-xs text-slate-400 font-bold uppercase tracking-widest italic">
-                                <svg class="w-4 h-4 mr-3 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-                                {{ $center->phone_number ?? '+254 700 000 000' }}
-                            </div>
+                        <div class="metric-item">
+                            <span class="metric-value">App</span>
+                            <span class="metric-label">Booking channel</span>
                         </div>
-                        
-                        <div class="flex space-x-4">
-                            <a href="{{ route('download') }}" class="flex-1 text-center py-3.5 bg-red-600 text-white font-black uppercase tracking-widest italic text-[10px] rounded-2xl hover:bg-red-700 transition-colors shadow-lg shadow-red-200 uppercase">Download to Book</a>
-                            <a href="{{ route('centers.show', $center) }}" class="flex-1 text-center py-3.5 border-2 border-slate-100 text-slate-700 font-black uppercase tracking-widest italic text-[10px] rounded-2xl hover:bg-slate-50 transition-colors">Details</a>
+                        <div class="metric-item">
+                            <span class="metric-value">Safe</span>
+                            <span class="metric-label">Screening flow</span>
                         </div>
                     </div>
                 </div>
-            @empty
-                <div class="col-span-full py-24 text-center">
-                    <div class="w-20 h-20 bg-slate-100 rounded-3xl flex items-center justify-center text-slate-300 mx-auto mb-6">
-                        <svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="soft-band">
+    <div class="section-shell">
+        <form action="{{ route('centers.index') }}" method="GET" class="form-panel reveal" role="search">
+            <label class="sr-only" for="center-search">Search centers</label>
+            <input id="center-search" type="search" name="search" value="{{ request('search') }}" placeholder="Search by center name, city, or address">
+            <button type="submit" class="magnetic-btn">
+                <span>Search</span>
+                <span class="btn-orb" aria-hidden="true">&rarr;</span>
+            </button>
+        </form>
+
+        @if(request('search'))
+            <div class="mt-5 reveal">
+                <a href="{{ route('centers.index') }}" class="filter-chip">Clear search</a>
+            </div>
+        @endif
+
+        <div class="grid gap-6 md:grid-cols-2 lg:grid-cols-3 mt-12">
+            @forelse($centers as $center)
+                <article class="premium-card reveal">
+                    <div class="image-frame" style="aspect-ratio: 16 / 10;">
+                        <img src="{{ $center->image_path ? asset('storage/' . $center->image_path) : $centerImage }}" alt="{{ $center->name }}">
                     </div>
-                    <p class="text-slate-500 font-black italic tracking-tight text-xl">No centers matching "{{ request('search') }}"</p>
-                    <a href="{{ route('centers.index') }}" class="text-red-600 font-bold uppercase tracking-widest text-xs mt-4 inline-block hover:underline">Clear Search</a>
+                    <div class="card-body">
+                        <span class="status-pill">{{ $center->status_label }}</span>
+                        <a href="{{ route('centers.show', $center) }}" class="block mt-4 no-underline">
+                            <h2 class="text-2xl font-extrabold leading-tight tracking-tight text-[var(--ink)] hover:text-[var(--accent)]">{{ $center->name }}</h2>
+                        </a>
+                        <p class="mt-3 line-clamp-2 text-sm leading-6 text-[var(--muted)]">{{ $center->address }}</p>
+
+                        <div class="meta-grid mt-6">
+                            <div class="meta-tile">
+                                <span>City</span>
+                                <strong>{{ $center->city ?? 'Not listed' }}</strong>
+                            </div>
+                            <div class="meta-tile">
+                                <span>Wait</span>
+                                <strong>{{ $center->wait_time_label ?? ($center->capacity_label ?? 'Ask center') }}</strong>
+                            </div>
+                            <div class="meta-tile">
+                                <span>Phone</span>
+                                <strong>{{ $center->phone ?? 'Not listed' }}</strong>
+                            </div>
+                            <div class="meta-tile">
+                                <span>Type</span>
+                                <strong>{{ $center->center_type ?? 'Donation center' }}</strong>
+                            </div>
+                        </div>
+
+                        @if(! empty($center->services))
+                            <div class="filter-row mt-6">
+                                @foreach(array_slice($center->services, 0, 3) as $service)
+                                    <span class="filter-chip">{{ $service }}</span>
+                                @endforeach
+                            </div>
+                        @endif
+
+                        <div class="action-row">
+                            <a href="{{ route('centers.show', $center) }}" class="secondary-btn">View Details</a>
+                            <a href="{{ route('download') }}" class="magnetic-btn">
+                                <span>Book</span>
+                                <span class="btn-orb" aria-hidden="true">&rarr;</span>
+                            </a>
+                        </div>
+                    </div>
+                </article>
+            @empty
+                <div class="premium-card reveal md:col-span-2 lg:col-span-3">
+                    <div class="card-body text-center">
+                        <h2 class="text-3xl font-extrabold">No centers found</h2>
+                        <p class="web-copy mx-auto mt-4">Try another center name, city, or address.</p>
+                        <div class="hero-actions justify-center">
+                            <a href="{{ route('centers.index') }}" class="secondary-btn">Show All Centers</a>
+                        </div>
+                    </div>
                 </div>
             @endforelse
         </div>
-        
-        <div class="mt-16">
-            {{ $centers->links() }}
+
+        <div class="mt-14">
+            {{ $centers->withQueryString()->links() }}
         </div>
     </div>
-</div>
+</section>
 @endsection
