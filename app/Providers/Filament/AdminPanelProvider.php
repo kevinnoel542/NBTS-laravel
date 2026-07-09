@@ -62,6 +62,9 @@ class AdminPanelProvider extends PanelProvider
                     ->collapsible(false),
                 NavigationGroup::make('Donor Safety')
                     ->icon('heroicon-o-shield-check'),
+                NavigationGroup::make('Public Content')
+                    ->icon('heroicon-o-newspaper')
+                    ->collapsible(false),
                 NavigationGroup::make('Loyalty')
                     ->icon('heroicon-o-gift')
                     ->collapsed(),

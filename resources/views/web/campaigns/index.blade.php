@@ -1,127 +1,198 @@
 @extends('layouts.app')
 
-@section('title', 'Donation Campaigns - NBTS')
-@section('meta_description', 'Browse NBTS blood donation campaigns by status, location, center, dates, target blood group, and campaign type.')
+@section('title', 'Kampeni za Kuchangia Damu - NBTS Tanzania')
+@section('meta_description', 'Tazama kampeni za kuchangia damu kutoka kwenye backend, chujio kwa status, aina ya kampeni, blood group inayolengwa, kituo, eneo, na tarehe.')
 
 @section('content')
 @php
-    $fallbackImage = asset('images/web/nbts-donation-hero.png');
-    $statuses = ['upcoming' => 'Upcoming', 'ongoing' => 'Active', 'completed' => 'Completed', 'cancelled' => 'Cancelled'];
-    $selectedStatus = request('status') === 'active' ? 'ongoing' : request('status');
+    $hasFilters = request('search') || request('status') || request('type') || request('target');
+    $statusCopy = [
+        'upcoming' => 'Inakuja',
+        'ongoing' => 'Inaendelea',
+        'completed' => 'Imekamilika',
+        'cancelled' => 'Imesitishwa',
+    ];
 @endphp
 
-<section class="page-hero">
-    <div class="section-shell hero-grid">
-        <div class="reveal">
-            <span class="kicker">Donation campaigns</span>
-            <h1 class="hero-title mt-6">Join the drives that need donors now.</h1>
-            <p class="web-copy mt-7">Browse campaigns by status, location, target blood group, and center. Use the app to participate.</p>
+<section class="pharma-hero campaign-hero">
+    <div class="section-shell">
+        <div class="pharma-hero-top">
+            <div class="pharma-hero-copy">
+                <div class="pharma-label-row">
+                    <span>Jamhuri ya Muungano wa Tanzania</span>
+                    <span>Wizara ya Afya</span>
+                </div>
+                <span class="pharma-kicker">Donation campaigns</span>
+                <h1>Kampeni za kuchangia damu zilizo kwenye mfumo.</h1>
+                <p class="pharma-lead">Tafuta kampeni kwa status, eneo, kituo, aina ya kampeni, na blood group inayolengwa. Kila record inatoka kwenye backend campaigns table.</p>
+            </div>
+            <div class="pharma-hero-summary campaign-command-card">
+                <span>Backend records</span>
+                <p class="pharma-lead">Public view inaonyesha campaign data iliyowekwa na staff. Donors wanapaswa kuthibitisha eligibility na center details kabla ya kwenda.</p>
+                <div class="pharma-action-row">
+                    <a href="#campaign-directory" class="primary-btn">View Campaigns</a>
+                    <a href="{{ route('download') }}" class="secondary-btn">Download App</a>
+                    <a href="{{ route('centers.index') }}" class="pharma-link">Find Center</a>
+                </div>
+            </div>
         </div>
-        <div class="bezel reveal">
-            <div class="bezel-core">
-                <div class="image-frame">
-                    <img src="{{ $fallbackImage }}" alt="Blood donation campaign inside a modern center">
-                </div>
-                <div class="card-body">
-                    <div class="metric-rail">
-                        <div class="metric-item">
-                            <span class="metric-value">{{ number_format($campaigns->total()) }}</span>
-                            <span class="metric-label">Campaigns found</span>
-                        </div>
-                        <div class="metric-item">
-                            <span class="metric-value">App</span>
-                            <span class="metric-label">Join channel</span>
-                        </div>
-                        <div class="metric-item">
-                            <span class="metric-value">Live</span>
-                            <span class="metric-label">Status tracking</span>
-                        </div>
-                    </div>
-                </div>
+
+        <div class="campaign-ledger" aria-label="Campaign summary">
+            <div>
+                <span>Total records</span>
+                <strong>{{ number_format($campaignStats['total']) }} campaigns</strong>
+            </div>
+            <div>
+                <span>Active flow</span>
+                <strong>{{ number_format($campaignStats['active']) }} active/upcoming</strong>
+            </div>
+            <div>
+                <span>Emergency</span>
+                <strong>{{ number_format($campaignStats['emergency']) }} emergency</strong>
+            </div>
+            <div>
+                <span>Centers</span>
+                <strong>{{ number_format($campaignStats['centers']) }} linked centers</strong>
             </div>
         </div>
     </div>
 </section>
 
-<section class="soft-band">
-    <div class="section-shell">
-        <form action="{{ route('campaigns.index') }}" method="GET" class="form-panel reveal" role="search">
-            <label class="sr-only" for="campaign-search">Search campaigns</label>
-            <input id="campaign-search" type="search" name="search" value="{{ request('search') }}" placeholder="Search by title, location, or description">
-            @if(request('status'))
-                <input type="hidden" name="status" value="{{ request('status') }}">
-            @endif
-            <button type="submit" class="magnetic-btn">
-                <span>Search</span>
-                <span class="btn-orb" aria-hidden="true">&rarr;</span>
-            </button>
-        </form>
+@if($featuredCampaign)
+    <section class="pharma-section">
+        <div class="section-shell">
+            <article class="campaign-feature-card">
+                <div class="campaign-feature-copy">
+                    <span class="pharma-kicker">{{ $statusCopy[$featuredCampaign->status] ?? str($featuredCampaign->status)->headline() }}</span>
+                    <h2>{{ $featuredCampaign->title }}</h2>
+                    <p>{{ $featuredCampaign->description }}</p>
+                    <div class="campaign-mini-grid">
+                        <div>
+                            <span>Start</span>
+                            <strong>{{ optional($featuredCampaign->start_date)->format('d M Y, H:i') ?? 'TBA' }}</strong>
+                        </div>
+                        <div>
+                            <span>Center</span>
+                            <strong>{{ $featuredCampaign->bloodCenter->name ?? 'Mobile drive' }}</strong>
+                        </div>
+                        <div>
+                            <span>Target</span>
+                            <strong>{{ $featuredCampaign->target_blood_group ?? 'All groups' }}</strong>
+                        </div>
+                    </div>
+                    <div class="pharma-action-row">
+                        <a href="{{ route('campaigns.show', $featuredCampaign) }}" class="primary-btn">View Details</a>
+                        <a href="{{ route('download') }}" class="secondary-btn">Join in App</a>
+                    </div>
+                </div>
+                <div class="campaign-feature-panel">
+                    @if($featuredCampaign->image_path)
+                        <img src="{{ asset('storage/' . $featuredCampaign->image_path) }}" alt="{{ $featuredCampaign->title }}">
+                    @else
+                        <div class="campaign-record-poster">
+                            <span>{{ $featuredCampaign->campaign_type ? str($featuredCampaign->campaign_type)->headline() : 'NBTS Campaign' }}</span>
+                            <strong>{{ $featuredCampaign->location ?? ($featuredCampaign->bloodCenter->city ?? 'Tanzania') }}</strong>
+                            <small>{{ optional($featuredCampaign->start_date)->format('d M Y') ?? 'Date to be announced' }}</small>
+                        </div>
+                    @endif
+                </div>
+            </article>
+        </div>
+    </section>
+@endif
 
-        <div class="filter-row mt-6 reveal">
-            <a href="{{ route('campaigns.index', request('search') ? ['search' => request('search')] : []) }}" class="filter-chip {{ $selectedStatus ? '' : 'is-active' }}">All</a>
-            @foreach($statuses as $value => $label)
-                <a href="{{ route('campaigns.index', array_filter(['search' => request('search'), 'status' => $value])) }}" class="filter-chip {{ $selectedStatus === $value ? 'is-active' : '' }}">{{ $label }}</a>
-            @endforeach
-            @if(request('search') || request('status'))
-                <a href="{{ route('campaigns.index') }}" class="filter-chip">Clear filters</a>
-            @endif
+<section id="campaign-directory" class="pharma-section pharma-neutral">
+    <div class="section-shell">
+        <div class="pharma-heading">
+            <span class="pharma-kicker">Campaign directory</span>
+            <h2>Chuja kampeni kwa taarifa zilizopo kwenye backend.</h2>
+            <p>Search inaangalia title, description, na location. Filters zinatumia status, campaign type, na target blood group.</p>
         </div>
 
-        <div class="grid gap-6 md:grid-cols-2 lg:grid-cols-3 mt-12">
-            @forelse($campaigns as $campaign)
-                <article class="premium-card reveal">
-                    <div class="image-frame" style="aspect-ratio: 16 / 10;">
-                        <img src="{{ $campaign->image_path ? asset('storage/' . $campaign->image_path) : $fallbackImage }}" alt="{{ $campaign->title }}">
-                    </div>
-                    <div class="card-body">
-                        <span class="status-pill">{{ $statuses[$campaign->status] ?? ucfirst($campaign->status ?? 'Campaign') }}</span>
-                        <a href="{{ route('campaigns.show', $campaign) }}" class="block mt-4 no-underline">
-                            <h2 class="text-2xl font-extrabold leading-tight tracking-tight text-[var(--ink)] hover:text-[var(--accent)]">{{ $campaign->title }}</h2>
-                        </a>
-                        <p class="mt-3 line-clamp-2 text-sm leading-6 text-[var(--muted)]">{{ $campaign->description }}</p>
+        <div class="campaign-control-panel">
+            <form action="{{ route('campaigns.index') }}" method="GET" class="campaign-search-form" role="search">
+                <label class="sr-only" for="campaign-search">Search campaigns</label>
+                <input id="campaign-search" type="search" name="search" value="{{ request('search') }}" placeholder="Search title, location, center">
+                @foreach(['status', 'type', 'target'] as $filter)
+                    @if(request($filter))
+                        <input type="hidden" name="{{ $filter }}" value="{{ request($filter) }}">
+                    @endif
+                @endforeach
+                <button type="submit" class="primary-btn">Search</button>
+            </form>
 
-                        <div class="meta-grid mt-6">
-                            <div class="meta-tile">
+            <div class="campaign-filter-stack">
+                <div class="campaign-filter-row" aria-label="Campaign status filters">
+                    <a href="{{ route('campaigns.index', array_filter(['search' => request('search'), 'type' => request('type'), 'target' => request('target')])) }}" class="{{ $selectedStatus ? '' : 'is-active' }}">All</a>
+                    @foreach($statuses as $value => $label)
+                        <a href="{{ route('campaigns.index', array_filter(['search' => request('search'), 'status' => $value, 'type' => request('type'), 'target' => request('target')])) }}" class="{{ $selectedStatus === $value ? 'is-active' : '' }}">{{ $label }}</a>
+                    @endforeach
+                </div>
+
+                <div class="campaign-filter-row" aria-label="Campaign type and blood group filters">
+                    @foreach($campaignTypes as $type)
+                        <a href="{{ route('campaigns.index', array_filter(['search' => request('search'), 'status' => request('status'), 'type' => $type, 'target' => request('target')])) }}" class="{{ request('type') === $type ? 'is-active' : '' }}">{{ str($type)->headline() }}</a>
+                    @endforeach
+                    @foreach($targetGroups as $target)
+                        <a href="{{ route('campaigns.index', array_filter(['search' => request('search'), 'status' => request('status'), 'type' => request('type'), 'target' => $target])) }}" class="{{ request('target') === $target ? 'is-active' : '' }}">{{ $target }}</a>
+                    @endforeach
+                    @if($hasFilters)
+                        <a href="{{ route('campaigns.index') }}">Clear</a>
+                    @endif
+                </div>
+            </div>
+        </div>
+
+        <div class="campaign-list-grid">
+            @forelse($campaigns as $campaign)
+                <article class="campaign-card">
+                    <a href="{{ route('campaigns.show', $campaign) }}" class="campaign-card-top {{ $campaign->image_path ? '' : 'is-compact-poster' }}" aria-label="View {{ $campaign->title }}">
+                        @if($campaign->image_path)
+                            <img src="{{ asset('storage/' . $campaign->image_path) }}" alt="{{ $campaign->title }}">
+                        @else
+                            <div class="campaign-record-poster">
+                                <span>{{ $campaign->campaign_type ? str($campaign->campaign_type)->headline() : 'NBTS Campaign' }}</span>
+                                <strong>{{ $campaign->location ?? ($campaign->bloodCenter->city ?? 'Tanzania') }}</strong>
+                                <small>{{ optional($campaign->start_date)->format('d M Y') ?? 'Date to be announced' }}</small>
+                            </div>
+                        @endif
+                    </a>
+                    <div class="campaign-card-body">
+                        <div class="campaign-card-meta">
+                            <span>{{ $statuses[$campaign->status] ?? str($campaign->status)->headline() }}</span>
+                            <span>{{ $campaign->target_blood_group ?? 'All groups' }}</span>
+                        </div>
+                        <a href="{{ route('campaigns.show', $campaign) }}" class="campaign-title-link">
+                            <h3>{{ $campaign->title }}</h3>
+                        </a>
+                        <p>{{ $campaign->description }}</p>
+                        <div class="campaign-detail-list">
+                            <div>
                                 <span>Center</span>
                                 <strong>{{ $campaign->bloodCenter->name ?? 'Mobile drive' }}</strong>
                             </div>
-                            <div class="meta-tile">
-                                <span>Location</span>
-                                <strong>{{ $campaign->location ?? ($campaign->bloodCenter->city ?? 'Not listed') }}</strong>
-                            </div>
-                            <div class="meta-tile">
+                            <div>
                                 <span>Starts</span>
-                                <strong>{{ optional($campaign->start_date)->format('M d, Y') ?? 'TBA' }}</strong>
-                            </div>
-                            <div class="meta-tile">
-                                <span>Blood group</span>
-                                <strong>{{ $campaign->target_blood_group ?? 'All groups' }}</strong>
+                                <strong>{{ optional($campaign->start_date)->format('d M Y') ?? 'TBA' }}</strong>
                             </div>
                         </div>
-
-                        <div class="action-row">
-                            <a href="{{ route('campaigns.show', $campaign) }}" class="secondary-btn">View Details</a>
-                            <a href="{{ route('download') }}" class="magnetic-btn">
-                                <span>Join</span>
-                                <span class="btn-orb" aria-hidden="true">&rarr;</span>
-                            </a>
+                        <div class="campaign-card-actions">
+                            <a href="{{ route('campaigns.show', $campaign) }}" class="secondary-btn">Details</a>
+                            <a href="{{ route('download') }}" class="primary-btn">Join</a>
                         </div>
                     </div>
                 </article>
             @empty
-                <div class="premium-card reveal md:col-span-2 lg:col-span-3">
-                    <div class="card-body text-center">
-                        <h2 class="text-3xl font-extrabold">No campaigns found</h2>
-                        <p class="web-copy mx-auto mt-4">Try another search term or status filter.</p>
-                        <div class="hero-actions justify-center">
-                            <a href="{{ route('campaigns.index') }}" class="secondary-btn">Show All Campaigns</a>
-                        </div>
-                    </div>
+                <div class="campaign-empty-state">
+                    <span class="pharma-kicker">No campaigns</span>
+                    <h2>Hakuna campaign inayolingana na search au filters hizi.</h2>
+                    <p>Badilisha search, status, type, au target blood group. Campaign mpya itaonekana hapa baada ya staff kuiweka kwenye backend.</p>
+                    <a href="{{ route('campaigns.index') }}" class="secondary-btn">Show All Campaigns</a>
                 </div>
             @endforelse
         </div>
 
-        <div class="mt-14">
+        <div class="campaign-pagination">
             {{ $campaigns->links() }}
         </div>
     </div>

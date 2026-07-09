@@ -1,126 +1,171 @@
 @extends('layouts.app')
 
-@section('title', 'Blood Centers - NBTS')
-@section('meta_description', 'Search NBTS blood centers, view opening hours, services, wait time, contact details, and app booking guidance.')
+@section('title', 'Vituo vya Damu - NBTS Tanzania')
+@section('meta_description', 'Tafuta vituo vya damu vilivyo kwenye mfumo, angalia mji, mawasiliano, muda wa huduma, huduma zinazopatikana, na namna ya kuweka miadi kupitia app.')
 
 @section('content')
 @php
-    $centerImage = asset('images/web/nbts-center-care.png');
+    $assetBase = 'images/web/generated/centers-pharma-clean/';
+    $heroImage = asset($assetBase . 'reception-checkin.png');
+    $fallbackImages = [
+        asset($assetBase . 'reception-checkin.png'),
+        asset($assetBase . 'donor-care-area.png'),
+        asset($assetBase . 'center-operations.png'),
+    ];
 @endphp
 
-<section class="page-hero">
-    <div class="section-shell hero-grid">
-        <div class="reveal">
-            <span class="kicker">Blood centers</span>
-            <h1 class="hero-title mt-6">Find a donation center that is ready for you.</h1>
-            <p class="web-copy mt-7">Search active NBTS locations, see services, opening details, and use the app to book a visit.</p>
+<section class="pharma-hero centers-hero">
+    <div class="section-shell">
+        <div class="pharma-hero-top">
+            <div class="pharma-hero-copy">
+                <div class="pharma-label-row">
+                    <span>Jamhuri ya Muungano wa Tanzania</span>
+                    <span>Wizara ya Afya</span>
+                </div>
+                <span class="pharma-kicker">Blood centers</span>
+                <h1>Tafuta kituo kilicho kwenye mfumo.</h1>
+                <p class="pharma-lead">Orodha hii inatumia rekodi za vituo vilivyowekwa kwenye mfumo wetu. Angalia mji, huduma, mawasiliano, muda wa huduma, na taarifa za kuweka miadi kabla ya kwenda.</p>
+            </div>
+            <div class="pharma-hero-summary">
+                <span>Taarifa za mfumo</span>
+                <p class="pharma-lead">Taarifa zinaweza kubadilika kulingana na ratiba za vituo. Thibitisha kupitia app au mawasiliano yaliyowekwa kwenye rekodi ya kituo.</p>
+                <div class="pharma-action-row">
+                    <a href="#center-directory" class="primary-btn">Find Center</a>
+                    <a href="{{ route('download') }}" class="secondary-btn">Download App</a>
+                    <a href="{{ route('eligibility') }}" class="pharma-link">Can I Donate?</a>
+                </div>
+            </div>
         </div>
-        <div class="bezel reveal">
-            <div class="bezel-core">
-                <div class="image-frame">
-                    <img src="{{ $centerImage }}" alt="Clean blood donation center prepared for donors">
-                </div>
-                <div class="card-body">
-                    <div class="metric-rail">
-                        <div class="metric-item">
-                            <span class="metric-value">{{ number_format($centers->total()) }}</span>
-                            <span class="metric-label">Active centers shown</span>
-                        </div>
-                        <div class="metric-item">
-                            <span class="metric-value">App</span>
-                            <span class="metric-label">Booking channel</span>
-                        </div>
-                        <div class="metric-item">
-                            <span class="metric-value">Safe</span>
-                            <span class="metric-label">Screening flow</span>
-                        </div>
-                    </div>
-                </div>
+        <figure class="pharma-hero-image centers-hero-image">
+            <img src="{{ $heroImage }}" alt="Mchangiaji akipokelewa katika dawati la kituo cha huduma za damu">
+        </figure>
+    </div>
+</section>
+
+<section class="pharma-status-band">
+    <div class="section-shell">
+        <div class="pharma-status-grid" aria-label="Muhtasari wa vituo kwenye mfumo">
+            <div>
+                <span>Vituo vilivyo hai</span>
+                <strong>{{ number_format($centerStats['active'] ?? $centers->total()) }}</strong>
+            </div>
+            <div>
+                <span>Miji kwenye rekodi</span>
+                <strong>{{ number_format($centerStats['cities'] ?? $cityFilters->count()) }}</strong>
+            </div>
+            <div>
+                <span>Mawasiliano</span>
+                <strong>{{ number_format($centerStats['with_phone'] ?? 0) }} vimeweka simu</strong>
+            </div>
+            <div>
+                <span>Ratiba</span>
+                <strong>{{ number_format($centerStats['with_hours'] ?? 0) }} vimeweka muda</strong>
             </div>
         </div>
     </div>
 </section>
 
-<section class="soft-band">
+<section id="center-directory" class="pharma-section">
     <div class="section-shell">
-        <form action="{{ route('centers.index') }}" method="GET" class="form-panel reveal" role="search">
-            <label class="sr-only" for="center-search">Search centers</label>
-            <input id="center-search" type="search" name="search" value="{{ request('search') }}" placeholder="Search by center name, city, or address">
-            <button type="submit" class="magnetic-btn">
-                <span>Search</span>
-                <span class="btn-orb" aria-hidden="true">&rarr;</span>
-            </button>
-        </form>
+        <div class="centers-directory-head">
+            <div class="pharma-heading">
+                <span class="pharma-kicker">Directory</span>
+                <h2>Chagua kituo kwa jina, mji, au eneo.</h2>
+                <p>Matokeo yanaonyesha rekodi hai pekee. Taarifa ya kila kituo inatoka kwenye backend ya mfumo, si orodha ya nje.</p>
+            </div>
+            <form action="{{ route('centers.index') }}" method="GET" class="centers-search-form" role="search">
+                @if(request('city'))
+                    <input type="hidden" name="city" value="{{ request('city') }}">
+                @endif
+                <label class="sr-only" for="center-search">Search centers</label>
+                <input id="center-search" type="search" name="search" value="{{ request('search') }}" placeholder="Tafuta jina, mji, au anuani">
+                <button type="submit" class="primary-btn">Search</button>
+            </form>
+        </div>
 
-        @if(request('search'))
-            <div class="mt-5 reveal">
-                <a href="{{ route('centers.index') }}" class="filter-chip">Clear search</a>
+        @if($cityFilters->isNotEmpty())
+            <div class="centers-filter-row" aria-label="Chuja kwa mji">
+                <a href="{{ route('centers.index', array_filter(['search' => request('search')])) }}" class="filter-chip {{ request('city') ? '' : 'is-active' }}">All</a>
+                @foreach($cityFilters as $city)
+                    <a href="{{ route('centers.index', array_filter(['city' => $city, 'search' => request('search')])) }}" class="filter-chip {{ request('city') === $city ? 'is-active' : '' }}">{{ $city }}</a>
+                @endforeach
+                @if(request('search') || request('city'))
+                    <a href="{{ route('centers.index') }}" class="pharma-link">Clear</a>
+                @endif
             </div>
         @endif
 
-        <div class="grid gap-6 md:grid-cols-2 lg:grid-cols-3 mt-12">
-            @forelse($centers as $center)
-                <article class="premium-card reveal">
-                    <div class="image-frame" style="aspect-ratio: 16 / 10;">
-                        <img src="{{ $center->image_path ? asset('storage/' . $center->image_path) : $centerImage }}" alt="{{ $center->name }}">
-                    </div>
-                    <div class="card-body">
-                        <span class="status-pill">{{ $center->status_label }}</span>
-                        <a href="{{ route('centers.show', $center) }}" class="block mt-4 no-underline">
-                            <h2 class="text-2xl font-extrabold leading-tight tracking-tight text-[var(--ink)] hover:text-[var(--accent)]">{{ $center->name }}</h2>
-                        </a>
-                        <p class="mt-3 line-clamp-2 text-sm leading-6 text-[var(--muted)]">{{ $center->address }}</p>
+        <div class="centers-result-bar">
+            <span>Matokeo</span>
+            <strong>{{ number_format($centers->total()) }} {{ str($centers->total() === 1 ? 'kituo' : 'vituo') }}</strong>
+        </div>
 
-                        <div class="meta-grid mt-6">
-                            <div class="meta-tile">
-                                <span>City</span>
-                                <strong>{{ $center->city ?? 'Not listed' }}</strong>
+        <div class="centers-card-grid">
+            @forelse($centers as $center)
+                @php
+                    $fallbackImage = $fallbackImages[$loop->index % count($fallbackImages)];
+                    $centerImage = $center->image_path ? asset('storage/' . $center->image_path) : $fallbackImage;
+                @endphp
+                <article class="center-card">
+                    <a href="{{ route('centers.show', $center) }}" class="center-card-image" aria-label="Fungua taarifa za {{ $center->name }}">
+                        <img src="{{ $centerImage }}" alt="{{ $center->name }}">
+                    </a>
+                    <div class="center-card-body">
+                        <div class="center-card-top">
+                            <span class="status-pill">{{ $center->status_label }}</span>
+                            <span>{{ $center->city ?? 'Mji haujawekwa' }}</span>
+                        </div>
+                        <a href="{{ route('centers.show', $center) }}" class="center-title-link">
+                            <h2>{{ $center->name }}</h2>
+                        </a>
+                        <p>{{ $center->address }}</p>
+
+                        <div class="center-meta-grid">
+                            <div>
+                                <span>Aina</span>
+                                <strong>{{ $center->center_type ?? 'Donation center' }}</strong>
                             </div>
-                            <div class="meta-tile">
+                            <div>
                                 <span>Wait</span>
                                 <strong>{{ $center->wait_time_label ?? ($center->capacity_label ?? 'Ask center') }}</strong>
                             </div>
-                            <div class="meta-tile">
+                            <div>
                                 <span>Phone</span>
                                 <strong>{{ $center->phone ?? 'Not listed' }}</strong>
                             </div>
-                            <div class="meta-tile">
-                                <span>Type</span>
-                                <strong>{{ $center->center_type ?? 'Donation center' }}</strong>
+                            <div>
+                                <span>Hours</span>
+                                <strong>{{ $center->opening_hours ?? 'Ask center' }}</strong>
                             </div>
                         </div>
 
                         @if(! empty($center->services))
-                            <div class="filter-row mt-6">
+                            <div class="pharma-chip-grid">
                                 @foreach(array_slice($center->services, 0, 3) as $service)
-                                    <span class="filter-chip">{{ $service }}</span>
+                                    <span>{{ $service }}</span>
                                 @endforeach
                             </div>
                         @endif
 
-                        <div class="action-row">
-                            <a href="{{ route('centers.show', $center) }}" class="secondary-btn">View Details</a>
-                            <a href="{{ route('download') }}" class="magnetic-btn">
-                                <span>Book</span>
-                                <span class="btn-orb" aria-hidden="true">&rarr;</span>
-                            </a>
+                        <div class="pharma-action-row">
+                            <a href="{{ route('centers.show', $center) }}" class="secondary-btn">Details</a>
+                            <a href="{{ route('download') }}" class="primary-btn">Book</a>
                         </div>
                     </div>
                 </article>
             @empty
-                <div class="premium-card reveal md:col-span-2 lg:col-span-3">
-                    <div class="card-body text-center">
-                        <h2 class="text-3xl font-extrabold">No centers found</h2>
-                        <p class="web-copy mx-auto mt-4">Try another center name, city, or address.</p>
-                        <div class="hero-actions justify-center">
-                            <a href="{{ route('centers.index') }}" class="secondary-btn">Show All Centers</a>
-                        </div>
+                <div class="centers-empty">
+                    <span class="pharma-kicker">Hakuna matokeo</span>
+                    <h2>Hakuna kituo kilicholingana na utafutaji huo.</h2>
+                    <p>Jaribu jina jingine, mji mwingine, au ondoa vichujio vilivyowekwa.</p>
+                    <div class="pharma-action-row">
+                        <a href="{{ route('centers.index') }}" class="primary-btn">Show All Centers</a>
                     </div>
                 </div>
             @endforelse
         </div>
 
-        <div class="mt-14">
+        <div class="centers-pagination">
             {{ $centers->withQueryString()->links() }}
         </div>
     </div>

@@ -1,145 +1,180 @@
 @extends('layouts.app')
 
 @section('title', $center->name . ' - NBTS Blood Center')
-@section('meta_description', 'View center details, services, opening information, contact details, and app booking guidance for ' . $center->name . '.')
+@section('meta_description', 'Angalia taarifa za kituo, huduma, muda wa kufungua, mawasiliano, na namna ya kuweka miadi kwa ' . $center->name . '.')
 
 @section('content')
 @php
-    $centerImage = $center->image_path ? asset('storage/' . $center->image_path) : asset('images/web/nbts-center-care.png');
+    $assetBase = 'images/web/generated/centers-pharma-clean/';
+    $fallbackImages = [
+        asset($assetBase . 'reception-checkin.png'),
+        asset($assetBase . 'donor-care-area.png'),
+        asset($assetBase . 'center-operations.png'),
+    ];
+    $centerImage = $center->image_path ? asset('storage/' . $center->image_path) : $fallbackImages[1];
 @endphp
 
-<section class="page-hero">
-    <div class="section-shell hero-grid">
-        <div class="reveal">
-            <a href="{{ route('centers.index') }}" class="filter-chip mb-6">&larr; Back to centers</a>
-            <span class="kicker">{{ $center->status_label }}</span>
-            <h1 class="hero-title mt-6">{{ $center->name }}</h1>
-            <p class="web-copy mt-7">{{ $center->address }}</p>
-            <div class="hero-actions">
-                <a href="{{ route('download') }}" class="magnetic-btn">
-                    <span>Book in App</span>
-                    <span class="btn-orb" aria-hidden="true">&rarr;</span>
-                </a>
-                <a href="{{ route('eligibility') }}" class="secondary-btn">Check Eligibility</a>
+<section class="pharma-hero center-detail-hero">
+    <div class="section-shell">
+        <div class="pharma-hero-top">
+            <div class="pharma-hero-copy">
+                <a href="{{ route('centers.index') }}" class="pharma-link center-back-link">Back to centers</a>
+                <div class="pharma-label-row">
+                    <span>{{ $center->status_label }}</span>
+                    <span>{{ $center->city ?? 'Mji haujawekwa' }}</span>
+                </div>
+                <span class="pharma-kicker">{{ $center->center_type ?? 'Blood center' }}</span>
+                <h1>{{ $center->name }}</h1>
+                <p class="pharma-lead">{{ $center->address }}</p>
+            </div>
+            <div class="pharma-hero-summary">
+                <span>Weka miadi</span>
+                <p class="pharma-lead">Tumia app kuthibitisha muda wa miadi na taarifa zako za mchangiaji kabla ya kwenda kituoni.</p>
+                <div class="pharma-action-row">
+                    <a href="{{ route('download') }}" class="primary-btn">Book in App</a>
+                    <a href="{{ route('eligibility') }}" class="secondary-btn">Can I Donate?</a>
+                </div>
             </div>
         </div>
-        <div class="bezel reveal">
-            <div class="bezel-core">
-                <div class="image-frame">
-                    <img src="{{ $centerImage }}" alt="{{ $center->name }}">
-                </div>
+        <figure class="pharma-hero-image centers-hero-image">
+            <img src="{{ $centerImage }}" alt="{{ $center->name }}">
+        </figure>
+    </div>
+</section>
+
+<section class="pharma-status-band">
+    <div class="section-shell">
+        <div class="pharma-status-grid" aria-label="Muhtasari wa kituo">
+            <div>
+                <span>Mji</span>
+                <strong>{{ $center->city ?? 'Not listed' }}</strong>
+            </div>
+            <div>
+                <span>Aina ya kituo</span>
+                <strong>{{ $center->center_type ?? 'Donation center' }}</strong>
+            </div>
+            <div>
+                <span>Wait</span>
+                <strong>{{ $center->wait_time_label ?? ($center->capacity_label ?? 'Ask center') }}</strong>
+            </div>
+            <div>
+                <span>Status</span>
+                <strong>{{ $center->status_label }}</strong>
             </div>
         </div>
     </div>
 </section>
 
-<section class="soft-band">
-    <div class="section-shell detail-shell">
-        <div class="space-y-6">
-            <article class="premium-card reveal">
-                <div class="card-body">
-                    <h2 class="section-title">Center information</h2>
-                    <p class="web-copy mt-5">Use this page to confirm location and contact details. Appointment booking is completed inside the NBTS mobile app.</p>
-                    <div class="meta-grid mt-8">
-                        <div class="meta-tile">
-                            <span>City</span>
-                            <strong>{{ $center->city ?? 'Not listed' }}</strong>
-                        </div>
-                        <div class="meta-tile">
-                            <span>Center type</span>
-                            <strong>{{ $center->center_type ?? 'Donation center' }}</strong>
-                        </div>
-                        <div class="meta-tile">
-                            <span>Capacity</span>
-                            <strong>{{ $center->capacity_label ?? 'Ask center' }}</strong>
-                        </div>
-                        <div class="meta-tile">
-                            <span>Wait time</span>
-                            <strong>{{ $center->wait_time_label ?? 'Not listed' }}</strong>
-                        </div>
+<section class="pharma-section">
+    <div class="section-shell">
+        <div class="center-detail-grid">
+            <article class="center-detail-card">
+                <span class="pharma-kicker">Taarifa za kituo</span>
+                <h2>Thibitisha taarifa kabla ya kutembelea.</h2>
+                <div class="center-info-list">
+                    <div>
+                        <span>Address</span>
+                        <strong>{{ $center->address }}</strong>
                     </div>
-                </div>
-            </article>
-
-            <article class="premium-card reveal">
-                <div class="card-body">
-                    <h2 class="text-3xl font-extrabold tracking-tight">Services</h2>
-                    @if(! empty($center->services))
-                        <div class="grid gap-3 sm:grid-cols-2 mt-6">
-                            @foreach($center->services as $service)
-                                <div class="story-row">
-                                    <strong>{{ $service }}</strong>
-                                </div>
-                            @endforeach
-                        </div>
-                    @else
-                        <p class="web-copy mt-4">Service details have not been published for this center yet.</p>
-                    @endif
-                </div>
-            </article>
-
-            <article class="premium-card reveal">
-                <div class="card-body">
-                    <h2 class="text-3xl font-extrabold tracking-tight">Before you visit</h2>
-                    <div class="story-list mt-6">
-                        @foreach(['Bring a valid ID document.', 'Eat a proper meal and drink water before donation.', 'Use the app to confirm appointment time and eligibility.', 'Tell staff about recent illness, medicine, travel, or previous deferral.'] as $item)
-                            <div class="story-row">{{ $item }}</div>
-                        @endforeach
+                    <div>
+                        <span>Phone</span>
+                        <strong>{{ $center->phone ?? 'Not listed' }}</strong>
                     </div>
-                </div>
-            </article>
-        </div>
-
-        <aside class="space-y-6">
-            <div class="bezel reveal">
-                <div class="bezel-core card-body">
-                    <h2 class="text-3xl font-extrabold tracking-tight">Contact</h2>
-                    <div class="meta-grid mt-6">
-                        <div class="meta-tile">
-                            <span>Phone</span>
-                            <strong>{{ $center->phone ?? 'Not listed' }}</strong>
-                        </div>
-                        <div class="meta-tile">
-                            <span>Email</span>
-                            <strong>{{ $center->email ?? 'Not listed' }}</strong>
-                        </div>
+                    <div>
+                        <span>Email</span>
+                        <strong>{{ $center->email ?? 'Not listed' }}</strong>
                     </div>
-                    <div class="meta-tile mt-4">
+                    <div>
                         <span>Opening hours</span>
                         <strong>{{ $center->opening_hours ?? 'Ask center' }}</strong>
                     </div>
-                    <a href="{{ route('download') }}" class="magnetic-btn mt-6 w-full">
-                        <span>Book Visit</span>
-                        <span class="btn-orb" aria-hidden="true">&rarr;</span>
-                    </a>
-                </div>
-            </div>
-
-            <div class="premium-card reveal">
-                <div class="card-body">
-                    <h2 class="text-2xl font-extrabold tracking-tight">Donation basics</h2>
-                    <div class="story-list mt-5">
-                        @foreach(['Age 18 to 65 years', 'Weight above 50 kg', 'Good general health', 'Enough time since last donation'] as $item)
-                            <div class="story-row">{{ $item }}</div>
-                        @endforeach
+                    <div>
+                        <span>Capacity</span>
+                        <strong>{{ $center->capacity_label ?? 'Ask center' }}</strong>
+                    </div>
+                    <div>
+                        <span>Coordinates</span>
+                        <strong>
+                            @if($center->latitude && $center->longitude)
+                                {{ $center->latitude }}, {{ $center->longitude }}
+                            @else
+                                Not listed
+                            @endif
+                        </strong>
                     </div>
                 </div>
+            </article>
+
+            <aside class="center-detail-card center-visit-card">
+                <span class="pharma-kicker">Kabla ya kwenda</span>
+                <h2>Jiandae vizuri.</h2>
+                <div class="about-check-list">
+                    <div>Beba kitambulisho kinachotambulika.</div>
+                    <div>Kula chakula na kunywa maji kabla ya kwenda.</div>
+                    <div>Tumia app kuthibitisha muda wa miadi.</div>
+                    <div>Mwambie mhudumu kuhusu ugonjwa, dawa, safari, au deferral ya awali.</div>
+                </div>
+            </aside>
+        </div>
+    </div>
+</section>
+
+<section class="pharma-section pharma-neutral">
+    <div class="section-shell">
+        <div class="center-service-layout">
+            <div class="pharma-heading">
+                <span class="pharma-kicker">Huduma</span>
+                <h2>Huduma zilizowekwa kwenye rekodi ya kituo.</h2>
+                <p>Sehemu hii inaonyesha huduma zilizohifadhiwa kwenye backend kwa kituo hiki. Ikiwa huduma haijaorodheshwa, wasiliana na kituo au tumia app kuthibitisha.</p>
             </div>
-        </aside>
+            <div class="center-service-panel">
+                @if(! empty($center->services))
+                    @foreach($center->services as $service)
+                        <div>{{ $service }}</div>
+                    @endforeach
+                @else
+                    <div>Service details have not been published for this center yet.</div>
+                @endif
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="pharma-section">
+    <div class="section-shell">
+        <div class="donate-final-cta">
+            <div>
+                <span class="pharma-kicker">Mobile app</span>
+                <h2>Weka miadi na uendelee kufuatilia taarifa zako.</h2>
+                <p>App ya NBTS hukusaidia kuweka miadi, kuona donor card, kufuatilia historia ya uchangiaji, na kupata mwongozo wa vigezo.</p>
+            </div>
+            <div class="about-system-actions">
+                <a href="{{ route('download') }}" class="primary-btn">Download App</a>
+                <a href="{{ route('eligibility') }}" class="secondary-btn">Can I Donate?</a>
+            </div>
+        </div>
     </div>
 </section>
 
 @if($relatedCenters->isNotEmpty())
-    <section class="split-band">
+    <section class="pharma-section pharma-neutral">
         <div class="section-shell">
-            <h2 class="section-title reveal">More locations</h2>
-            <div class="grid gap-5 md:grid-cols-4 mt-10">
+            <div class="pharma-heading">
+                <span class="pharma-kicker">Vituo vingine</span>
+                <h2>Angalia vituo vingine vilivyo kwenye mfumo.</h2>
+                <p>Kwa kipaumbele, tunaonyesha vituo vya mji huo huo kama vipo. Vinginevyo tunaonyesha vituo hai kutoka kwenye rekodi ya mfumo.</p>
+            </div>
+            <div class="center-related-grid">
                 @foreach($relatedCenters as $other)
-                    <a href="{{ route('centers.show', $other) }}" class="premium-card reveal no-underline">
-                        <div class="card-body">
-                            <span class="status-pill">{{ $other->status_label }}</span>
-                            <h3 class="mt-4 text-xl font-extrabold leading-tight text-[var(--ink)]">{{ $other->name }}</h3>
-                            <p class="mt-3 line-clamp-2 text-sm leading-6 text-[var(--muted)]">{{ $other->address }}</p>
+                    @php
+                        $relatedImage = $other->image_path ? asset('storage/' . $other->image_path) : $fallbackImages[$loop->index % count($fallbackImages)];
+                    @endphp
+                    <a href="{{ route('centers.show', $other) }}" class="center-related-card">
+                        <img src="{{ $relatedImage }}" alt="{{ $other->name }}">
+                        <div>
+                            <span>{{ $other->status_label }}</span>
+                            <h3>{{ $other->name }}</h3>
+                            <p>{{ $other->city ?? 'Mji haujawekwa' }}</p>
                         </div>
                     </a>
                 @endforeach

@@ -11,8 +11,8 @@ class ArticleController extends Controller
     public function index()
     {
         $articles = Article::where('status', 'published')
-            ->latest('published_at')
-            ->latest()
+            ->published()
+            ->orderedForPublic()
             ->get();
 
         return ArticleResource::collection($articles);
@@ -20,7 +20,7 @@ class ArticleController extends Controller
 
     public function show($id)
     {
-        $article = Article::where('status', 'published')->find($id);
+        $article = Article::published()->find($id);
 
         if (!$article) {
             return response()->json(['message' => 'Article not found'], 404);
