@@ -162,7 +162,7 @@ These are shown on the official site as zone/region contacts. Treat them as regi
 - [x] Publications page redesigned in the Pharma Clean visual system with Swahili-first content, no fake downloadable files, and clear backend publication requirements.
 - [x] FAQ page redesigned in the Pharma Clean visual system with Swahili-first donor eligibility, safety, testing, app, and center guidance.
 - [x] Contact page redesigned in the Pharma Clean visual system with official NBTS contacts, working hours, support areas, and backend-driven active center records.
-- [ ] Download app page redesign pass.
+- [x] Download app page redesigned in the Pharma Clean visual system with Swahili-first app guidance, local app screenshot, verified-link availability status, donor workflow, and support actions.
 
 ### Backend Already Present
 
@@ -195,7 +195,7 @@ These are shown on the official site as zone/region contacts. Treat them as regi
 - [ ] Make `/publications` data-driven with filters and download actions.
 - [ ] Add a public announcements/releases area if NBTS staff will publish notices.
 - [ ] Add upcoming events or collection schedules if there is a reliable backend source.
-- [ ] Replace placeholder app store buttons on `/download-app` with real links or a clear "coming soon" state.
+- [x] Replace placeholder app store buttons on `/download-app` with a clear verified-link pending state.
 - [ ] Confirm all images are appropriate, locally available, and not misleading.
 - [ ] Verify no page uses non-Tanzania demo content.
 

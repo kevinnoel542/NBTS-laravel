@@ -229,58 +229,64 @@ body.web-shell {
 
 .mobile-menu {
     position: fixed;
-    inset: 0;
+    top: 88px;
+    right: 12px;
+    left: 12px;
     z-index: 29;
-    padding: 86px 16px 20px;
-    background: rgba(245, 248, 252, 0.82);
+    padding: 0;
+    background: transparent;
+}
+
+.mobile-menu-inner {
+    max-width: 1240px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    padding: 8px;
+    border-radius: 8px;
+    background: #fff;
+    border: 1px solid var(--line);
+    box-shadow: 0 18px 46px rgba(23, 25, 31, 0.12);
     backdrop-filter: blur(18px);
     -webkit-backdrop-filter: blur(18px);
 }
 
-.mobile-menu-inner {
-    max-width: 560px;
-    margin: 0 auto;
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 8px;
-    padding: 12px;
-    border-radius: 8px;
-    background: rgba(255, 255, 255, 0.96);
-    border: 1px solid var(--line);
-    box-shadow: 0 20px 52px rgba(23, 25, 31, 0.14);
-}
-
 .mobile-nav-link {
-    min-height: 44px;
+    min-height: 40px;
     display: inline-flex;
     align-items: center;
-    justify-content: center;
-    padding: 0 12px;
-    border: 1px solid var(--line);
+    justify-content: flex-start;
+    padding: 0 14px;
+    border: 0;
     border-radius: 4px;
     color: var(--ink);
     background: #fff;
-    font-size: 0.84rem;
-    font-weight: 800;
+    font-size: 0.88rem;
+    font-weight: 700;
     line-height: 1.15;
-    text-align: center;
+    text-align: left;
     text-decoration: none;
     opacity: 0;
-    transform: translateY(8px);
+    transform: translateY(4px);
     animation: menuIn 360ms var(--ease) forwards;
+    box-shadow: inset 0 -1px 0 rgba(94, 111, 136, 0.16);
 }
 
 .mobile-nav-link.is-active {
     color: var(--accent);
-    border-color: rgba(25, 118, 210, 0.35);
     background: var(--accent-soft);
 }
 
+.mobile-nav-link:hover {
+    color: var(--accent);
+    background: var(--surface);
+}
+
 .mobile-cta {
-    grid-column: 1 / -1;
     width: 100%;
     min-height: 44px;
-    margin-top: 4px;
+    margin-top: 8px;
 }
 
 .page-hero {
@@ -3941,6 +3947,224 @@ body.web-shell {
     margin-top: 32px;
 }
 
+.download-hero {
+    padding-bottom: 34px;
+}
+
+.download-hero-grid,
+.download-availability-grid,
+.download-process-grid,
+.download-support-grid {
+    display: grid;
+    gap: 32px;
+}
+
+.download-hero-grid {
+    grid-template-columns: minmax(0, 0.9fr) minmax(320px, 0.58fr);
+    align-items: center;
+}
+
+.download-hero-copy h1,
+.download-availability-copy h2,
+.download-process-copy h2,
+.download-support-panel h2 {
+    color: var(--ink);
+    font-weight: 500;
+    line-height: 1.04;
+    letter-spacing: 0;
+    text-wrap: balance;
+}
+
+.download-hero-copy h1 {
+    max-width: 12ch;
+    margin-top: 24px;
+    font-size: 3.5rem;
+}
+
+.download-hero-copy .pharma-lead {
+    max-width: 58ch;
+    margin-top: 22px;
+}
+
+.download-action-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 26px;
+}
+
+.download-phone-panel {
+    min-height: 640px;
+    display: grid;
+    place-items: center;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    background: var(--panel);
+}
+
+.download-phone-frame {
+    width: min(315px, 78%);
+    overflow: hidden;
+    border: 10px solid #0b1220;
+    border-radius: 34px;
+    background: #0b1220;
+    box-shadow: 0 24px 70px rgba(11, 30, 58, 0.18);
+}
+
+.download-phone-frame img {
+    display: block;
+    width: 100%;
+    height: auto;
+}
+
+.download-status-strip,
+.download-link-ledger,
+.download-step-list {
+    display: grid;
+    gap: 1px;
+    overflow: hidden;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    background: var(--line);
+}
+
+.download-status-strip {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    margin-top: 26px;
+}
+
+.download-status-strip div,
+.download-link-ledger div,
+.download-step-list div {
+    background: var(--panel);
+}
+
+.download-status-strip div,
+.download-link-ledger div {
+    min-height: 104px;
+    padding: 18px;
+}
+
+.download-status-strip span,
+.download-link-ledger span,
+.download-feature-grid span,
+.download-step-list span {
+    display: block;
+    color: var(--accent);
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+.download-status-strip strong,
+.download-link-ledger strong {
+    display: block;
+    margin-top: 18px;
+    color: var(--ink);
+    font-size: 1rem;
+    font-weight: 700;
+    line-height: 1.35;
+}
+
+.download-availability-grid {
+    grid-template-columns: minmax(0, 0.8fr) minmax(360px, 0.62fr);
+    align-items: start;
+}
+
+.download-availability-copy,
+.download-support-panel {
+    padding: 32px;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    background: var(--panel);
+}
+
+.download-availability-copy h2,
+.download-process-copy h2,
+.download-support-panel h2 {
+    max-width: 16ch;
+    margin-top: 20px;
+    font-size: 2.75rem;
+}
+
+.download-availability-copy p,
+.download-process-copy p,
+.download-support-panel p {
+    max-width: 62ch;
+    margin-top: 16px;
+    color: var(--muted);
+    font-size: 0.95rem;
+    line-height: 1.65;
+}
+
+.download-feature-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 1px;
+    overflow: hidden;
+    margin-top: 32px;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    background: var(--line);
+}
+
+.download-feature-grid article {
+    min-height: 240px;
+    padding: 24px;
+    background: var(--panel);
+}
+
+.download-feature-grid h3 {
+    margin-top: 42px;
+    color: var(--ink);
+    font-size: 1.35rem;
+    font-weight: 600;
+    line-height: 1.18;
+    letter-spacing: 0;
+}
+
+.download-feature-grid p {
+    margin-top: 14px;
+    color: var(--muted);
+    font-size: 0.92rem;
+    line-height: 1.6;
+}
+
+.download-process-grid {
+    grid-template-columns: minmax(0, 0.72fr) minmax(360px, 0.72fr);
+    align-items: start;
+}
+
+.download-step-list div {
+    display: grid;
+    grid-template-columns: 54px minmax(0, 1fr);
+    gap: 16px;
+    align-items: start;
+    padding: 18px;
+}
+
+.download-step-list span {
+    width: 38px;
+    height: 38px;
+    display: inline-grid;
+    place-items: center;
+    color: #fff;
+    background: var(--accent);
+    border-radius: 4px;
+}
+
+.download-step-list p {
+    color: var(--ink);
+    font-size: 1rem;
+    font-weight: 600;
+    line-height: 1.45;
+}
+
+.download-support-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
 .public-footer {
     position: relative;
     z-index: 2;
@@ -4109,18 +4333,23 @@ body.web-shell {
     }
 
     .mobile-menu {
-        padding: 76px 10px 16px;
+        top: 76px;
+        right: 8px;
+        left: 8px;
+        padding: 0;
     }
 
     .mobile-menu-inner {
-        gap: 7px;
-        padding: 10px;
+        max-height: calc(100dvh - 88px);
+        gap: 2px;
+        padding: 8px;
+        overflow-y: auto;
     }
 
     .mobile-nav-link {
-        min-height: 40px;
-        padding: 0 8px;
-        font-size: 0.78rem;
+        min-height: 39px;
+        padding: 0 12px;
+        font-size: 0.86rem;
     }
 
     .mobile-cta {
@@ -4385,14 +4614,20 @@ body.web-shell {
     .campaign-feature-card,
     .campaign-control-panel,
     .campaign-detail-layout,
-    .campaign-center-band {
+    .campaign-center-band,
+    .download-hero-grid,
+    .download-availability-grid,
+    .download-process-grid {
         grid-template-columns: 1fr;
     }
 
     .news-list-grid,
     .news-ledger,
     .campaign-ledger,
-    .campaign-list-grid {
+    .campaign-list-grid,
+    .download-status-strip,
+    .download-feature-grid,
+    .download-support-grid {
         grid-template-columns: repeat(2, minmax(0, 1fr));
     }
 
@@ -4405,6 +4640,11 @@ body.web-shell {
 
     .campaign-center-band {
         align-items: start;
+    }
+
+    .download-phone-panel {
+        min-height: auto;
+        padding: 34px 0;
     }
 }
 
@@ -4472,8 +4712,64 @@ body.web-shell {
     .campaign-ledger,
     .campaign-mini-grid,
     .campaign-list-grid,
-    .campaign-info-grid {
+    .campaign-info-grid,
+    .download-status-strip,
+    .download-link-ledger,
+    .download-feature-grid,
+    .download-support-grid {
         grid-template-columns: 1fr;
+    }
+
+    .download-hero-copy h1 {
+        max-width: 11ch;
+        font-size: 2.45rem;
+    }
+
+    .download-availability-copy,
+    .download-support-panel,
+    .download-feature-grid article {
+        padding: 22px;
+    }
+
+    .download-availability-copy h2,
+    .download-process-copy h2,
+    .download-support-panel h2 {
+        font-size: 2.2rem;
+    }
+
+    .download-phone-panel {
+        padding: 22px 0;
+    }
+
+    .download-phone-frame {
+        width: min(270px, 82%);
+        border-width: 8px;
+        border-radius: 30px;
+    }
+
+    .download-status-strip div,
+    .download-link-ledger div {
+        min-height: 90px;
+        padding: 16px;
+    }
+
+    .download-feature-grid article {
+        min-height: auto;
+    }
+
+    .download-feature-grid h3 {
+        margin-top: 24px;
+    }
+
+    .download-step-list div {
+        grid-template-columns: 1fr;
+        gap: 10px;
+        padding: 16px;
+    }
+
+    .download-action-row .primary-btn,
+    .download-action-row .secondary-btn {
+        width: 100%;
     }
 
     .pharma-feature-image,

@@ -1,79 +1,151 @@
 @extends('layouts.app')
 
 @section('title', 'Download NBTS Mobile App')
-@section('meta_description', 'Download the NBTS mobile app to manage donor profile, appointments, donor card, eligibility guidance, notifications, and donation history.')
+@section('meta_description', 'Taarifa za NBTS mobile app kwa donor profile, appointment booking, donor card, eligibility guidance, notifications, na donation history.')
 
 @section('content')
 @php
     $phoneImage = asset('images/web/mobile/nbts-mobile-dashboard.jpeg');
-    $supportImage = asset('images/web/official/official-hero-1.jpg');
+
+    $features = [
+        ['label' => 'Profile', 'title' => 'Donor profile', 'copy' => 'Hifadhi taarifa zako za donor, blood group, na mawasiliano yanayotumika na NBTS.'],
+        ['label' => 'Booking', 'title' => 'Miadi ya kuchangia', 'copy' => 'Chagua center au campaign, kisha fuatilia appointment yako kabla ya kwenda.'],
+        ['label' => 'Card', 'title' => 'Donor card', 'copy' => 'Tumia donor ID na QR profile access kwa huduma zinazohitaji uthibitisho.'],
+        ['label' => 'History', 'title' => 'Donation history', 'copy' => 'Angalia donation records, next appointment, na taarifa muhimu baada ya kuchangia.'],
+    ];
+
+    $steps = [
+        'Fungua app na thibitisha namba ya simu au email inayotumika na NBTS.',
+        'Kamilisha donor profile na soma eligibility guidance kabla ya booking.',
+        'Chagua blood center au campaign inayofaa, kisha weka appointment.',
+        'Fika center na kitambulisho; staff watafanya screening ya mwisho.',
+        'Baada ya kuchangia, fuatilia historia, notifications, na next eligible date.',
+    ];
 @endphp
 
-<section class="page-hero">
-    <div class="section-shell hero-grid">
-        <div class="reveal">
-            <span class="small-label">NBTS mobile app</span>
-            <h1 class="hero-title mt-6">Your donor journey in one app.</h1>
-            <p class="subhead mt-6">Book appointments, keep your donor card, see eligibility guidance, receive updates, and track donation history.</p>
-            <div class="hero-actions">
-                <a href="#" class="primary-btn">Google Play</a>
-                <a href="#" class="secondary-btn">App Store</a>
+<section class="pharma-hero download-hero">
+    <div class="section-shell">
+        <div class="download-hero-grid">
+            <div class="download-hero-copy">
+                <div class="pharma-label-row">
+                    <span>Jamhuri ya Muungano wa Tanzania</span>
+                    <span>Wizara ya Afya</span>
+                </div>
+                <span class="pharma-kicker">NBTS mobile app</span>
+                <h1>Huduma za donor kwenye app moja.</h1>
+                <p class="pharma-lead">App inamsaidia donor kuweka profile, kuona eligibility guidance, kufanya booking, kutumia donor card, na kufuatilia donation history.</p>
+                <div class="download-action-row">
+                    <a href="#download-status" class="primary-btn">Check Availability</a>
+                    <a href="{{ route('centers.index') }}" class="secondary-btn">Find Center</a>
+                </div>
             </div>
-        </div>
-        <div class="phone-display reveal">
-            <div class="phone-shell">
-                <div class="phone-screen">
-                    <img src="{{ $phoneImage }}" alt="NBTS mobile app dashboard with eligibility, appointments, donor card, and navigation">
+
+            <div class="download-phone-panel" aria-label="NBTS mobile app preview">
+                <div class="download-phone-frame">
+                    <img src="{{ $phoneImage }}" alt="NBTS mobile app dashboard showing eligibility, appointment booking, donor card, centers, history, and profile navigation">
                 </div>
             </div>
         </div>
-    </div>
-</section>
 
-<section class="section-band surface">
-    <div class="section-shell four-grid">
-        <article class="quiet-panel reveal"><div class="panel-body"><h2 class="card-title">Book donation</h2><p class="card-copy mt-3">Choose a center and available appointment time.</p></div></article>
-        <article class="quiet-panel reveal"><div class="panel-body"><h2 class="card-title">Donor card</h2><p class="card-copy mt-3">Keep your donor ID and QR profile access ready.</p></div></article>
-        <article class="quiet-panel reveal"><div class="panel-body"><h2 class="card-title">History</h2><p class="card-copy mt-3">View donation records synced from NBTS.</p></div></article>
-        <article class="quiet-panel reveal"><div class="panel-body"><h2 class="card-title">Notifications</h2><p class="card-copy mt-3">Receive appointment, campaign, and service updates.</p></div></article>
-    </div>
-</section>
-
-<section class="section-band">
-    <div class="section-shell split-layout">
-        <div class="media-panel reveal">
-            <div class="media-frame tall">
-                <img src="{{ $supportImage }}" alt="NBTS staff supporting digital donor services">
+        <div class="download-status-strip" id="download-status">
+            <div>
+                <span>Google Play</span>
+                <strong>Official link haijawekwa bado</strong>
             </div>
-        </div>
-        <div class="reveal">
-            <h2 class="section-title">Built for donors and staff.</h2>
-            <p class="subhead mt-5">The app keeps private donor actions inside authenticated mobile flows, while this website gives public guidance and discovery.</p>
-            <div class="process-list mt-8">
-                <div class="process-item"><div><h3 class="card-title">Create profile</h3><p class="card-copy mt-2">Keep donor details and preferences ready.</p></div></div>
-                <div class="process-item"><div><h3 class="card-title">Choose center</h3><p class="card-copy mt-2">Find centers and book a suitable visit.</p></div></div>
-                <div class="process-item"><div><h3 class="card-title">Track donation</h3><p class="card-copy mt-2">See history, points, appointments, and next eligible date.</p></div></div>
+            <div>
+                <span>App Store</span>
+                <strong>Official link haijawekwa bado</strong>
+            </div>
+            <div>
+                <span>Public website</span>
+                <strong>Tunatumia only verified links</strong>
             </div>
         </div>
     </div>
 </section>
 
-<section class="section-band surface">
-    <div class="section-shell balanced-grid">
-        <div class="content-panel reveal">
-            <div class="panel-body">
-                <h2 class="section-title">Before installing</h2>
-                <p class="subhead mt-5">Use the same phone number or email you want NBTS to use for donor communication and reminders.</p>
+<section class="pharma-section download-availability">
+    <div class="section-shell download-availability-grid">
+        <div class="download-availability-copy">
+            <span class="pharma-kicker">Download status</span>
+            <h2>Hatutaweka store link mpaka ithibitishwe rasmi.</h2>
+            <p>Kwa sasa page hii inaonyesha taarifa za app na njia za kupata msaada. Google Play au App Store buttons zitaongezwa baada ya NBTS kuthibitisha official download URL.</p>
+        </div>
+        <div class="download-link-ledger">
+            <div>
+                <span>Primary action</span>
+                <strong>Use official store link when available</strong>
+            </div>
+            <div>
+                <span>Support</span>
+                <strong>Contact NBTS for account or appointment help</strong>
+            </div>
+            <div>
+                <span>Current safe action</span>
+                <strong>Find center, read FAQ, or contact staff</strong>
             </div>
         </div>
-        <div class="content-panel reveal">
-            <div class="panel-body">
-                <h2 class="section-title">Need help?</h2>
-                <p class="subhead mt-5">Contact NBTS or ask staff at a blood center if your account, appointment, or donor profile needs support.</p>
-                <div class="action-row">
-                    <a href="{{ route('contact') }}" class="primary-btn">Contact</a>
-                    <a href="{{ route('faq') }}" class="secondary-btn">Read FAQ</a>
+    </div>
+</section>
+
+<section class="pharma-section pharma-neutral">
+    <div class="section-shell">
+        <div class="pharma-heading">
+            <span class="pharma-kicker">App functions</span>
+            <h2>Vipengele muhimu kwa donor.</h2>
+            <p>App inaweka donor actions kwenye authenticated mobile flow, huku website ikibaki kwa public information na discovery.</p>
+        </div>
+
+        <div class="download-feature-grid">
+            @foreach($features as $feature)
+                <article>
+                    <span>{{ $feature['label'] }}</span>
+                    <h3>{{ $feature['title'] }}</h3>
+                    <p>{{ $feature['copy'] }}</p>
+                </article>
+            @endforeach
+        </div>
+    </div>
+</section>
+
+<section class="pharma-section">
+    <div class="section-shell download-process-grid">
+        <div class="download-process-copy">
+            <span class="pharma-kicker">How it works</span>
+            <h2>Namna donor anavyotumia app kabla na baada ya kuchangia.</h2>
+            <p>Eligibility ya mwisho haifanywi na app peke yake. Staff wa NBTS au center ndio wanathibitisha kama donor anaweza kuchangia siku hiyo.</p>
+            <div class="download-action-row">
+                <a href="{{ route('faq') }}" class="secondary-btn">Read FAQ</a>
+                <a href="{{ route('contact') }}" class="primary-btn">Contact NBTS</a>
+            </div>
+        </div>
+
+        <div class="download-step-list">
+            @foreach($steps as $index => $step)
+                <div>
+                    <span>{{ str_pad((string) ($index + 1), 2, '0', STR_PAD_LEFT) }}</span>
+                    <p>{{ $step }}</p>
                 </div>
+            @endforeach
+        </div>
+    </div>
+</section>
+
+<section class="pharma-section pharma-neutral">
+    <div class="section-shell download-support-grid">
+        <div class="download-support-panel">
+            <span class="pharma-kicker">Before installing</span>
+            <h2>Tumia mawasiliano sahihi.</h2>
+            <p>Tumia namba ya simu au email unayotaka NBTS itumie kwa reminders, donor profile, na appointment updates.</p>
+        </div>
+
+        <div class="download-support-panel">
+            <span class="pharma-kicker">Need help?</span>
+            <h2>Pata msaada kupitia NBTS.</h2>
+            <p>Kama account, appointment, au donor profile ina changamoto, wasiliana na NBTS au uliza staff katika blood center.</p>
+            <div class="download-action-row">
+                <a href="{{ route('contact') }}" class="primary-btn">Contact</a>
+                <a href="{{ route('centers.index') }}" class="secondary-btn">View Centers</a>
             </div>
         </div>
     </div>
