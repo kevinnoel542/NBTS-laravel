@@ -114,7 +114,11 @@ class CampaignResource extends Resource
                             ->disk('public')
                             ->visibility('public')
                             ->fetchFileInformation(false)
-                            ->directory('campaigns'),
+                            ->directory('campaigns')
+                            ->imagePreviewHeight('220')
+                            ->panelAspectRatio('16:9')
+                            ->panelLayout('integrated')
+                            ->helperText('Upload a clear rectangular poster. Recommended ratio: 16:9 or 4:3.'),
                         Forms\Components\Textarea::make('description')
                             ->rows(5)
                             ->columnSpanFull(),
@@ -130,7 +134,13 @@ class CampaignResource extends Resource
                 Tables\Columns\ImageColumn::make('image_path')
                     ->label('Poster')
                     ->disk('public')
-                    ->circular(),
+                    ->defaultImageUrl(fn (): string => url('/images/web/nbts-donation-hero.png'))
+                    ->height(72)
+                    ->width(112)
+                    ->extraImgAttributes([
+                        'class' => 'rounded-xl object-cover ring-1 ring-gray-200 dark:ring-gray-700',
+                        'loading' => 'lazy',
+                    ]),
                 Tables\Columns\TextColumn::make('title')
                     ->weight('bold')
                     ->description(fn (Campaign $record): ?string => str($record->description)->limit(70)->toString())
@@ -257,7 +267,7 @@ class CampaignResource extends Resource
                         Infolists\Components\ImageEntry::make('image_path')
                             ->label('Poster')
                             ->disk('public')
-                            ->height(120)
+                            ->height(220)
                             ->placeholder('No poster'),
                         Infolists\Components\TextEntry::make('title')
                             ->weight('bold')
