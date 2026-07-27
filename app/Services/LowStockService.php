@@ -76,7 +76,22 @@ class LowStockService
             $campaign->title,
             'Urgent blood donation appeal for ' . $alert->blood_group . ' at ' . $center?->name . '.',
             'emergency_campaign',
-            ['campaign_id' => $campaign->id, 'blood_group' => $alert->blood_group],
+            [
+                'type' => 'urgent',
+                'campaign_id' => $campaign->id,
+                'title' => $campaign->title,
+                'body' => 'Urgent blood donation appeal for ' . $alert->blood_group . ' at ' . $center?->name . '.',
+                'campaign_title' => $campaign->title,
+                'message' => 'Urgent blood donation appeal for ' . $alert->blood_group . ' at ' . $center?->name . '.',
+                'summary' => $campaign->description,
+                'blood_group' => $alert->blood_group,
+                'blood_type' => $alert->blood_group,
+                'center_id' => $campaign->blood_center_id,
+                'center_name' => $center?->name,
+                'urgent' => true,
+                'starts_at' => optional($campaign->start_date)->toISOString(),
+                'ends_at' => optional($campaign->end_date)->toISOString(),
+            ],
             '/campaigns/' . $campaign->id,
         );
 

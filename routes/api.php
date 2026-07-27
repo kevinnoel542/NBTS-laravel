@@ -62,6 +62,7 @@ Route::prefix('v1')->group(function () {
         // Profile Management
         Route::get('/profile', [AuthController::class, 'profile']);
         Route::put('/profile', [AuthController::class, 'updateProfile']);
+        Route::post('/profile/photo', [AuthController::class, 'uploadProfilePhoto']);
         Route::get('/donor-card', [DonorCardController::class, 'show']);
         Route::get('/eligibility', [EligibilityController::class, 'show']);
         Route::get('/loyalty', [LoyaltyController::class, 'me']);
@@ -112,6 +113,7 @@ Route::prefix('v1')->group(function () {
         Route::post('/notifications/register-token', [NotificationController::class, 'registerToken']);
         Route::post('/notifications/mark-all-read', [NotificationController::class, 'markAllAsRead']);
         Route::post('/notifications/{notification}/read', [NotificationController::class, 'markAsRead']);
+        Route::delete('/notifications/{notification}', [NotificationController::class, 'destroy']);
     });
 
 });

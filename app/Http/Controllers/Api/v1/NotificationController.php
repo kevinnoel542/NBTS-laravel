@@ -43,6 +43,21 @@ class NotificationController extends Controller
         return new UserNotificationResource($notification->refresh());
     }
 
+    public function destroy(Request $request, UserNotification $notification)
+    {
+        abort_unless($notification->user_id === $request->user()->id, 404);
+
+        $notification->delete();
+
+        return response()->json([
+            'message' => 'Notification deleted',
+            'data' => [
+                'id' => $notification->id,
+                'unread_count' => $request->user()->userNotifications()->whereNull('read_at')->count(),
+            ],
+        ]);
+    }
+
     public function markAllAsRead(Request $request)
     {
         $request->user()

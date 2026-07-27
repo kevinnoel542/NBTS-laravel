@@ -37,6 +37,7 @@ These donor mobile routes must stay available:
 - `GET /api/v1/user`
 - `GET /api/v1/profile`
 - `PUT /api/v1/profile`
+- `POST /api/v1/profile/photo`
 - `GET /api/v1/campaigns`
 - `GET /api/v1/articles`
 - `GET /api/v1/blood-centers`
@@ -57,6 +58,7 @@ These donor mobile routes must stay available:
 - `POST /api/v1/notifications/register-token`
 - `POST /api/v1/notifications/mark-all-read`
 - `POST /api/v1/notifications/{notification}/read`
+- `DELETE /api/v1/notifications/{notification}`
 
 ## Firebase Login Status
 
@@ -104,6 +106,49 @@ FIREBASE_NOTIFICATIONS_ENABLED=true
 FIREBASE_PROJECT_ID=nbts-d567e
 FIREBASE_CREDENTIALS=storage/app/firebase/firebase-service-account.json
 ```
+
+## SMS Reminder Status
+
+Mobile only saves the donor preference through:
+
+`PUT /api/v1/profile`
+
+with:
+
+```json
+{
+  "sms_reminders_enabled": true
+}
+```
+
+Laravel sends appointment SMS reminders through:
+
+`App\Services\AppointmentSmsReminderService`
+
+The scheduled command is:
+
+```bash
+php artisan nbts:sms-appointment-reminders
+```
+
+The command runs daily at `08:00` through Laravel scheduler and sends 7-day, 3-day, and 1-day reminders for active `pending` or `confirmed` appointments. It skips donors without a phone number, donors who disabled SMS reminders, and cancelled/completed appointments. Sent/failed attempts are logged in `sms_reminder_logs` to avoid duplicate reminders.
+
+For production SMS delivery, configure one provider in `.env`:
+
+```env
+SMS_DRIVER=africas_talking
+SMS_FROM=NBTS
+AFRICASTALKING_USERNAME=
+AFRICASTALKING_API_KEY=
+AFRICASTALKING_SENDER_ID=NBTS
+```
+
+Supported `SMS_DRIVER` values:
+
+- `log`
+- `africas_talking`
+- `beem`
+- `twilio`
 
 ## Field Names To Keep Stable
 
@@ -198,6 +243,14 @@ Notification:
 - `sent_at`
 - `created_at`
 
+Profile photo upload:
+
+- `POST /api/v1/profile/photo`
+- multipart field name: `photo`
+- supported image types: jpg, jpeg, png, webp
+- max size: 5 MB
+- response shape: same `UserResource` payload as `GET /api/v1/profile`
+
 ## Before Changing A Mobile API
 
 Check these Laravel places:
@@ -268,4 +321,3 @@ Check:
 - `FIREBASE_NOTIFICATIONS_ENABLED=true`.
 - Service account file exists at `storage/app/firebase/firebase-service-account.json`.
 - Laravel queue/log has no Firebase send error.
-

@@ -148,7 +148,7 @@ Laravel returns a Sanctum token and user data.
 
 ### `POST /api/v1/auth/firebase`
 
-Used by Google login and other Firebase social login flows.
+Used by Google and Apple Firebase social login flows.
 
 This endpoint is needed because Firebase login on the phone is not the same as Laravel login. The phone gets a Firebase ID token first, then sends it to Laravel. Laravel verifies it and returns a normal Sanctum token.
 
@@ -245,6 +245,27 @@ Important fields:
 - `sms_reminders_enabled`
 - `share_anonymized_data`
 - `language`
+
+### `POST /api/v1/profile/photo`
+
+Uploads the logged-in donor's profile photo.
+
+This route needs login and expects multipart form data:
+
+```text
+photo: image file
+```
+
+Allowed image types:
+
+- `jpg`
+- `jpeg`
+- `png`
+- `webp`
+
+Maximum size: 5 MB.
+
+Laravel stores the file on the public disk, updates `profile_photo_path`, and returns the same user/profile response shape as `GET /api/v1/profile`.
 
 ## Public Lookup Routes
 
@@ -533,6 +554,24 @@ Marks one notification as read.
 
 Laravel only allows the owner of the notification to mark it as read.
 
+### `DELETE /api/v1/notifications/{notification}`
+
+Deletes one notification from the authenticated donor's notification list.
+
+Laravel only allows the owner of the notification to delete it.
+
+Example response:
+
+```json
+{
+  "message": "Notification deleted",
+  "data": {
+    "id": 1,
+    "unread_count": 0
+  }
+}
+```
+
 ### `POST /api/v1/notifications/register-token`
 
 Stores the phone FCM token.
@@ -550,6 +589,41 @@ Allowed `device_type` values:
 
 - `android`
 - `ios`
+
+## SMS Appointment Reminders
+
+The Flutter app does not send scheduled SMS. Laravel is responsible for SMS reminders.
+
+Mobile saves the donor preference through `PUT /api/v1/profile`:
+
+```json
+{
+  "sms_reminders_enabled": true
+}
+```
+
+Laravel sends appointment reminders using:
+
+```bash
+php artisan nbts:sms-appointment-reminders
+```
+
+The scheduler runs this command daily at `08:00`. It sends 7-day, 3-day, and 1-day reminders for active `pending` or `confirmed` appointments only.
+
+The SMS delivery log is stored in `sms_reminder_logs`.
+
+Provider config examples:
+
+```env
+SMS_DRIVER=log
+SMS_FROM=NBTS
+```
+
+Supported production drivers:
+
+- `africas_talking`
+- `beem`
+- `twilio`
 
 ## Staff API Routes
 
@@ -762,4 +836,3 @@ Returns inventory report data.
 Permission needed:
 
 - `reports.view`
-

@@ -42,4 +42,27 @@ return [
         'credentials' => env('FIREBASE_CREDENTIALS'),
     ],
 
+    'sms' => [
+        'driver' => env('SMS_DRIVER', 'log'),
+        'from' => env('SMS_FROM', 'NBTS'),
+
+        'africas_talking' => [
+            'username' => env('AFRICASTALKING_USERNAME'),
+            'api_key' => env('AFRICASTALKING_API_KEY'),
+            'sender_id' => env('AFRICASTALKING_SENDER_ID', env('SMS_FROM', 'NBTS')),
+        ],
+
+        'beem' => [
+            'source_addr' => env('BEEM_SOURCE_ADDR', env('SMS_FROM', 'NBTS')),
+            'api_key' => env('BEEM_API_KEY'),
+            'secret_key' => env('BEEM_SECRET_KEY'),
+        ],
+
+        'twilio' => [
+            'sid' => env('TWILIO_SID'),
+            'token' => env('TWILIO_TOKEN'),
+            'from' => env('TWILIO_FROM'),
+        ],
+    ],
+
 ];

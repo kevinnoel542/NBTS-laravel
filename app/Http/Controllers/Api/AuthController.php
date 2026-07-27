@@ -9,6 +9,7 @@ use App\Services\FirebaseAuthService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 
@@ -89,7 +90,7 @@ class AuthController extends Controller
         $data = $request->validate([
             'firebase_id_token' => 'required_without:id_token|string',
             'id_token' => 'required_without:firebase_id_token|string',
-            'provider' => 'nullable|string|in:google.com,apple.com,microsoft.com,google,apple,microsoft',
+            'provider' => 'nullable|string|in:google.com,apple.com,google,apple',
             'email' => 'nullable|email|max:255',
             'name' => 'nullable|string|max:255',
             'photo_url' => 'nullable|url|max:2048',
@@ -229,6 +230,28 @@ class AuthController extends Controller
                     'donor_id' => $user->donorProfile?->donor_id ?? $this->generateDonorId(),
                 ], $profileData)
             );
+        }
+
+        return new UserResource($user->load(['roles', 'donorProfile.preferredCenter', 'donations']));
+    }
+
+    public function uploadProfilePhoto(Request $request)
+    {
+        $data = $request->validate([
+            'photo' => 'required|image|mimes:jpg,jpeg,png,webp|max:5120',
+        ]);
+
+        $user = $request->user();
+        $path = $data['photo']->store('profile-photos', 'public');
+
+        $oldPath = $user->profile_photo_path;
+
+        $user->forceFill([
+            'profile_photo_path' => $path,
+        ])->save();
+
+        if ($oldPath && ! str_starts_with($oldPath, 'http://') && ! str_starts_with($oldPath, 'https://')) {
+            Storage::disk('public')->delete($oldPath);
         }
 
         return new UserResource($user->load(['roles', 'donorProfile.preferredCenter', 'donations']));

@@ -67,8 +67,18 @@ class CampaignObserver
             'campaign_' . $status,
             [
                 'campaign_id' => $campaign->id,
+                'title' => $title,
+                'body' => $body,
+                'campaign_title' => $campaign->title,
+                'summary' => $campaign->description,
                 'status' => $status,
                 'blood_group' => $campaign->target_blood_group,
+                'blood_type' => $campaign->target_blood_group,
+                'center_id' => $campaign->blood_center_id,
+                'center_name' => $campaign->bloodCenter?->name,
+                'urgent' => $campaign->campaign_type === 'emergency',
+                'starts_at' => optional($campaign->start_date)->toISOString(),
+                'ends_at' => optional($campaign->end_date)->toISOString(),
             ],
             '/campaigns/' . $campaign->id,
         );
