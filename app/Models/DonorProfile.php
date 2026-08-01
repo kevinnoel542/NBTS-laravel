@@ -21,6 +21,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property int|null $blood_group_verified_by
  * @property CarbonImmutable|null $next_eligible_donation_date
  * @property EligibilityStatus $eligibility_status
+ * @property CarbonImmutable|null $last_eligibility_checked_at
+ * @property string|null $eligibility_notes
  * @property int $total_donations
  */
 #[Fillable([

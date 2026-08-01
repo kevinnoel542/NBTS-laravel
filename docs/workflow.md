@@ -85,20 +85,24 @@ Permissions, not role names, decide whether a page, action, metric, or export is
 
 ### Mobile password login
 
-1. The donor submits email or phone and password to `/api/v1/auth/login`.
-2. Laravel validates credentials and active status.
-3. Sanctum issues a named, revocable mobile token.
-4. The API returns a stable `UserResource` representation.
-5. Logout revokes the current token.
+1. A donor registers through `/api/v1/auth/register` with name, optional email, unique phone, confirmed password, self-reported blood group, gender, region, date of birth, and optional device name.
+2. Registration creates the donor role/profile and a stable donor ID in one transaction; self-reported blood group remains `user_selected`, never staff verified.
+3. The donor later submits email or phone plus password to `/api/v1/auth/login`.
+4. Laravel validates the password and requires an active donor account; staff and inactive accounts receive the same generic failure as invalid credentials.
+5. Sanctum issues a named, revocable 30-day mobile token. Re-authenticating the same device name replaces its old token.
+6. The API returns the same stable `UserResource` representation used by Firebase login.
+7. Logout revokes only the presented bearer token.
 
 ### Mobile Firebase login
 
 1. Flutter authenticates with an enabled Firebase provider.
-2. Flutter sends the Firebase ID token to `/api/v1/auth/firebase`.
-3. Laravel validates signature, issuer, audience, subject, activation time, and expiry against Firebase project `nbts-d567e`.
-4. Laravel links by Firebase UID or a safely verified email, preventing UID conflicts.
-5. Laravel creates the donor profile only when needed.
-6. Sanctum returns the NBTS API token; Firebase never replaces Laravel authorization.
+2. Flutter sends the Firebase ID token and a recognizable `device_name` to `/api/v1/auth/firebase`.
+3. Laravel's Firebase Admin bridge validates signature, issuer, audience, subject, activation time, expiry, and revocation against the credential's configured project (`nbts-d567e`).
+4. Laravel links by Firebase UID. First-time linking or account creation by email requires the token's trusted `email_verified` claim; client-submitted UID, provider, email, role, and profile values are not identity evidence.
+5. UID/email conflicts, inactive users, and attempts to auto-link staff accounts through the donor app are rejected.
+6. Laravel creates the donor role and donor profile only when needed and records a redacted audit event.
+7. Sanctum returns a named 30-day token with `donor:read` and `donor:write` abilities; a new login replaces the prior token for the same device name.
+8. `GET /api/v1/me` returns the current donor resource and `POST /api/v1/logout` revokes the presented bearer token. Firebase establishes identity but never replaces Laravel authorization.
 
 ## End-to-end donor journey
 
@@ -129,10 +133,19 @@ Permissions, not role names, decide whether a page, action, metric, or export is
 
 ### Donor booking
 
-1. The donor chooses an active center and available time.
-2. The service checks capacity, conflicting active appointments, center status, lead time, and scheduling rules.
-3. The appointment starts as `pending` unless center policy confirms automatically.
-4. Laravel creates in-app notification history and dispatches configured channels.
+1. The donor queries an active center's slots for a date within the configured 90-day booking window.
+2. The current compatibility schedule exposes `08:00`, `09:30`, `11:00`, `13:00`, `14:30`, and `16:00`; capacity defaults to one active booking per center/slot and is operator-configurable.
+3. The donor chooses an active center and available future time.
+4. A transaction locks the center row, then checks capacity, configured time, center status, booking window, and whether the donor already has a `pending` or `confirmed` appointment.
+5. The appointment starts as `pending` and an audit record captures the center and scheduled time without copying donor notes.
+6. Notification history and channel dispatch will be added after the notification outbox layer exists.
+
+### Donor rescheduling and cancellation
+
+1. Only the owning active donor can reschedule or cancel a `pending` or `confirmed` appointment through a `donor:write` token.
+2. Rescheduling locks the destination center and appointment, reruns the same availability rules while excluding the current record, resets status to `pending`, clears prior staff confirmation, and records the previous schedule in audit metadata.
+3. Cancellation changes the appointment to `cancelled`, records the cancellation time, and preserves the history.
+4. Completed/cancelled appointments and appointments owned by another donor cannot be mutated through donor APIs.
 
 ### Staff processing
 
@@ -365,6 +378,61 @@ The target API prefix is `/api/v1`. Required capability groups:
 - Notifications: list, unread count, register token, mark all read, read one, delete one.
 - Staff: donor search, screening, deferrals, appointment operations, donation recording, blood-group verification, unit/inventory operations, alerts, campaigns, and reports.
 
+Implemented authentication contract:
+
+- `POST /api/v1/auth/register`: accepts the existing Flutter registration payload and optional `device_name`; omitted device names default to `NBTS Mobile` for compatibility.
+- `POST /api/v1/auth/login`: accepts `identifier`, `password`, and optional `device_name`; legacy `email` or `phone` identifier keys are normalized.
+- `POST /api/v1/auth/firebase`: `{ firebase_id_token, device_name }` → `{ token_type, token, expires_at, user }`.
+- `GET /api/v1/me`: requires a Sanctum bearer token with `donor:read` and returns `{ data: user }`.
+- `POST /api/v1/logout`: revokes only the presented bearer token and returns HTTP 204.
+- `X-Locale: en|sw` (or `Accept-Language`) controls localized API errors; persisted domain states remain stable codes.
+
+Implemented profile contract:
+
+- `GET /api/v1/profile` and compatibility aliases `GET /api/v1/me` and `GET /api/v1/user` return the current donor.
+- `PUT /api/v1/profile` updates only the current donor's approved profile/preference fields and requires `donor:write`.
+- `POST /api/v1/profile/photo` accepts a validated raster image up to 5 MB and 3000×3000 pixels, stores it on the public disk, and safely replaces prior local files.
+- Donors cannot change a staff-verified blood group; preferred centers must be active; phone numbers are database-unique.
+- Compatibility fields used by the existing Flutter `User` model are available at the top level while richer donor details remain nested under `donor_profile`.
+
+Implemented center and appointment contract:
+
+- `GET /api/v1/blood-centers` and `GET /api/v1/blood-centers/{id}` expose active centers with Flutter aliases, search/city/service filters, and bounded pagination.
+- `GET /api/v1/blood-centers/{id}/available-slots?date=YYYY-MM-DD` exposes stable slot aliases, availability, reason code, and localized reason.
+- `GET /api/v1/appointments`, `/appointments/upcoming`, and `/appointments/{id}` require `donor:read` and return only the authenticated donor's records.
+- `POST /api/v1/appointments`, `PUT /api/v1/appointments/{id}`, and `POST /api/v1/appointments/{id}/cancel` require `donor:write`.
+- Booking accepts both `blood_center_id` and the legacy `center_id`; resources expose both identifiers and the center name.
+
+Implemented donor card, eligibility, and history contract:
+
+- `GET /api/v1/donor-card` returns the authenticated donor's card, current donor-facing statistics, and an `nbtsqr` payload signed with HMAC-SHA256. The payload expires after five minutes by default and can use a dedicated environment signing key.
+- QR payload verification rejects malformed, modified, expired, inactive-account, non-donor, and identity-mismatched cards. Card refreshes are intentionally not audited to avoid a high-volume low-value audit trail; future staff scans must audit the lookup/use event.
+- `GET /api/v1/eligibility` prioritizes active deferrals, persisted staff decisions, and the next-donation interval. It returns stable eligibility codes and localized donor guidance while always stating that clinical screening is required at the center.
+- The read-only mobile eligibility summary never creates a screening record, lifts a deferral, or authorizes donation completion; those remain staff-controlled workflow actions.
+- `GET /api/v1/donations` returns only the authenticated donor's history using bounded pagination and Flutter-compatible date, center, blood-group, volume, status, and type aliases.
+- `GET /api/v1/donations/summary` calculates totals from completed donation records rather than trusting cached profile counters. The legacy `lives_touched` value remains an explicitly flagged estimate.
+- All four endpoints require an active Sanctum token with `donor:read`; donor role and record ownership are enforced server-side.
+
+Implemented public/mobile discovery contract:
+
+- `GET /api/v1/campaigns` and `/campaigns/{id}` expose only `upcoming` or `ongoing` campaigns whose end time has not passed and whose owning blood center is active.
+- Campaign filters include text, status, type, target blood group, and center. Emergency campaigns sort first, followed by event start time.
+- `GET /api/v1/articles` and `/articles/{id}` expose only `published` articles whose non-null publication time has arrived. Draft, archived, and future-scheduled records return no public data.
+- Article filters include text, category, featured state, and bounded pagination. The response retains the body because the canonical Flutter dashboard opens article details from its list payload.
+- `GET /api/v1/publications` and `/publications/{id}` reuse published article records that have an approved attachment, preserving the deployed schema while exposing document metadata and download URLs.
+- `GET /api/v1/schedules` and `/schedules/{id}` expose the schedule/location projection of publicly visible campaign and center records. This avoids inventing a second scheduling table before staff content requirements are finalized.
+- All discovery endpoints are public, validated, bounded to 50 records per page, and return storage-disk URLs or approved external media URLs.
+
+Implemented notification and device-token contract:
+
+- `GET /api/v1/notifications` returns only the authenticated donor's inbox with bounded pagination, optional unread/type filters, Flutter aliases, and an authoritative unread count in response metadata.
+- `GET /api/v1/notifications/unread-count` supports the dashboard badge without downloading the inbox.
+- `POST /api/v1/notifications/{id}/read`, `POST /api/v1/notifications/mark-all-read`, and `DELETE /api/v1/notifications/{id}` require `donor:write` and return 404 for records owned by another donor.
+- `POST /api/v1/notifications/register-token` validates Android/iOS FCM tokens, deduplicates globally, and safely reassigns a refreshed device token to the currently authenticated donor.
+- `DELETE /api/v1/notifications/device-token` unregisters only a token owned by the authenticated donor and is idempotent for missing or foreign tokens.
+- Device registration/removal is audited with the platform and SHA-256 token fingerprint. Raw FCM tokens never enter audit metadata.
+- Registering a token does not override notification consent; queued delivery must still check `push_notifications_enabled` and retire provider-invalid tokens.
+
 Compatibility fields currently required by Flutter include:
 
 - User: `id`, `name`, `email`, `phone`, `blood_group`, `gender`, `region`, `date_of_birth`, `donor_id`, `preferred_center`, `loyalty_tier`, `loyalty_points`, `total_donations`, `total_volume_ml`, `next_eligible_date`.
@@ -422,4 +490,3 @@ Every displayed metric must link to its definition and source period. Exported t
 ## Completion evidence
 
 Implementation status is tracked in `docs/task.md`. Proven completed work is recorded in `docs/achievement.md`. A workflow is complete only when its domain tests, authorization tests, UI/API tests, operational evidence, and relevant browser/device checks pass.
-

@@ -115,6 +115,12 @@ class BloodCenter extends Model
         return $this->hasMany(Donation::class);
     }
 
+    /** @return HasMany<Campaign, $this> */
+    public function campaigns(): HasMany
+    {
+        return $this->hasMany(Campaign::class);
+    }
+
     /** @return HasMany<BloodUnit, $this> */
     public function bloodUnits(): HasMany
     {

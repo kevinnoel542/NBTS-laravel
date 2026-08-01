@@ -7,6 +7,7 @@ use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Laravel\Fortify\Fortify;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
 
 class EnsureAccountIsActive
@@ -22,6 +23,12 @@ class EnsureAccountIsActive
 
         if (! $user || $user->is_active) {
             return $next($request);
+        }
+
+        if ($request->expectsJson()) {
+            return new JsonResponse([
+                'message' => trans('api.mobile_account_inactive'),
+            ], 403);
         }
 
         Auth::guard((string) config('fortify.guard', 'web'))->logout();

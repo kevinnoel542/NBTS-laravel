@@ -90,7 +90,7 @@ Update this file whenever work changes state. Mark an item complete only when it
 - [x] Merge the existing NBTS user fields into the new Fortify `User` model.
 - [x] Preserve Fortify two-factor and passkey traits.
 - [x] Preserve existing password hashes and remember tokens.
-- [ ] Add relationships for donor profile, center assignments, appointments, donations, eligibility, deferrals, loyalty, notifications, and FCM tokens.
+- [-] Add relationships for donor profile, center assignments, appointments, donations, eligibility, deferrals, loyalty, notifications, and FCM tokens; the core donor/operations graph is complete, while loyalty, notification, and FCM-token relationships remain pending.
 - [x] Reconcile nullable mobile email with Fortify's email-first web flows.
 - [ ] Remove role duplication as a source of authority; permissions must be canonical.
 - [x] Keep legacy role data readable during migration.
@@ -125,15 +125,15 @@ Update this file whenever work changes state. Mark an item complete only when it
 - [ ] Translate navigation, authentication, validation, empty states, system messages, PDF headings, and operational actions.
 - [x] Store user language preference.
 - [ ] Define which managed content fields are bilingual.
-- [ ] Ensure API responses expose stable codes rather than translated state values.
+- [-] Ensure API responses expose stable codes rather than translated state values; the Firebase authentication/current-user resource does so, while remaining API resources are pending.
 
 ### Phase 1 completion gate
 
-- [ ] Identity and authorization Pest suites pass.
+- [x] Identity and authorization Pest suites pass.
 - [ ] Existing users can authenticate in a cloned environment.
-- [ ] Permission and center-scope tests prove isolation.
+- [x] Permission and center-scope tests prove isolation for the implemented policies and workflows.
 - [ ] English and Kiswahili smoke tests pass.
-- [ ] No credentials or private Firebase keys are tracked by Git.
+- [x] No credentials or private Firebase keys are tracked by Git; service-account JSON paths are explicitly ignored.
 
 ## Phase 2 — Core domain and operational services
 
@@ -148,9 +148,9 @@ Update this file whenever work changes state. Mark an item complete only when it
 
 ### Donors and centers
 
-- [ ] Donor profile creation and donor ID generation.
+- [-] Donor profile creation and donor ID generation; the Firebase onboarding path is complete and other registration/reception entry points remain pending.
 - [ ] Donor search by QR payload, donor ID, phone, email, or name.
-- [ ] Blood-center profile, location, opening hours, services, capacity, and status.
+- [-] Blood-center profile, location, opening hours, services, capacity, and status; active public/mobile read APIs with filters and compatibility fields are complete, while staff management UI remains pending.
 - [ ] Center staff assignment and active/inactive lifecycle.
 - [ ] Preferred donor center.
 
@@ -165,9 +165,9 @@ Update this file whenever work changes state. Mark an item complete only when it
 
 ### Appointments and walk-ins
 
-- [ ] Donors can view slots and book appointments.
-- [ ] Capacity and duplicate-booking rules are enforced.
-- [ ] Donors can reschedule or cancel eligible appointments.
+- [x] Donors can view slots and book appointments.
+- [x] Capacity and duplicate-booking rules are enforced.
+- [x] Donors can reschedule or cancel eligible appointments.
 - [-] Staff can confirm, cancel, and complete appointments through the audited transition action; rescheduling and check-in remain pending.
 - [x] Backend walk-in donation completion works without an appointment.
 - [x] Appointment status transitions are explicit, center-authorized, transactional, and audited.
@@ -214,46 +214,46 @@ Update this file whenever work changes state. Mark an item complete only when it
 
 ### API foundation
 
-- [ ] Restore versioned `/api/v1` routing.
-- [ ] Use Sanctum bearer tokens and API Resources.
-- [ ] Preserve the stable response fields documented in `docs/workflow.md`.
-- [ ] Add validation Form Requests and authorization policies.
-- [ ] Add rate limiting, consistent errors, pagination, and API tests.
+- [x] Restore versioned `/api/v1` routing.
+- [x] Use Sanctum bearer tokens and API Resources.
+- [-] Preserve the stable response fields documented in `docs/workflow.md`; all currently implemented donor/mobile capability groups are stable, while loyalty and leaderboard compatibility remain pending.
+- [-] Add validation Form Requests and authorization policies; Firebase authentication validation and account boundaries are complete, while remaining endpoint policies are pending.
+- [-] Add rate limiting, consistent errors, pagination, and API tests; authentication throttling/localized errors and bounded center, appointment, and donation pagination are complete, while remaining API groups are pending.
 
 ### Donor API capabilities
 
-- [ ] Register, login, Firebase login, logout, and current user.
-- [ ] Profile read/update and profile photo upload.
-- [ ] Digital donor card and expiring QR payload.
-- [ ] Eligibility, loyalty, leaderboard, and donation history.
-- [ ] Centers, slots, campaigns, articles, publications, and schedules.
-- [ ] Appointment list, upcoming, create, reschedule, and cancel.
-- [ ] Notification list, unread count, read, delete, and device registration.
+- [x] Register, login, Firebase login, logout, and current user.
+- [x] Profile read/update and profile photo upload.
+- [x] Digital donor card and expiring signed QR payload.
+- [-] Eligibility, loyalty, leaderboard, and donation history; read-only personal eligibility plus donation history/summary are complete, while loyalty and leaderboard APIs remain pending.
+- [x] Centers, slots, campaigns, articles, publications, and schedules discovery APIs.
+- [x] Appointment list, upcoming, create, reschedule, and cancel.
+- [x] Notification list, unread count, read, delete, and device registration.
 
 ### Firebase and messaging
 
-- [ ] Keep Firebase project `nbts-d567e` unless an explicit migration is approved.
-- [ ] Generate a fresh backend service-account key and keep it outside Git.
-- [ ] Configure Android package `com.nbts.mobile`.
+- [x] Keep Firebase project `nbts-d567e` unless an explicit migration is approved.
+- [!] Generate a fresh backend service-account key and keep it outside Git; code/config boundaries are ready, but key rotation requires Firebase Console access.
+- [-] Configure Android package `com.nbts.mobile`; the canonical old client is confirmed on this package/project, while migration and device verification remain pending.
 - [ ] Configure iOS Firebase before claiming iOS support.
-- [ ] Verify Firebase ID tokens against the configured project.
-- [ ] Register, refresh, invalidate, and deduplicate FCM tokens.
+- [x] Verify Firebase ID tokens with the Laravel Firebase Admin bridge, including revocation checks; live credentials still require the fresh external key above.
+- [x] Register, refresh/reassign, invalidate, and deduplicate FCM tokens.
 - [ ] Send FCM HTTP v1 messages and handle invalid tokens safely.
 
 ### Flutter integration
 
-- [ ] Establish the canonical Flutter workspace location.
-- [ ] Update API base URL handling for local, staging, and production environments.
-- [ ] Align every repository and model with the Laravel API contract.
+- [x] Establish the canonical Flutter workspace location as the standalone `NBTS/nbts-mobile` Git repository; `NBTS/database/nbts-mobile` is an older divergent duplicate and will not be migrated.
+- [x] Update API base URL handling for local, staging, and production environments.
+- [-] Align every repository and model with the Laravel API contract; existing auth/profile/center/appointment/card/eligibility/history/campaign/article/notification repositories and models match v1, while loyalty and new publication/schedule client surfaces remain pending.
 - [ ] Verify Google and Apple authentication on supported platforms.
-- [ ] Verify donor card, appointments, history, campaigns, centers, and notifications.
-- [ ] Add or update Flutter tests for repositories, models, and critical screens.
+- [-] Verify donor card, appointments, history, campaigns, centers, and notifications; parser contract tests are added but cannot run until Flutter tooling is installed, and emulator/device verification remains pending.
+- [-] Add or update Flutter tests for repositories, models, and critical screens; API URL/header/payload and core model contract tests are added, while repository and screen coverage remains pending.
 - [ ] Update the mobile achievement evidence after device/emulator testing.
 
 ### Phase 3 completion gate
 
-- [ ] Laravel API tests pass.
-- [ ] Flutter static analysis and tests pass.
+- [-] Authentication, profile, center, appointment, donor-card, eligibility, donation-history, public-content, notification, and FCM-token API tests pass; loyalty and Flutter integration gates remain pending.
+- [!] Flutter static analysis and tests cannot run on the current workstation because neither `flutter` nor `dart` is installed.
 - [ ] Android end-to-end donor journey passes.
 - [ ] iOS is either tested or clearly marked unsupported pending configuration.
 - [ ] Push notification delivery is proven with a test device or Firebase test environment.

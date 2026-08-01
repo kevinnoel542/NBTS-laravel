@@ -1,6 +1,25 @@
 <?php
 
 return [
+    'mobile_token_expiration_days' => (int) env('NBTS_MOBILE_TOKEN_EXPIRATION_DAYS', 30),
+
+    'donor_card_qr_ttl_seconds' => (int) env('NBTS_DONOR_CARD_QR_TTL_SECONDS', 300),
+
+    'donor_card_qr_signing_key' => env('NBTS_DONOR_CARD_QR_SIGNING_KEY'),
+
+    'appointment_booking_window_days' => (int) env('NBTS_APPOINTMENT_BOOKING_WINDOW_DAYS', 90),
+
+    'appointment_slot_capacity' => (int) env('NBTS_APPOINTMENT_SLOT_CAPACITY', 1),
+
+    'appointment_slot_times' => [
+        '08:00',
+        '09:30',
+        '11:00',
+        '13:00',
+        '14:30',
+        '16:00',
+    ],
+
     /*
     |--------------------------------------------------------------------------
     | Whole blood donation policy

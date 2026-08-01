@@ -15,7 +15,10 @@ class DonationPolicy
      */
     public function viewAny(User $user): bool
     {
-        return $user->can(PermissionName::ViewDonations->value);
+        return $user->is_active && (
+            $user->hasRole(RoleName::Donor->value)
+            || $user->can(PermissionName::ViewDonations->value)
+        );
     }
 
     /**

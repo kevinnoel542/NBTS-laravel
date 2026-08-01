@@ -2,9 +2,7 @@
 
 namespace App\Actions\Auth;
 
-use App\BloodGroupStatus;
 use App\Firebase\VerifiedFirebaseIdentity;
-use App\Models\DonorProfile;
 use App\Models\User;
 use App\RoleName;
 use App\Support\AuditLogger;
@@ -15,9 +13,10 @@ use Illuminate\Validation\ValidationException;
 
 final readonly class AuthenticateFirebaseUser
 {
-    public function __construct(private AuditLogger $auditLogger)
-    {
-    }
+    public function __construct(
+        private AuditLogger $auditLogger,
+        private EnsureDonorProfile $ensureDonorProfile,
+    ) {}
 
     /**
      * @throws AuthorizationException
@@ -53,7 +52,7 @@ final readonly class AuthenticateFirebaseUser
             }
 
             $user->assignRole(RoleName::Donor->value);
-            $this->ensureDonorProfile($user);
+            $this->ensureDonorProfile->handle($user);
 
             $this->auditLogger->record(
                 actor: $user,
@@ -142,25 +141,5 @@ final readonly class AuthenticateFirebaseUser
         }
 
         $user->forceFill($attributes)->save();
-    }
-
-    private function ensureDonorProfile(User $user): void
-    {
-        $user->donorProfile()->firstOrCreate([], [
-            'donor_id' => $this->generateDonorId(),
-            'blood_group_status' => $user->blood_group === null
-                ? BloodGroupStatus::Unknown
-                : BloodGroupStatus::UserSelected,
-            'language' => $user->locale,
-        ]);
-    }
-
-    private function generateDonorId(): string
-    {
-        do {
-            $donorId = 'DNR-'.now()->format('Y').'-'.Str::upper(Str::random(8));
-        } while (DonorProfile::query()->where('donor_id', $donorId)->exists());
-
-        return $donorId;
     }
 }

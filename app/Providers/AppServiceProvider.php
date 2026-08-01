@@ -2,6 +2,8 @@
 
 namespace App\Providers;
 
+use App\Firebase\FirebaseTokenVerifier;
+use App\Firebase\KreaitFirebaseTokenVerifier;
 use App\Models\User;
 use App\RoleName;
 use Carbon\CarbonImmutable;
@@ -18,7 +20,7 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        //
+        $this->app->bind(FirebaseTokenVerifier::class, KreaitFirebaseTokenVerifier::class);
     }
 
     /**

@@ -33,4 +33,11 @@ class FirebaseAuthenticationRequest extends FormRequest
 
         return $credentials;
     }
+
+    protected function prepareForValidation(): void
+    {
+        $this->merge([
+            'device_name' => $this->filled('device_name') ? $this->input('device_name') : 'NBTS Mobile',
+        ]);
+    }
 }

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api\V1;
 
 use App\Actions\Auth\AuthenticateFirebaseUser;
+use App\Actions\Auth\IssueMobileToken;
 use App\Firebase\FirebaseTokenVerifier;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Api\V1\FirebaseAuthenticationRequest;
@@ -15,24 +16,17 @@ final class FirebaseAuthenticationController extends Controller
         FirebaseAuthenticationRequest $request,
         FirebaseTokenVerifier $tokenVerifier,
         AuthenticateFirebaseUser $authenticateFirebaseUser,
+        IssueMobileToken $issueMobileToken,
     ): JsonResponse {
         $credentials = $request->credentials();
         $identity = $tokenVerifier->verify($credentials['firebase_id_token']);
         $user = $authenticateFirebaseUser->handle($identity);
-        $expiresAt = now()->addDays((int) config('nbts.mobile_token_expiration_days', 30));
-
-        $user->tokens()->where('name', $credentials['device_name'])->delete();
-
-        $token = $user->createToken(
-            name: $credentials['device_name'],
-            abilities: ['donor:read', 'donor:write'],
-            expiresAt: $expiresAt,
-        );
+        $token = $issueMobileToken->handle($user, $credentials['device_name']);
 
         return response()->json([
             'token_type' => 'Bearer',
             'token' => $token->plainTextToken,
-            'expires_at' => $expiresAt->toIso8601String(),
+            'expires_at' => $token->expiresAt->toIso8601String(),
             'user' => new UserResource($user),
         ]);
     }

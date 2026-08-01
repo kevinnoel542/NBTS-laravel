@@ -2,6 +2,7 @@
 
 namespace App\Policies;
 
+use App\AppointmentStatus;
 use App\Models\Appointment;
 use App\Models\User;
 use App\PermissionName;
@@ -14,7 +15,10 @@ class AppointmentPolicy
      */
     public function viewAny(User $user): bool
     {
-        return $user->can(PermissionName::ViewAppointments->value);
+        return $user->is_active && (
+            $user->hasRole(RoleName::Donor->value)
+            || $user->can(PermissionName::ViewAppointments->value)
+        );
     }
 
     /**
@@ -44,6 +48,19 @@ class AppointmentPolicy
     public function update(User $user, Appointment $appointment): bool
     {
         return $this->transition($user, $appointment);
+    }
+
+    public function reschedule(User $user, Appointment $appointment): bool
+    {
+        return $user->is_active
+            && $user->hasRole(RoleName::Donor->value)
+            && $user->id === $appointment->user_id
+            && in_array($appointment->status, [AppointmentStatus::Pending, AppointmentStatus::Confirmed], true);
+    }
+
+    public function cancel(User $user, Appointment $appointment): bool
+    {
+        return $this->reschedule($user, $appointment);
     }
 
     public function transition(User $user, Appointment $appointment): bool

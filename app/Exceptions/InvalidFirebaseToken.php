@@ -10,13 +10,13 @@ final class InvalidFirebaseToken extends RuntimeException
 {
     public function __construct()
     {
-        parent::__construct(trans('api.firebase_authentication_failed'));
+        parent::__construct('api.firebase_authentication_failed');
     }
 
     public function render(Request $request): JsonResponse
     {
         return response()->json([
-            'message' => $this->getMessage(),
+            'message' => trans($this->getMessage()),
         ], 401);
     }
 

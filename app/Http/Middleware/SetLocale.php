@@ -18,9 +18,11 @@ class SetLocale
     public function handle(Request $request, Closure $next): Response
     {
         $user = $request->user();
-        $locale = $user instanceof User
-            ? $user->preferredLocale()
-            : $request->session()->get('locale', config('app.locale'));
+        $locale = match (true) {
+            $user instanceof User => $user->preferredLocale(),
+            $request->is('api/*') => $request->header('X-Locale', $request->getPreferredLanguage(['en', 'sw'])),
+            default => $request->session()->get('locale', config('app.locale')),
+        };
 
         $supportedLocales = config('app.supported_locales', ['en', 'sw']);
 

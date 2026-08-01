@@ -201,6 +201,18 @@ class User extends Authenticatable implements HasLocalePreference, MustVerifyEma
         return $this->hasMany(EligibilityRecord::class);
     }
 
+    /** @return HasMany<UserNotification, $this> */
+    public function userNotifications(): HasMany
+    {
+        return $this->hasMany(UserNotification::class);
+    }
+
+    /** @return HasMany<FcmToken, $this> */
+    public function fcmTokens(): HasMany
+    {
+        return $this->hasMany(FcmToken::class);
+    }
+
     /** @return HasMany<Deferral, $this> */
     public function deferrals(): HasMany
     {

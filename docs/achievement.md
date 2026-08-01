@@ -393,6 +393,328 @@ Next dependent task:
 
 - Build the versioned mobile API/authentication contract and the first staff Livewire workflow surfaces on top of the verified domain actions.
 
+## 2026-08-01 — Secure Firebase mobile authentication foundation
+
+Status: completed
+
+Scope: backend and mobile API foundation.
+
+Delivered:
+
+- Established versioned `/api/v1` routing with localized API middleware and explicit Sanctum ability aliases.
+- Installed the Laravel 13/PHP 8.4-compatible Laravel Firebase bridge 7.2.1 and Firebase PHP Admin SDK 8.3.0.
+- Added a Firebase verifier boundary that asks the Admin SDK to verify ID-token revocation and maps only trusted token claims into an immutable identity object.
+- Added Firebase donor onboarding and authentication with row locks, verified-email requirements for first linking, UID/email conflict protection, inactive-account denial, and staff-account auto-link denial.
+- Created the canonical donor role/profile and stable donor ID only when absent, without overwriting existing donor names or profiles.
+- Issued named 30-day Sanctum tokens with `donor:read` and `donor:write` abilities and replaced stale tokens for the same device name.
+- Added protected current-user and bearer-token logout endpoints; logout revokes only the presented token.
+- Added a stable API Resource with domain state codes plus English/Kiswahili authentication errors selected through `X-Locale` or `Accept-Language`.
+- Added redacted audit events for Firebase account creation and authentication; Firebase tokens, UIDs, emails, and service credentials are not written to audit metadata.
+- Identified the standalone `NBTS/nbts-mobile` Git repository as the canonical Flutter source and rejected the older divergent `NBTS/database/nbts-mobile` duplicate.
+- Confirmed the existing Android identity uses Firebase project `nbts-d567e` and package `com.nbts.mobile` without copying the old private service-account key.
+- Ignored backend service-account JSON locations and documented fresh credential generation as an external Firebase Console step.
+
+Database/API impact:
+
+- No schema or domain-data changes were required; the existing Firebase UID/provider and Sanctum token tables are reused.
+- Added `POST /api/v1/auth/firebase`, `GET /api/v1/me`, and `POST /api/v1/logout`.
+- Firebase login accepts `firebase_id_token` and `device_name`, returning `token_type`, `token`, `expires_at`, and `user`.
+- The current-user endpoint requires the `donor:read` token ability; mobile tokens expire after 30 days by default.
+- No Firebase service-account JSON or `.env` secret is tracked by Git.
+
+Automated verification:
+
+- Firebase authentication feature suite: 9 tests passed with 59 assertions.
+- Kreait adapter unit suite: 2 tests passed with 9 assertions.
+- Full suite: 75 tests passed with 299 assertions.
+- `vendor/bin/phpstan analyse --memory-limit=1G`: passed with zero errors.
+- `vendor/bin/pint --dirty --format agent`: passed.
+- `composer audit --no-interaction`: no security vulnerability advisories found.
+- Secret-path tracking and ignore checks: passed.
+
+Browser/device verification:
+
+- Not yet applicable to this server-only milestone; Flutter migration and emulator/device testing remain pending.
+
+Known limitations:
+
+- A fresh Firebase backend credential must be generated/rotated by an authorized Firebase Console operator and supplied through `FIREBASE_CREDENTIALS` or Google Application Default Credentials.
+- Password registration/login, profile mutation, donor card, appointments, content, notifications, and FCM token APIs remain pending.
+- Android client configuration is identified but not yet migrated into NBTS-NEW; iOS Firebase configuration was not present and must not be claimed as supported.
+- Live Firebase verification has not been exercised because no private credential is stored in this workspace; the adapter and HTTP behavior are tested with deterministic fakes/mocks.
+
+Next dependent task:
+
+- Complete the donor-facing API contract (password authentication, profile, centers, appointments, donor card, history, and notifications), then align the canonical Flutter repository against it.
+
+## 2026-08-01 — Mobile password identity and profile contract
+
+Status: completed
+
+Scope: backend and donor mobile API.
+
+Delivered:
+
+- Added donor password registration and email-or-phone login under `/api/v1` without reopening staff web registration.
+- Preserved nullable donor email while requiring a unique phone number and adding a database uniqueness guarantee against concurrent duplicate registration.
+- Normalized legacy Flutter payloads, including omitted device names and login aliases, so the existing client contract can migrate incrementally.
+- Reused one transactional token issuer for password and Firebase authentication: named 30-day Sanctum tokens, `donor:read`/`donor:write` abilities, and same-device replacement.
+- Required active donor status for mobile password login and returned one generic localized failure for missing users, bad passwords, inactive donors, and staff accounts.
+- Added current-user/profile compatibility routes, approved profile mutation, active preferred-center validation, unique phone validation, and English/Kiswahili preference persistence.
+- Prevented donors from changing a blood group once NBTS staff has verified it.
+- Added validated 5 MB/3000×3000 raster profile-photo upload with transactional model/audit updates, rollback cleanup, local-file replacement, and safe handling of remote Firebase photo URLs.
+- Expanded the user API resource with the top-level compatibility fields consumed by the canonical Flutter model while retaining a structured `donor_profile` object.
+- Added redacted audit events for password account creation, successful password authentication, profile changes, and photo changes.
+
+Database/API impact:
+
+- Added `users_phone_unique` after proving the safe clone had no duplicate or empty non-null phone values.
+- Applied the additive migration only to `nbts_new_dev`; it now has 31 migrations while user/profile counts remain 11 and 7.
+- Refreshed the schema-only MySQL test snapshot; shared `nbts` remains unchanged at its original migration history.
+- Added `/api/v1/auth/register`, `/api/v1/auth/login`, `/api/v1/user`, `/api/v1/profile`, `/api/v1/profile/photo`, and the legacy-compatible `/api/v1/auth/logout` alias.
+
+Automated verification:
+
+- Password registration/login suite: 5 tests passed.
+- Mobile profile suite: 5 tests passed.
+- Focused mobile password/profile suites: 10 tests passed with 117 assertions.
+- Full suite: 85 tests passed with 416 assertions.
+- `vendor/bin/phpstan analyse --memory-limit=1G`: passed with zero errors before the focused/full feature runs.
+- `vendor/bin/pint --dirty --format agent`: passed.
+- `git diff --check`: passed before final documentation updates.
+
+Browser/device verification:
+
+- Server API milestone only. Flutter analyzer, emulator/device, and network-environment testing remain pending.
+
+Known limitations:
+
+- Mobile password reset/email verification flows are not yet exposed through the donor API.
+- Phone values are trimmed and unique but not yet normalized to a single E.164 format; that requires an approved Tanzania/international number policy and migration plan for existing values.
+- Public profile-photo URLs require the deployment's public storage link or object-storage URL to be configured.
+- Donor card, discovery, appointments, history, loyalty, content, notifications, and FCM registration APIs remain pending.
+
+Next dependent task:
+
+- Implement read-only center/campaign/article discovery and donor appointment/card/history capabilities, then align the Flutter repositories and environment-specific base URL.
+
+## 2026-08-01 — Donor center discovery and appointment workflow API
+
+Status: completed
+
+Scope: backend and donor mobile API.
+
+Delivered:
+
+- Added a public active blood-center directory/detail API with bounded pagination, text/city/service filtering, public storage URLs, and all aliases consumed by the existing Flutter center model.
+- Added date-specific appointment-slot discovery using the established six daily times, stable availability aliases, localized status/reason copy, configurable per-slot capacity, and a configurable 90-day booking window.
+- Added donor-owned appointment list, detail, nearest upcoming, booking, rescheduling, and cancellation endpoints.
+- Rebuilt appointment mutations as retryable transactional actions instead of porting legacy controller writes.
+- Serialized bookings by locking the center row before checking slot capacity and active donor appointments.
+- Enforced one `pending`/`confirmed` appointment per donor, active-center requirements, exact configured slot times, future/window limits, per-slot capacity, donor ownership, active account status, and Sanctum read/write abilities.
+- Rescheduling reruns availability rules, returns confirmed appointments to `pending`, clears prior confirmation/handler state, and preserves the prior schedule in redacted audit metadata.
+- Cancellation is donor-owned and auditable while staff confirmation/completion continues through the separate center-authorized transition action.
+- Added appointment and center API Resources matching the Flutter compatibility parser while retaining stable status/reason codes.
+
+Database/API impact:
+
+- No schema or existing-data changes were required.
+- Added public center list/detail/slot routes and protected donor appointment list/upcoming/detail/create/update/cancel routes.
+- Appointment slot capacity defaults to one and the booking window to 90 days through `config/nbts.php` and environment overrides.
+
+Automated verification:
+
+- Blood-center API suite: 4 tests.
+- Donor appointment API suite: 6 tests.
+- Focused center/appointment run: 10 tests passed after correcting the create response expectation to HTTP 201.
+- Full suite: 95 tests passed with 485 assertions.
+- `vendor/bin/phpstan analyse --memory-limit=1G`: passed with zero errors.
+- `vendor/bin/pint --dirty --format agent`: passed.
+
+Browser/device verification:
+
+- Server API milestone only; Flutter repository and emulator/device integration remain pending.
+
+Known limitations:
+
+- Slot times and capacity are configuration-based because the deployed schema has no per-center schedule/capacity tables; managed center schedules remain a later additive feature.
+- Dedicated parallel-process contention testing is still pending even though center row locking serializes normal competing requests.
+- Appointment reminders and creation/reschedule/cancel notifications await the after-commit notification/outbox layer.
+- Expanded check-in, no-show, and rescheduled status codes require an additive compatibility migration before use.
+
+Next dependent task:
+
+- Implement donor card, eligibility summary, donation history/summary, then content/campaign discovery and notification/FCM registration.
+
+## 2026-08-01 — Donor card, eligibility, and donation-history API
+
+Status: completed
+
+Scope: backend and donor mobile API.
+
+Delivered:
+
+- Added a Flutter-compatible digital donor card endpoint with a five-minute configurable signed QR payload, preferred center, blood-group confidence, eligibility state, loyalty fields, and completed-donation statistics.
+- Added a reusable QR issuer/verifier using purpose/version markers, random nonces, HMAC-SHA256 signatures, strict URL-safe Base64 parsing, configurable signing-key separation, expiry checks, identity matching, and active donor-account enforcement.
+- Kept legacy donors usable by safely creating a missing donor profile and stable donor ID during card retrieval while explicitly preserving HTTP 200 semantics for the GET response.
+- Added a donor-facing eligibility endpoint that prioritizes effective deferrals, persisted staff decisions, and next-donation intervals without making or storing a new clinical decision.
+- Added English and Kiswahili eligibility guidance and stable, untranslated eligibility codes. Every response states that center screening remains required.
+- Added owner-scoped, bounded, paginated donation history with the aliases consumed by the canonical Flutter model.
+- Added authoritative completed-donation summary totals, volume, last donation, and the legacy lives-touched estimate with an explicit estimate flag.
+- Updated donation authorization so active donors can view their own history while staff center-scope rules remain intact.
+- Corrected `Deferral` and `DonorProfile` model property contracts so static analysis reflects their enum/date casts.
+
+Database/API impact:
+
+- No schema or existing-data changes were required.
+- Added protected `GET /api/v1/donor-card`, `GET /api/v1/eligibility`, `GET /api/v1/donations`, and `GET /api/v1/donations/summary` routes.
+- Added `NBTS_DONOR_CARD_QR_TTL_SECONDS` and optional `NBTS_DONOR_CARD_QR_SIGNING_KEY` environment configuration. The application key remains the safe fallback when a dedicated key is not configured.
+
+Automated verification:
+
+- Donor journey API suite: 7 tests covering compatible card data, legacy profile creation, deferral priority, Kiswahili interval guidance, owner-scoped pagination, authoritative summaries, token ability, and donor-role boundaries.
+- QR service suite: 3 tests covering valid signatures, payload tampering, expiration, and inactive donors.
+- Focused donor journey: 10 tests; two edge-case failures were corrected and rerun before the complete suite.
+- Full suite: 105 tests passed with 537 assertions.
+- `vendor/bin/phpstan analyse --memory-limit=1G --no-progress`: passed with zero errors.
+- `vendor/bin/pint --dirty --format agent`: passed.
+
+Browser/device verification:
+
+- Server API milestone only; Flutter repository parsing, analyzer, emulator/device networking, and rendered donor-card QR verification remain pending.
+
+Known limitations:
+
+- The endpoint exposes current recorded eligibility guidance, not a substitute for same-day staff screening.
+- A dedicated QR signing key is optional until deployment secrets are provisioned; changing it invalidates outstanding five-minute cards.
+- Staff QR scan/search and audited reception are a later staff workflow milestone.
+- Loyalty and leaderboard APIs remain pending even though existing card fields are exposed.
+
+Next dependent task:
+
+- Implement public/mobile campaign, article, publication, and schedule discovery; then add notification/FCM device registration and align the canonical Flutter repositories.
+
+## 2026-08-01 — Published campaign, article, publication, and schedule APIs
+
+Status: completed
+
+Scope: backend, public API, and donor mobile API.
+
+Delivered:
+
+- Ported the deployed campaign and article tables into typed Laravel models, factories, enum casts, relationships, and reusable public-visibility scopes.
+- Added public campaign list/detail APIs with text, state, type, target-blood-group, and center filters; bounded pagination; emergency-first ordering; active-center enforcement; and Flutter compatibility aliases.
+- Prevented stale campaign states from leaking by excluding records whose end time has passed even when legacy status still says `upcoming` or `ongoing`.
+- Added public article list/detail APIs with search, category, featured-state filters, bounded pagination, public storage URLs, and every field consumed by the canonical Flutter dashboard/article sheet.
+- Enforced a non-null publication timestamp at or before the current time; draft, archived, and future-scheduled articles remain private.
+- Added publication list/detail APIs as a safe projection of published articles with approved attachments, avoiding a speculative new table while preserving document names, MIME types, source attribution, and download URLs.
+- Added donation schedule list/detail APIs as a location/time projection of visible campaigns and active centers, avoiding duplicated schedule state until staff management requirements are finalized.
+- Added deterministic article slug and reading-time maintenance for future content-management entry points.
+
+Database/API impact:
+
+- No schema or existing-data changes were required; the existing five campaigns and three articles remain intact.
+- Added public list/detail routes for campaigns, articles, publications, and schedules under `/api/v1`.
+- Publications currently use article attachment fields; schedules currently use campaign event dates and center location fields.
+
+Automated verification:
+
+- Public-content API suite: 7 tests passed with 51 assertions.
+- Full suite: 112 tests passed with 588 assertions.
+- `vendor/bin/phpstan analyse --memory-limit=1G --no-progress`: passed with zero errors.
+- `vendor/bin/pint --dirty --format agent`: passed.
+
+Browser/device verification:
+
+- API-only milestone. Public page rendering and Flutter emulator/device integration remain pending.
+
+Known limitations:
+
+- The cloned campaigns are all past their end dates as of 2026-08-01, so the production-like clone correctly returns no current campaigns until authorized staff publish new dates.
+- Publications and schedules are compatibility projections, not independent management domains. Dedicated additive tables should be introduced only when workflow fields, review states, ownership, and migration rules are approved.
+- Content currently has one language per record; explicit bilingual pairing/fallback remains pending.
+
+Next dependent task:
+
+- Implement donor notification inbox/unread/read/delete APIs and secure FCM device-token registration, then align and test the canonical Flutter client.
+
+## 2026-08-01 — Donor notification inbox and FCM device registration
+
+Status: completed
+
+Scope: backend and donor mobile API.
+
+Delivered:
+
+- Ported the deployed custom user-notification and FCM-token tables into typed Laravel models, factories, casts, and user relationships.
+- Added owner-scoped notification list, unread-count, mark-one-read, mark-all-read, and delete endpoints matching the canonical Flutter repository.
+- Added bounded pagination plus optional unread/type filters while retaining `body`/`message`, `read`/`read_at`, and timestamp compatibility fields.
+- Added Android/iOS FCM token registration with global deduplication, token refresh/reassignment support, idempotent repeat registration, and an owner-scoped idempotent unregister endpoint.
+- Added tamper-evident audit events for FCM registration and removal using only a SHA-256 fingerprint and platform; raw device tokens are excluded from audit evidence.
+- Enforced active donor role, Sanctum `donor:read`/`donor:write` abilities, and record ownership across the capability group.
+- Corrected Laravel's single-resource wrapping edge case caused by a notification's own `data` metadata field, keeping the outer `{ data: ... }` API contract stable.
+
+Database/API impact:
+
+- No schema or existing-data changes were required.
+- Added seven protected notification/device routes under `/api/v1/notifications`.
+- Existing unique `f_c_m_tokens.token` storage remains the global deduplication boundary.
+
+Automated verification:
+
+- Notification/FCM API suite: 8 tests covering inbox isolation, filters, unread totals, individual/all read operations, deletion ownership, registration reassignment/deduplication, audit redaction, unregister ownership/idempotency, abilities, and validation.
+- The one single-resource wrapping failure was corrected and passed its targeted rerun.
+- Full suite: 120 tests passed with 637 assertions.
+- `vendor/bin/phpstan analyse --memory-limit=1G --no-progress`: passed with zero errors.
+- `vendor/bin/pint --dirty --format agent`: passed.
+
+Browser/device verification:
+
+- Server API milestone only. Live FCM delivery requires the fresh external service-account key and a test device; Flutter integration remains pending.
+
+Known limitations:
+
+- FCM HTTP v1 send jobs, provider-error handling, invalid-token retirement, delivery attempt records, and after-commit notification triggers remain pending.
+- The deployed token column is limited to 255 characters; current Android/iOS registration tokens fit the existing contract, but schema expansion must precede support for a provider that emits longer values.
+- Notification delete is a hard delete in the deployed schema; retention/archive policy should be decided before staff broadcast management is added.
+
+Next dependent task:
+
+- Align the canonical Flutter API environment and repositories with the now-tested v1 contract, run Flutter analysis/tests, then implement loyalty and queued FCM delivery.
+
+## 2026-08-01 — Canonical Flutter API and security alignment
+
+Status: implementation complete; SDK verification blocked
+
+Scope: canonical Flutter repository at `/home/kevin/Desktop/MAIN /PROJECTS/NBTS/nbts-mobile`.
+
+Delivered:
+
+- Removed the developer-specific `192.168.*` API default and added `API_BASE_URL` build-time configuration.
+- Added Android-emulator and loopback debug defaults, normalized path/query composition, absolute HTTP(S) validation, a required release value, and mandatory HTTPS for release builds.
+- Added `X-Locale` to every API request from the current English/Kiswahili language controller.
+- Extended DELETE requests with JSON bodies and connected FCM unregister-on-logout before the Sanctum token is revoked.
+- Removed global Android and iOS cleartext allowances. Android local HTTP remains allowed only in debug/profile manifest overlays.
+- Added Flutter contract tests for URL handling, authorization/locale headers, token unregister payloads, and Laravel response parsing across donor card, eligibility, campaign, article, donation, and notification models.
+- Updated the canonical mobile README and mobile achievement log with current environment commands and platform support boundaries.
+
+Verification:
+
+- Flutter repository was clean before this scoped work and now contains only the described uncommitted changes.
+- Android manifests and iOS plist pass `xmllint --noout`.
+- `git diff --check` passes in both Laravel and Flutter repositories.
+- `flutter analyze`, `flutter test`, and Dart formatting could not run because `flutter`, `dart`, `fvm`, and `melos` are not installed on the workstation.
+
+Known limitations:
+
+- iOS has no `GoogleService-Info.plist`; Firebase/Apple login and push notification support are not claimed.
+- Android emulator/device end-to-end testing remains pending until Flutter tooling and a reachable API environment are available.
+- No Flutter dependency versions were changed and no generated platform files were regenerated without the SDK.
+
+Next dependent task:
+
+- Install or provide a Flutter 3.41+/Dart 3.11-compatible SDK, run format/analyze/tests, then perform the Android donor-journey device pass against a configured `API_BASE_URL`.
+
 ## Achievement template
 
 Copy this section for future verified work.

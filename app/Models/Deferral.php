@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\DeferralType;
+use Carbon\CarbonImmutable;
 use Carbon\CarbonInterface;
 use Database\Factories\DeferralFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
@@ -11,6 +12,19 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
+/**
+ * @property int $id
+ * @property int $user_id
+ * @property int|null $created_by
+ * @property DeferralType $type
+ * @property string $reason
+ * @property string|null $notes
+ * @property CarbonImmutable $starts_at
+ * @property CarbonImmutable|null $ends_at
+ * @property bool $is_active
+ * @property CarbonImmutable|null $lifted_at
+ * @property int|null $lifted_by
+ */
 #[Fillable([
     'user_id',
     'created_by',

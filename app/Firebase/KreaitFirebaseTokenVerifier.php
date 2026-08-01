@@ -9,14 +9,15 @@ use Kreait\Firebase\Exception\Auth\RevokedIdToken;
 
 final readonly class KreaitFirebaseTokenVerifier implements FirebaseTokenVerifier
 {
-    public function __construct(private Auth $auth)
-    {
-    }
+    public function __construct(private Auth $auth) {}
 
     public function verify(string $idToken): VerifiedFirebaseIdentity
     {
         try {
-            $claims = $this->auth->verifyIdToken($idToken, checkIfRevoked: true)->claims();
+            $claims = $this->auth->verifyIdToken(
+                $this->nonEmptyToken($idToken),
+                checkIfRevoked: true,
+            )->claims();
         } catch (FailedToVerifyToken|RevokedIdToken) {
             throw new InvalidFirebaseToken;
         }
@@ -45,5 +46,15 @@ final readonly class KreaitFirebaseTokenVerifier implements FirebaseTokenVerifie
     private function nullableString(mixed $value): ?string
     {
         return is_string($value) && $value !== '' ? $value : null;
+    }
+
+    /** @return non-empty-string */
+    private function nonEmptyToken(string $idToken): string
+    {
+        if ($idToken === '') {
+            throw new InvalidFirebaseToken;
+        }
+
+        return $idToken;
     }
 }

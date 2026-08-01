@@ -64,15 +64,15 @@ CREATE TABLE `audit_logs` (
   `id` bigint unsigned NOT NULL AUTO_INCREMENT,
   `actor_id` bigint unsigned DEFAULT NULL,
   `blood_center_id` bigint unsigned DEFAULT NULL,
-  `action` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
-  `subject_type` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `action` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `subject_type` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `subject_id` bigint unsigned DEFAULT NULL,
   `metadata` json DEFAULT NULL,
-  `ip_address` varchar(45) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `user_agent` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+  `ip_address` varchar(45) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `user_agent` text COLLATE utf8mb4_unicode_ci,
   `occurred_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  `previous_hash` char(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `record_hash` char(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `previous_hash` char(64) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `record_hash` char(64) COLLATE utf8mb4_unicode_ci NOT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `audit_logs_record_hash_unique` (`record_hash`),
   KEY `audit_logs_actor_id_foreign` (`actor_id`),
@@ -550,8 +550,8 @@ DROP TABLE IF EXISTS `passkeys`;
 CREATE TABLE `passkeys` (
   `id` bigint unsigned NOT NULL AUTO_INCREMENT,
   `user_id` bigint unsigned NOT NULL,
-  `name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
-  `credential_id` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `name` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `credential_id` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
   `credential` json NOT NULL,
   `last_used_at` timestamp NULL DEFAULT NULL,
   `created_at` timestamp NULL DEFAULT NULL,
@@ -716,8 +716,8 @@ CREATE TABLE `users` (
   `email` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `email_verified_at` timestamp NULL DEFAULT NULL,
   `password` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
-  `two_factor_secret` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
-  `two_factor_recovery_codes` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+  `two_factor_secret` text COLLATE utf8mb4_unicode_ci,
+  `two_factor_recovery_codes` text COLLATE utf8mb4_unicode_ci,
   `two_factor_confirmed_at` timestamp NULL DEFAULT NULL,
   `phone` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `blood_group` enum('A+','A-','B+','B-','AB+','AB-','O+','O-') CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
@@ -729,7 +729,7 @@ CREATE TABLE `users` (
   `profile_photo_path` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `role` enum('donor','admin','staff') CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'donor',
   `is_active` tinyint(1) NOT NULL DEFAULT '1',
-  `locale` varchar(5) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'en',
+  `locale` varchar(5) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'en',
   `remember_token` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `firebase_uid` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `firebase_provider` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
@@ -737,7 +737,8 @@ CREATE TABLE `users` (
   `updated_at` timestamp NULL DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `users_email_unique` (`email`),
-  UNIQUE KEY `users_firebase_uid_unique` (`firebase_uid`)
+  UNIQUE KEY `users_firebase_uid_unique` (`firebase_uid`),
+  UNIQUE KEY `users_phone_unique` (`phone`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
@@ -750,30 +751,31 @@ CREATE TABLE `users` (
 INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES (1,'0001_01_01_000000_create_users_table',1);
 INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES (2,'0001_01_01_000001_create_cache_table',1);
 INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES (3,'0001_01_01_000002_create_jobs_table',1);
-INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES (4,'2024_01_01_000000_create_passkeys_table',1);
-INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES (5,'2025_08_14_170933_add_two_factor_columns_to_users_table',1);
-INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES (6,'2026_03_16_055922_create_blood_centers_table',1);
-INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES (7,'2026_03_16_055939_create_appointments_table',1);
-INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES (8,'2026_03_16_055939_create_campaigns_table',1);
-INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES (9,'2026_03_16_055939_create_donations_table',1);
-INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES (10,'2026_03_16_060304_create_personal_access_tokens_table',1);
-INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES (11,'2026_03_16_081830_create_f_c_m_tokens_table',1);
-INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES (12,'2026_03_16_082509_align_users_table_with_flutter_specs',1);
-INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES (13,'2026_06_12_105702_create_permission_tables',1);
-INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES (14,'2026_06_12_110000_create_donor_profiles_table',1);
-INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES (15,'2026_06_12_110100_create_center_staff_table',1);
-INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES (16,'2026_06_12_120000_add_workflow_fields_to_appointments_and_donations',1);
-INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES (17,'2026_06_13_090000_create_eligibility_and_loyalty_tables',1);
-INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES (18,'2026_06_13_100000_create_inventory_alerts_and_reports_tables',1);
-INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES (19,'2026_06_22_130000_add_mobile_app_support_fields',1);
-INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES (20,'2026_06_22_140000_create_user_notifications_table',1);
-INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES (21,'2026_06_22_150000_add_profile_photo_path_to_users_table',1);
-INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES (22,'2026_06_30_130000_add_firebase_auth_fields_to_users_table',1);
-INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES (23,'2026_07_01_150000_allow_nullable_user_email_for_mobile_phone_registration',1);
-INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES (24,'2026_07_09_160000_extend_articles_for_news_management',1);
-INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES (25,'2026_07_27_080000_create_sms_reminder_logs_table',1);
-INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES (26,'2026_08_01_092943_add_locale_to_users_table',1);
-INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES (27,'2026_08_01_092944_backfill_user_locales_from_donor_profiles',1);
-INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES (28,'2026_08_01_131334_create_audit_logs_table',2);
-INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES (29,'2026_08_01_132337_add_workflow_uniqueness_constraints',3);
-INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES (30,'2026_08_01_133218_add_reserved_quantity_delta_to_inventory_adjustments',4);
+INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES (4,'2026_03_16_055922_create_blood_centers_table',1);
+INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES (5,'2026_03_16_055939_create_appointments_table',1);
+INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES (6,'2026_03_16_055939_create_campaigns_table',1);
+INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES (7,'2026_03_16_055939_create_donations_table',1);
+INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES (8,'2026_03_16_060304_create_personal_access_tokens_table',2);
+INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES (9,'2026_03_16_081830_create_f_c_m_tokens_table',3);
+INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES (10,'2026_03_16_082509_align_users_table_with_flutter_specs',4);
+INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES (11,'2026_06_12_105702_create_permission_tables',5);
+INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES (12,'2026_06_12_110000_create_donor_profiles_table',5);
+INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES (13,'2026_06_12_110100_create_center_staff_table',5);
+INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES (14,'2026_06_12_120000_add_workflow_fields_to_appointments_and_donations',6);
+INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES (15,'2026_06_13_090000_create_eligibility_and_loyalty_tables',7);
+INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES (16,'2026_06_13_100000_create_inventory_alerts_and_reports_tables',8);
+INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES (17,'2026_06_22_130000_add_mobile_app_support_fields',9);
+INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES (18,'2026_06_22_140000_create_user_notifications_table',10);
+INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES (19,'2026_06_22_150000_add_profile_photo_path_to_users_table',11);
+INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES (20,'2026_06_30_130000_add_firebase_auth_fields_to_users_table',12);
+INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES (21,'2026_07_01_150000_allow_nullable_user_email_for_mobile_phone_registration',13);
+INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES (22,'2026_07_09_160000_extend_articles_for_news_management',14);
+INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES (23,'2026_07_27_080000_create_sms_reminder_logs_table',15);
+INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES (24,'2024_01_01_000000_create_passkeys_table',16);
+INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES (25,'2025_08_14_170933_add_two_factor_columns_to_users_table',16);
+INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES (26,'2026_08_01_092943_add_locale_to_users_table',17);
+INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES (27,'2026_08_01_092944_backfill_user_locales_from_donor_profiles',17);
+INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES (28,'2026_08_01_131334_create_audit_logs_table',18);
+INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES (29,'2026_08_01_132337_add_workflow_uniqueness_constraints',19);
+INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES (30,'2026_08_01_133218_add_reserved_quantity_delta_to_inventory_adjustments',20);
+INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES (31,'2026_08_01_140434_add_unique_index_to_users_phone',21);
