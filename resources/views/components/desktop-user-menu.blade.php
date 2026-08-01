@@ -19,6 +19,12 @@
         </div>
         <flux:menu.separator />
         <flux:menu.radio.group>
+            <form method="POST" action="{{ route('locale.update', app()->getLocale() === 'en' ? 'sw' : 'en') }}" class="w-full">
+                @csrf
+                <flux:menu.item as="button" type="submit" icon="language" class="w-full cursor-pointer">
+                    {{ app()->getLocale() === 'en' ? __('Kiswahili') : __('English') }}
+                </flux:menu.item>
+            </form>
             <flux:menu.item :href="route('profile.edit')" icon="cog" wire:navigate>
                 {{ __('Settings') }}
             </flux:menu.item>

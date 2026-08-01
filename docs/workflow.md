@@ -294,6 +294,17 @@ Primary triggers include appointment creation/confirmation/reminders/cancellatio
 
 Managed content includes articles, publications, campaigns, centers, schedules, regional contacts, FAQs, leadership/governance information, public metrics, feedback categories, privacy, and terms.
 
+### Managed-content language contract
+
+- English (`en`) is the backward-compatible base locale because existing deployed text columns contain English or source-language content; Kiswahili (`sw`) is the second managed locale.
+- Localized values use polymorphic translation records keyed by content type, record ID, field, and locale. Existing columns remain the English/base value, so legacy imports and API aliases do not break.
+- The authoritative bilingual field map is `config/content.php`: article/publication title, category, summary, body, metadata and attachment label; campaign title, description and location; center name, address, opening hours, services, capacity label and type; badge/reward name and description; and static-page title, summary, body and metadata.
+- Proper identifiers, donor/clinical records, blood groups, dates, phone/email values, URLs, coordinates, source names, and uploaded filenames are not translated. Controlled states use stable codes plus `operations.*` display labels.
+- A requested non-base translation is used when present and non-blank; otherwise the English/base value is shown. The UI identifies fallback content to editors, but public readers never see an empty field.
+- Publishing requires complete approved English/base fields. Missing Kiswahili is allowed during migration but is shown as an editorial warning; no machine translation is silently generated.
+- Notifications are rendered in the recipient's preferred locale when sent and stored as the delivered snapshot. They are not retranslated after delivery.
+- API resources keep stable field/state codes independent of locale and may add localized display text without replacing those codes.
+
 ## Public-page information architecture
 
 - Home: mission, urgent actions, current campaigns, centers, trusted impact, and donor journey.
@@ -316,7 +327,7 @@ Implemented public web contract:
 - Named Laravel routes render the home, institutional information, donation guidance, services, eligibility, center directory/detail, campaign directory/detail, news directory/detail, publications, FAQ, contact, app-download guidance, and aggregate impact pages.
 - Center, campaign, article, and publication visibility uses the same active/published lifecycle boundaries as the mobile API. Inactive centers, ended campaigns, drafts, archived records, and future publications are not exposed by detail routes.
 - Center, campaign, and news searches are validated and retain their filters through pagination. Impact totals are calculated from aggregate operational records and do not expose donor identity or sensitive stock details.
-- The public shell and static guidance are translated in English and Kiswahili. Managed database content currently displays in its stored language until bilingual content fields and editorial fallback rules are implemented.
+- The public shell and static guidance are translated in English and Kiswahili. Existing managed records currently use their base stored value; Phase 4 implements the translation-record storage and editor defined by the managed-content language contract above.
 - App-store links and QR destinations are withheld until approved URLs exist. The app preview uses an anonymized donor label and no Firebase credentials, personal data, or service-account material is placed in public assets.
 
 ## Staff account navigation flow

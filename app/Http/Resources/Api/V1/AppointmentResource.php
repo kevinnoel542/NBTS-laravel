@@ -28,6 +28,7 @@ final class AppointmentResource extends JsonResource
             'scheduled_at' => $appointment->scheduled_at->toIso8601String(),
             'starts_at' => $appointment->scheduled_at->toIso8601String(),
             'status' => $appointment->status->value,
+            'status_label' => __('operations.status.'.$appointment->status->value),
             'confirmed_at' => $appointment->confirmed_at?->toIso8601String(),
             'cancelled_at' => $appointment->cancelled_at?->toIso8601String(),
             'rescheduled_at' => $appointment->rescheduled_at?->toIso8601String(),

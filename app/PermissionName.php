@@ -8,6 +8,7 @@ enum PermissionName: string
     case ManageUsers = 'users.manage';
     case ManageRoles = 'roles.manage';
     case ViewDonors = 'donors.view';
+    case RegisterDonors = 'donors.register';
     case ManageDonors = 'donors.manage';
     case ViewCenters = 'centers.view';
     case ManageCenters = 'centers.manage';

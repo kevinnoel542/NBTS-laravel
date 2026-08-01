@@ -19,6 +19,7 @@ final class EligibilityResource extends JsonResource
 
         return [
             'status' => $eligibility['status'],
+            'status_label' => __('operations.status.'.$eligibility['status']),
             'eligible' => $eligibility['eligible'],
             'message' => $eligibility['message'],
             'reasons' => $eligibility['reasons'],

@@ -859,6 +859,131 @@ Next dependent task:
 
 - Complete and test sensitive Fortify and Livewire action throttling before starting the remaining Phase 1 localization work.
 
+## 2026-08-01 — Phase 1 sensitive account-action throttling
+
+Status: completed
+
+Scope: web authentication and Livewire account security.
+
+Delivered:
+
+- Retained named Fortify limits for password login, two-factor challenge, and passkey authentication/registration.
+- Added per-route, per-identity, and per-IP minute/hour limits for password reset requests, password resets, password confirmation, 2FA enable/confirm/disable/recovery regeneration, and passkey deletion.
+- Added a shared Livewire action limiter for password changes, profile/email changes, verification resend, account deletion, passkey deletion, and 2FA enable/confirm/disable actions.
+- Returned a validation error with the remaining retry interval when a Livewire action is blocked.
+
+Database/API impact:
+
+- No schema or API contract changes; rate-limit counters use the configured Laravel cache.
+
+Automated verification:
+
+- Sensitive-action limiter suite: 4 tests passed with 53 assertions.
+- The broader authentication/settings regression run passed 30 of 31 tests; its sole failure was an incorrect middleware-introspection assertion. After correcting the assertion to expand the web middleware group, the focused suite passed completely.
+- Laravel Pint passed after formatting the implementation and tests.
+
+Browser/device verification:
+
+- No visual behavior changed; the visible browser remains open for the complete EN/SW Phase 1 smoke pass.
+
+Known limitations:
+
+- Rate limits are process/cache-environment dependent and must use a shared production cache when the application is horizontally scaled.
+
+Next dependent task:
+
+- Complete English/Kiswahili UI, validation, system, PDF, and operational-action translations and verify both locales.
+
+## 2026-08-01 — Phase 1 localization and completion gate
+
+Status: completed
+
+Scope: staff web authentication, localization, mobile API contracts, authorization, and quality gates.
+
+Delivered:
+
+- Completed current English/Kiswahili coverage for navigation, authentication, settings, validation, empty states, system messages, PDF headings, accessibility labels, and operational labels.
+- Added persistent language controls to guest and authenticated layouts and translated static Livewire page titles.
+- Defined the managed-content language contract: English base fields, future polymorphic Kiswahili translations, explicit fallback behavior, recipient-locale notification snapshots, and no silent machine translation.
+- Preserved machine-stable API status, type, and blood-group codes while adding separately localized display labels.
+- Verified that cloned staff and admin users retain their existing password hashes and can authenticate without password resets; only the documented local demo staff password differs intentionally.
+- Completed record-level policies for every current application model and enforced canonical Spatie roles with center-scoped operational access.
+
+Main implementation:
+
+- `lang/sw.json`, `lang/sw/*.php`, and the matching English operational/system/PDF catalogs.
+- `config/content.php` and the managed-content contract in `docs/workflow.md`.
+- `app/Http/Resources/Api/V1/*Resource.php` stable-code and localized-label contracts.
+- `app/Policies/*.php`, `app/Concerns/ThrottlesSensitiveActions.php`, and `app/Http/Middleware/ThrottleSensitiveAuthenticationActions.php`.
+
+Database/API impact:
+
+- No schema changes were required.
+- Existing API code fields remain stable across locales; localized labels are additive fields.
+- The source `nbts` database remained read-only, while authentication verification used the isolated `nbts_new_dev` clone.
+
+Automated verification:
+
+- `composer ci:check`: 145 tests passed with 1,579 assertions; Pint passed and Larastan reported zero errors.
+- `npm run build`: the Tailwind/Vite production bundle completed successfully.
+- `git diff --check`: passed.
+
+Browser/device verification:
+
+- Headed Chromium at 1600x900, signed in as the cloned center-staff demo account on `/settings/security`.
+- Kiswahili and English titles, navigation, account menus, form labels, password visibility labels, 2FA action, and passkey action rendered correctly; the current page reported no browser errors.
+
+Known limitations:
+
+- Stored Boost logs contain older missing-Lucide warnings from unfinished public pages; these remain a Phase 4 public-website cleanup item.
+- Managed-content translation persistence and editors are intentionally scheduled for Phase 4; Phase 1 defines and tests their contract.
+
+Next dependent task:
+
+- Complete the Phase 2 core-domain models, seeders, services, operations, PDFs, audits, and corresponding Pest coverage before starting Phase 3.
+
+## 2026-08-01 — Phase 2 domain records and safe seed foundation
+
+Status: completed
+
+Scope: backend models, authorization, reference data, and local test/demo setup.
+
+Delivered:
+
+- Completed typed models, relationships, casts, scopes, factories, and record policies for every deployed NBTS domain table.
+- Audited the legacy repositories and intentionally did not copy their thin, unbounded Eloquent wrappers; current actions, services, and model scopes are the tested query and mutation boundaries.
+- Added deterministic seeders for canonical roles/permissions, four Tanzanian blood centers, loyalty badges/rewards, and public education content.
+- Added environment-gated local/testing demo accounts and center assignments while preserving an existing account password on every rerun.
+- Ensured reference and demo seeders are idempotent and do not delete existing center or content records.
+
+Main implementation:
+
+- `app/Models/*.php`, `database/factories/*.php`, and `app/Policies/*.php`.
+- `database/seeders/RolePermissionSeeder.php`, `BloodCenterSeeder.php`, `LoyaltySeeder.php`, `ArticleSeeder.php`, `DemoDataSeeder.php`, and `DatabaseSeeder.php`.
+
+Database/API impact:
+
+- No schema or API contract changes.
+- Seeders were verified only in the isolated test database; the cloned development and source databases were not seeded during this milestone.
+
+Automated verification:
+
+- Seeder suite: 2 tests passed with 16 assertions, including idempotency, production no-op behavior, canonical role assignment, and password preservation.
+- Core model, loyalty, and record-policy regression group: 11 tests passed with 94 assertions.
+- Laravel Pint passed, Larastan reported zero errors, and `git diff --check` passed.
+
+Browser/device verification:
+
+- Not applicable to this backend-only milestone; the headed 1600x900 Chromium session remains open on the authenticated account UI.
+
+Known limitations:
+
+- Phase 2 operational actions for donor reception, screening/deferrals, inventory maintenance, alerts, campaigns, loyalty, and notifications remain open.
+
+Next dependent task:
+
+- Complete donor and center operational services, including donor creation/search, preferred centers, and center-staff lifecycle, before moving to eligibility workflows.
+
 ## Achievement template
 
 Copy this section for future verified work.

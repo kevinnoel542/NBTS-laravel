@@ -36,7 +36,7 @@
     @stack('head')
 </head>
 <body class="public-site">
-    <a class="skip-link" href="#main-content">Skip to content</a>
+    <a class="skip-link" href="#main-content">{{ __('Skip to content') }}</a>
 
     <div class="official-bar">
         <div class="public-shell official-bar__inner">
@@ -64,7 +64,7 @@
                 </span>
             </a>
 
-            <nav class="desktop-nav" aria-label="Primary navigation">
+            <nav class="desktop-nav" aria-label="{{ __('Primary navigation') }}">
                 @foreach ($primaryNavigation as $item)
                     <a href="{{ route($item['route']) }}" @class(['is-active' => request()->routeIs($item['active'])])>
                         {{ $item['label'] }}
@@ -104,7 +104,7 @@
             </div>
         </div>
 
-        <nav class="mobile-nav" id="mobile-navigation" data-mobile-menu aria-label="Mobile navigation" hidden>
+        <nav class="mobile-nav" id="mobile-navigation" data-mobile-menu aria-label="{{ __('Mobile navigation') }}" hidden>
             <div class="public-shell mobile-nav__inner">
                 @foreach ($primaryNavigation as $item)
                     <a href="{{ route($item['route']) }}" @class(['is-active' => request()->routeIs($item['active'])])>{{ $item['label'] }}</a>

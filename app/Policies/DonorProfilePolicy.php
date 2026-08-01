@@ -2,6 +2,7 @@
 
 namespace App\Policies;
 
+use App\Models\BloodCenter;
 use App\Models\DonorProfile;
 use App\Models\User;
 use App\PermissionName;
@@ -36,8 +37,16 @@ class DonorProfilePolicy
     {
         return $user->is_active && (
             $user->hasRole(RoleName::Donor->value)
+            || $user->can(PermissionName::RegisterDonors->value)
             || $user->can(PermissionName::ManageDonors->value)
         );
+    }
+
+    public function registerAt(User $user, BloodCenter $bloodCenter): bool
+    {
+        return $bloodCenter->is_active
+            && $user->can(PermissionName::RegisterDonors->value)
+            && $user->hasCenterAccess($bloodCenter);
     }
 
     /**

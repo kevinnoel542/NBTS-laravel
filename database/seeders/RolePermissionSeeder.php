@@ -24,6 +24,8 @@ class RolePermissionSeeder extends Seeder
             Permission::findOrCreate($permission->value, 'web');
         }
 
+        $permissionRegistrar->forgetCachedPermissions();
+
         foreach ($this->rolePermissions() as $roleName => $permissions) {
             Role::findOrCreate($roleName, 'web')->syncPermissions($permissions);
         }
@@ -52,6 +54,7 @@ class RolePermissionSeeder extends Seeder
             RoleName::NbtsAdmin->value => $this->values([
                 PermissionName::ViewUsers,
                 PermissionName::ViewDonors,
+                PermissionName::RegisterDonors,
                 PermissionName::ManageDonors,
                 PermissionName::ViewCenters,
                 PermissionName::ManageCenters,
@@ -77,6 +80,7 @@ class RolePermissionSeeder extends Seeder
             ]),
             RoleName::CenterManager->value => $this->values([
                 PermissionName::ViewDonors,
+                PermissionName::RegisterDonors,
                 PermissionName::ViewCenters,
                 PermissionName::ManageCenterStaff,
                 PermissionName::ViewAppointments,
@@ -94,6 +98,7 @@ class RolePermissionSeeder extends Seeder
             ]),
             RoleName::CenterStaff->value => $this->values([
                 PermissionName::ViewDonors,
+                PermissionName::RegisterDonors,
                 PermissionName::ViewCenters,
                 PermissionName::ViewAppointments,
                 PermissionName::CheckEligibility,

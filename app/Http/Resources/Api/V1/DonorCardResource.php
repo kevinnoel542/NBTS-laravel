@@ -74,6 +74,7 @@ final class DonorCardResource extends JsonResource
                 'last_donation' => $this->donationSummary['last_donation'],
                 'next_eligible_donation_date' => $this->eligibilitySummary['next_eligible_donation_date'],
                 'eligibility_status' => $this->eligibilitySummary['status'],
+                'eligibility_status_label' => __('operations.status.'.$this->eligibilitySummary['status']),
                 'loyalty_points' => $profile->loyalty_points,
                 'loyalty_tier' => $profile->loyalty_tier,
             ],

@@ -68,8 +68,10 @@ final class UserResource extends JsonResource
                 fn (): array => [
                     'donor_id' => $donorProfile->donor_id,
                     'blood_group_status' => $donorProfile->blood_group_status->value,
+                    'blood_group_status_label' => __('operations.status.'.$donorProfile->blood_group_status->value),
                     'blood_group_verified' => $donorProfile->blood_group_verified,
                     'eligibility_status' => $donorProfile->eligibility_status->value,
+                    'eligibility_status_label' => __('operations.status.'.$donorProfile->eligibility_status->value),
                     'next_eligible_donation_date' => $donorProfile->next_eligible_donation_date?->toDateString(),
                     'total_donations' => $donorProfile->total_donations,
                     'loyalty_tier' => $donorProfile->loyalty_tier,

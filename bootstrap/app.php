@@ -3,6 +3,7 @@
 use App\Http\Middleware\EnsureAccountIsActive;
 use App\Http\Middleware\EnsureStaffAccountAccess;
 use App\Http\Middleware\SetLocale;
+use App\Http\Middleware\ThrottleSensitiveAuthenticationActions;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -18,7 +19,10 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
-        $middleware->web(append: [SetLocale::class]);
+        $middleware->web(append: [
+            SetLocale::class,
+            ThrottleSensitiveAuthenticationActions::class,
+        ]);
         $middleware->api(prepend: [SetLocale::class]);
 
         $middleware->alias([

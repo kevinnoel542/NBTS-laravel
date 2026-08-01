@@ -9,6 +9,7 @@
         name: '',
         loading: false,
         error: null,
+        deviceConnector: @js(__('on')),
         updateSupport() {
             this.supported = Boolean(window.Passkeys?.isSupported());
         },
@@ -31,7 +32,7 @@
                 { pattern: /Windows/, name: 'Windows' },
             ].find(({ pattern }) => pattern.test(ua))?.name;
 
-            return [browser, os].filter(Boolean).join(' on ') || '';
+            return [browser, os].filter(Boolean).join(` ${this.deviceConnector} `) || '';
         },
         init() {
             this.name = this.getDefaultPasskeyName();

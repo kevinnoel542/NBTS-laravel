@@ -34,7 +34,7 @@ final class DonationResource extends JsonResource
                 : null,
             'appointment_id' => $donation->appointment_id,
             'donation_type' => $donation->donation_type->value,
-            'type_label' => str($donation->donation_type->value)->replace('_', ' ')->title()->toString(),
+            'type_label' => __('operations.types.'.$donation->donation_type->value),
             'blood_group' => $donation->blood_group->value,
             'blood_type' => $donation->blood_group->value,
             'blood_group_verified' => $donation->blood_group_verified,
@@ -44,6 +44,7 @@ final class DonationResource extends JsonResource
             'donated_at' => $donation->donation_date->toDateString(),
             'date' => $donation->donation_date->toDateString(),
             'status' => $donation->status->value,
+            'status_label' => __('operations.status.'.$donation->status->value),
             'is_completed' => $donation->status === DonationStatus::Completed,
             'is_failed' => $donation->status === DonationStatus::Failed,
         ];

@@ -40,6 +40,7 @@ final class ArticleResource extends JsonResource
             'reading_time_minutes' => $article->reading_time_minutes,
             'meta_description' => $article->meta_description,
             'status' => $article->status->value,
+            'status_label' => __('operations.status.'.$article->status->value),
             'published_at' => $article->published_at?->toIso8601String(),
         ];
     }

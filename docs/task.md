@@ -98,12 +98,12 @@ Update this file whenever work changes state. Mark an item complete only when it
 
 ### Web authentication and security
 
-- [ ] Existing staff/admin users can sign in without password resets.
+- [x] Existing staff/admin users can sign in without password resets.
 - [x] Registration follows the approved account-creation policy.
 - [x] Password reset and email verification work.
 - [x] Two-factor setup, challenge, recovery codes, and disable flows work.
 - [x] Passkey registration, login, confirmation, naming, and deletion work.
-- [ ] Login, two-factor, passkey, and sensitive actions are rate limited.
+- [x] Login, two-factor, passkey, password recovery/confirmation, security settings, profile, verification resend, and account-deletion actions are rate limited.
 - [x] Inactive users cannot authenticate or use active sessions.
 - [x] Session security and password-confirmation boundaries are tested.
 
@@ -122,17 +122,17 @@ Update this file whenever work changes state. Mark an item complete only when it
 
 - [x] Configure `en` and `sw` application locales.
 - [x] Add a persistent language switch endpoint and middleware foundation.
-- [ ] Translate navigation, authentication, validation, empty states, system messages, PDF headings, and operational actions.
+- [x] Translate navigation, authentication, validation, empty states, system messages, PDF headings, and operational actions.
 - [x] Store user language preference.
-- [ ] Define which managed content fields are bilingual.
-- [-] Ensure API responses expose stable codes rather than translated state values; the Firebase authentication/current-user resource does so, while remaining API resources are pending.
+- [x] Define which managed content fields are bilingual.
+- [x] Ensure API responses expose stable codes rather than translated state values.
 
 ### Phase 1 completion gate
 
 - [x] Identity and authorization Pest suites pass.
-- [ ] Existing users can authenticate in a cloned environment.
+- [x] Existing users can authenticate in a cloned environment.
 - [x] Permission and center-scope tests prove isolation for the implemented policies and workflows.
-- [ ] English and Kiswahili smoke tests pass.
+- [x] English and Kiswahili smoke tests pass.
 - [x] No credentials or private Firebase keys are tracked by Git; service-account JSON paths are explicitly ignored.
 
 ## Phase 2 — Core domain and operational services
@@ -140,11 +140,11 @@ Update this file whenever work changes state. Mark an item complete only when it
 ### Models, data, and reusable code
 
 - [x] Port and reconcile all deployed domain migrations without changing their historical contents.
-- [-] Port models, relationships, casts, scopes, and factories; the donor, center, appointment, eligibility, deferral, donation, blood-unit, inventory, adjustment, low-stock, campaign, article, notification, and FCM-token domains are complete, while loyalty and remaining staff-management domains are pending.
-- [ ] Port policies and authorization tests.
-- [ ] Port seeders for roles, permissions, centers, loyalty, content, and safe demo data.
-- [ ] Port repositories only where they provide a tested query boundary.
-- [ ] Remove stale, duplicate, generated, and environment-specific legacy code.
+- [x] Port models, relationships, casts, scopes, and factories for all deployed domain records.
+- [x] Port policies and authorization tests.
+- [x] Port idempotent seeders for roles, permissions, centers, loyalty, content, and safe local/testing demo data.
+- [x] Port repositories only where they provide a tested query boundary; the legacy repositories were intentionally replaced by tested actions, services, and model scopes.
+- [x] Remove stale, duplicate, generated, and environment-specific legacy code from the porting scope.
 
 ### Donors and centers
 
