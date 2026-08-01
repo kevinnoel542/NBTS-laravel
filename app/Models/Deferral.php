@@ -3,13 +3,13 @@
 namespace App\Models;
 
 use App\DeferralType;
+use Carbon\CarbonInterface;
 use Database\Factories\DeferralFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Support\Carbon;
 
 #[Fillable([
     'user_id',
@@ -44,7 +44,7 @@ class Deferral extends Model
      * @param  Builder<Deferral>  $query
      * @return Builder<Deferral>
      */
-    public function scopeEffectiveOn(Builder $query, ?Carbon $date = null): Builder
+    public function scopeEffectiveOn(Builder $query, ?CarbonInterface $date = null): Builder
     {
         $effectiveDate = ($date ?? now())->toDateString();
 

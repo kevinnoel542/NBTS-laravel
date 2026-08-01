@@ -247,6 +247,52 @@ Next dependent task:
 
 - Implement policy-protected appointment transitions and transactional donation completion with eligibility, blood-unit, inventory, and audit invariants.
 
+## 2026-08-01 — Audited appointment transitions
+
+Status: completed
+
+Scope: backend workflow, authorization, and audit foundation.
+
+Delivered:
+
+- Added an appointment policy for donor ownership, staff permissions, and active center assignment.
+- Added a transactional appointment transition action using row-level `FOR UPDATE` locking and deadlock retries.
+- Enforced explicit pending → confirmed/cancelled and confirmed → completed/cancelled transitions.
+- Added handler attribution, confirmation/cancellation timestamps, optional staff notes, and complete rollback on invalid or unauthorized transitions.
+- Added native append-only audit records with actor, center, polymorphic subject, request context, metadata, timestamp, previous hash, and HMAC record hash.
+- Added application-level update/delete prevention for audit models and chained hashes for tamper evidence.
+- Added the audit relationship to users and blood centers.
+
+Database/API impact:
+
+- Added the `audit_logs` table to `nbts_new_dev`; the clone is now at 28 migrations.
+- Shared `nbts` remains unchanged at 23 migrations.
+- Audit table includes nullable actor/center foreign keys, subject/action/time indexes, and a unique record hash.
+- Existing development records remain intact: 11 users and 10 appointments; no synthetic audit records were added to the clone.
+- Refreshed the clean MySQL schema snapshot to include the audit structure.
+
+Automated verification:
+
+- Appointment workflow suite: 5 tests passed with 23 assertions.
+- Full suite: 55 tests passed with 183 assertions.
+- `vendor/bin/phpstan analyse --memory-limit=1G`: passed with zero errors.
+- `vendor/bin/pint --dirty --format agent`: passed.
+- `git diff --check`: passed.
+
+Browser/device verification:
+
+- Pending implementation of the staff appointment workspace.
+
+Known limitations:
+
+- Appointment rescheduling, slot capacity, donor cancellation windows, and check-in are not yet implemented.
+- Model events protect normal Eloquent writes; direct database administrators remain capable of altering rows, with hash-chain verification intended to reveal tampering.
+- Audit verification/reporting UI and scheduled integrity checks remain pending.
+
+Next dependent task:
+
+- Implement transactional donation completion, official configurable eligibility intervals, blood-unit creation, and later laboratory release into inventory.
+
 ## Achievement template
 
 Copy this section for future verified work.

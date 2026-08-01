@@ -5,6 +5,7 @@ namespace App\Models;
 use App\BloodGroup;
 use App\DonationStatus;
 use App\DonationType;
+use Carbon\CarbonImmutable;
 use Database\Factories\DonationFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Builder;
@@ -13,6 +14,19 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 
+/**
+ * @property int $id
+ * @property int $user_id
+ * @property int $blood_center_id
+ * @property int|null $recorded_by
+ * @property int|null $appointment_id
+ * @property DonationType $donation_type
+ * @property BloodGroup $blood_group
+ * @property bool $blood_group_verified
+ * @property int $volume_ml
+ * @property CarbonImmutable $donation_date
+ * @property DonationStatus $status
+ */
 #[Fillable([
     'user_id',
     'blood_center_id',

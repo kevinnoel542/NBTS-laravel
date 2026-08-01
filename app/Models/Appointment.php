@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\AppointmentStatus;
+use Carbon\CarbonImmutable;
 use Database\Factories\AppointmentFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Builder;
@@ -11,6 +12,19 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 
+/**
+ * @property int $id
+ * @property int $user_id
+ * @property int $blood_center_id
+ * @property CarbonImmutable $scheduled_at
+ * @property AppointmentStatus $status
+ * @property CarbonImmutable|null $confirmed_at
+ * @property CarbonImmutable|null $cancelled_at
+ * @property CarbonImmutable|null $rescheduled_at
+ * @property int|null $handled_by
+ * @property string|null $notes
+ * @property-read BloodCenter $bloodCenter
+ */
 #[Fillable([
     'user_id',
     'blood_center_id',

@@ -4,7 +4,8 @@ namespace App\Policies;
 
 use App\Models\Appointment;
 use App\Models\User;
-use Illuminate\Auth\Access\Response;
+use App\PermissionName;
+use App\RoleName;
 
 class AppointmentPolicy
 {
@@ -13,7 +14,7 @@ class AppointmentPolicy
      */
     public function viewAny(User $user): bool
     {
-        return false;
+        return $user->can(PermissionName::ViewAppointments->value);
     }
 
     /**
@@ -21,7 +22,12 @@ class AppointmentPolicy
      */
     public function view(User $user, Appointment $appointment): bool
     {
-        return false;
+        if ($user->hasRole(RoleName::Donor->value)) {
+            return $user->id === $appointment->user_id;
+        }
+
+        return $user->can(PermissionName::ViewAppointments->value)
+            && $user->hasCenterAccess($appointment->blood_center_id);
     }
 
     /**
@@ -29,7 +35,7 @@ class AppointmentPolicy
      */
     public function create(User $user): bool
     {
-        return false;
+        return $user->is_active && $user->hasRole(RoleName::Donor->value);
     }
 
     /**
@@ -37,30 +43,12 @@ class AppointmentPolicy
      */
     public function update(User $user, Appointment $appointment): bool
     {
-        return false;
+        return $this->transition($user, $appointment);
     }
 
-    /**
-     * Determine whether the user can delete the model.
-     */
-    public function delete(User $user, Appointment $appointment): bool
+    public function transition(User $user, Appointment $appointment): bool
     {
-        return false;
-    }
-
-    /**
-     * Determine whether the user can restore the model.
-     */
-    public function restore(User $user, Appointment $appointment): bool
-    {
-        return false;
-    }
-
-    /**
-     * Determine whether the user can permanently delete the model.
-     */
-    public function forceDelete(User $user, Appointment $appointment): bool
-    {
-        return false;
+        return $user->can(PermissionName::ManageAppointments->value)
+            && $user->hasCenterAccess($appointment->blood_center_id);
     }
 }

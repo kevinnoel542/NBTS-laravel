@@ -168,9 +168,9 @@ Update this file whenever work changes state. Mark an item complete only when it
 - [ ] Donors can view slots and book appointments.
 - [ ] Capacity and duplicate-booking rules are enforced.
 - [ ] Donors can reschedule or cancel eligible appointments.
-- [ ] Staff can confirm, reschedule, cancel, check in, and complete appointments.
+- [-] Staff can confirm, cancel, and complete appointments through the audited transition action; rescheduling and check-in remain pending.
 - [ ] Walk-in donation flow works without an appointment.
-- [ ] Appointment status transitions are explicit and audited.
+- [x] Appointment status transitions are explicit, center-authorized, transactional, and audited.
 
 ### Donation recording
 

@@ -138,4 +138,10 @@ class BloodCenter extends Model
     {
         return $this->hasMany(LowStockAlert::class);
     }
+
+    /** @return HasMany<AuditLog, $this> */
+    public function auditLogs(): HasMany
+    {
+        return $this->hasMany(AuditLog::class);
+    }
 }

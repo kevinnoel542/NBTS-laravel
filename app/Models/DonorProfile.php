@@ -4,12 +4,25 @@ namespace App\Models;
 
 use App\BloodGroupStatus;
 use App\EligibilityStatus;
+use Carbon\CarbonImmutable;
 use Database\Factories\DonorProfileFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
+/**
+ * @property int $id
+ * @property int $user_id
+ * @property string $donor_id
+ * @property BloodGroupStatus $blood_group_status
+ * @property bool $blood_group_verified
+ * @property CarbonImmutable|null $blood_group_verified_at
+ * @property int|null $blood_group_verified_by
+ * @property CarbonImmutable|null $next_eligible_donation_date
+ * @property EligibilityStatus $eligibility_status
+ * @property int $total_donations
+ */
 #[Fillable([
     'user_id',
     'preferred_center_id',

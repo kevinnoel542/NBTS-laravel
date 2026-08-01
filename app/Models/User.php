@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use App\BloodGroup;
+use App\Gender;
 use App\RoleName;
 use Database\Factories\UserFactory;
 use Illuminate\Auth\MustVerifyEmail as MustVerifyEmailTrait;
@@ -31,8 +33,8 @@ use Spatie\Permission\Traits\HasRoles;
  * @property Carbon|null $email_verified_at
  * @property string $password
  * @property string|null $phone
- * @property string|null $blood_group
- * @property string|null $gender
+ * @property BloodGroup|null $blood_group
+ * @property Gender|null $gender
  * @property Carbon|null $date_of_birth
  * @property string|null $region
  * @property Carbon|null $last_donation
@@ -96,9 +98,11 @@ class User extends Authenticatable implements HasLocalePreference, MustVerifyEma
         return [
             'date_of_birth' => 'date',
             'email_verified_at' => 'datetime',
+            'gender' => Gender::class,
             'is_active' => 'boolean',
             'last_donation' => 'date',
             'password' => 'hashed',
+            'blood_group' => BloodGroup::class,
             'two_factor_confirmed_at' => 'datetime',
         ];
     }
@@ -207,6 +211,12 @@ class User extends Authenticatable implements HasLocalePreference, MustVerifyEma
     public function donatedBloodUnits(): HasMany
     {
         return $this->hasMany(BloodUnit::class, 'donor_id');
+    }
+
+    /** @return HasMany<AuditLog, $this> */
+    public function auditLogs(): HasMany
+    {
+        return $this->hasMany(AuditLog::class, 'actor_id');
     }
 
     public function preferredLocale(): string
