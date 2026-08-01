@@ -64,15 +64,15 @@ CREATE TABLE `audit_logs` (
   `id` bigint unsigned NOT NULL AUTO_INCREMENT,
   `actor_id` bigint unsigned DEFAULT NULL,
   `blood_center_id` bigint unsigned DEFAULT NULL,
-  `action` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `subject_type` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `action` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `subject_type` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `subject_id` bigint unsigned DEFAULT NULL,
   `metadata` json DEFAULT NULL,
-  `ip_address` varchar(45) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `user_agent` text COLLATE utf8mb4_unicode_ci,
+  `ip_address` varchar(45) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `user_agent` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
   `occurred_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  `previous_hash` char(64) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `record_hash` char(64) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `previous_hash` char(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `record_hash` char(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `audit_logs_record_hash_unique` (`record_hash`),
   KEY `audit_logs_actor_id_foreign` (`actor_id`),
@@ -162,6 +162,7 @@ CREATE TABLE `blood_units` (
   `updated_at` timestamp NULL DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `blood_units_unit_number_unique` (`unit_number`),
+  UNIQUE KEY `blood_units_donation_id_unique` (`donation_id`),
   KEY `blood_units_donation_id_foreign` (`donation_id`),
   KEY `blood_units_donor_id_foreign` (`donor_id`),
   KEY `blood_units_blood_center_id_foreign` (`blood_center_id`),
@@ -282,6 +283,7 @@ CREATE TABLE `donations` (
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
   PRIMARY KEY (`id`),
+  UNIQUE KEY `donations_appointment_id_unique` (`appointment_id`),
   KEY `donations_user_id_foreign` (`user_id`),
   KEY `donations_blood_center_id_foreign` (`blood_center_id`),
   KEY `donations_appointment_id_foreign` (`appointment_id`),
@@ -772,3 +774,4 @@ INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES (25,'2026_07_27_080
 INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES (26,'2026_08_01_092943_add_locale_to_users_table',1);
 INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES (27,'2026_08_01_092944_backfill_user_locales_from_donor_profiles',1);
 INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES (28,'2026_08_01_131334_create_audit_logs_table',2);
+INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES (29,'2026_08_01_132337_add_workflow_uniqueness_constraints',3);

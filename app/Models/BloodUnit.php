@@ -11,7 +11,21 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Carbon\CarbonImmutable;
 
+/**
+ * @property int $id
+ * @property string $unit_number
+ * @property int $donation_id
+ * @property int $donor_id
+ * @property int $blood_center_id
+ * @property BloodGroup $blood_group
+ * @property CarbonImmutable $collection_date
+ * @property CarbonImmutable $expiry_date
+ * @property BloodUnitStatus $status
+ * @property int|null $handled_by
+ * @property-read BloodCenter $bloodCenter
+ */
 #[Fillable([
     'unit_number',
     'donation_id',

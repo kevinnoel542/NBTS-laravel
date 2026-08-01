@@ -15,6 +15,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
     'adjusted_by',
     'blood_group',
     'quantity_delta',
+    'reserved_quantity_delta',
     'reason',
     'notes',
 ])]

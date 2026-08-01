@@ -293,6 +293,57 @@ Next dependent task:
 
 - Implement transactional donation completion, official configurable eligibility intervals, blood-unit creation, and later laboratory release into inventory.
 
+## 2026-08-01 — Transactional donation completion
+
+Status: completed
+
+Scope: backend donation, eligibility, blood unit, authorization, and audit workflow.
+
+Delivered:
+
+- Added a donation policy that combines canonical permissions with active center assignment and donor ownership.
+- Added typed donation input data and a retryable transactional recording action for both confirmed appointments and walk-ins.
+- Required an active donor account, completed donor profile, eligible profile state, elapsed donation interval, no active deferral, and an eligible same-day screening record.
+- Required staff blood-group verification and recorded the verifier and verification time.
+- Applied current NBTS Tanzania whole-blood intervals: three months for men and four months for women, with a conservative four-month fallback for other or missing gender values.
+- Updated donor blood group, last donation date, profile eligibility state, next eligible date, and completed-donation count.
+- Completed a matching confirmed appointment inside the same transaction.
+- Created exactly one deterministic blood-unit number per donation with initial `collected` status and configurable shelf life.
+- Kept available inventory unchanged until the future laboratory release transition marks a unit `available`.
+- Added a chained `donations.completed` audit record containing only operational metadata.
+- Added database uniqueness guarantees for one donation per non-null appointment and one blood unit per donation.
+
+Database/API impact:
+
+- `nbts_new_dev` is now at 29 migrations; shared `nbts` remains unchanged at 23.
+- Added unique indexes on `donations.appointment_id` and `blood_units.donation_id` after confirming no deployed duplicates.
+- Existing counts remain unchanged: 11 users, 7 donor profiles, 10 appointments, 7 donations, and 7 blood units.
+- Added `config/nbts.php` for reviewed interval policy and configurable whole-blood shelf life.
+- API endpoints and request idempotency keys remain pending.
+
+Automated verification:
+
+- Donation workflow suite: 5 tests passed with 25 assertions.
+- Full suite: 60 tests passed with 208 assertions.
+- `vendor/bin/phpstan analyse --memory-limit=1G`: passed with zero errors.
+- `vendor/bin/pint --dirty --format agent`: passed.
+- Clean MySQL schema snapshot refreshed and both new unique indexes verified.
+- `git diff --check`: passed.
+
+Browser/device verification:
+
+- Pending implementation of donor lookup, screening, and staff donation workspaces.
+
+Known limitations:
+
+- The same-day screening record is modeled and enforced, but the staff screening/deferral action and UI are not yet implemented.
+- Whole-blood shelf life defaults to the legacy 35-day rule and remains operator-configurable pending final component/storage SOP review.
+- Loyalty awards, notifications, API idempotency keys, and laboratory inventory-release transitions remain pending.
+
+Next dependent task:
+
+- Implement audited blood-unit transitions and exactly-once center/blood-group inventory adjustments, including low-stock alert resolution.
+
 ## Achievement template
 
 Copy this section for future verified work.

@@ -157,10 +157,10 @@ Update this file whenever work changes state. Mark an item complete only when it
 ### Eligibility and deferrals
 
 - [ ] Screening records capture age, weight, health answers, notes, and staff member.
-- [ ] Age, weight, donation interval, and active deferral rules are enforced.
+- [-] Donation interval and active-deferral rules are enforced at completion; age and weight are captured by screening records but their screening action remains pending.
 - [ ] Temporary and permanent deferrals work.
 - [ ] Deferral lifting records the actor and triggers reevaluation.
-- [ ] Official male/female donation intervals are configurable and consistently applied.
+- [x] Official NBTS Tanzania whole-blood intervals of three months for men and four months for women are configured and tested, with a conservative four-month fallback.
 - [ ] Staff remains the final authority for donor safety decisions.
 
 ### Appointments and walk-ins
@@ -169,22 +169,22 @@ Update this file whenever work changes state. Mark an item complete only when it
 - [ ] Capacity and duplicate-booking rules are enforced.
 - [ ] Donors can reschedule or cancel eligible appointments.
 - [-] Staff can confirm, cancel, and complete appointments through the audited transition action; rescheduling and check-in remain pending.
-- [ ] Walk-in donation flow works without an appointment.
+- [x] Backend walk-in donation completion works without an appointment.
 - [x] Appointment status transitions are explicit, center-authorized, transactional, and audited.
 
 ### Donation recording
 
-- [ ] Staff verifies donor identity and eligibility before completion.
-- [ ] Appointment and walk-in donations are supported.
-- [ ] Blood-group verification records verifier and time.
-- [ ] Completing a donation updates donor history and next eligibility.
-- [ ] Completion is transactional and idempotent.
-- [ ] Failed or rejected attempts do not incorrectly increase inventory or loyalty.
+- [-] Staff eligibility and center authority are enforced before completion; donor lookup and UI identity verification remain pending.
+- [x] Appointment and walk-in donation completion are supported by the shared transactional action.
+- [x] Blood-group verification records verifier and time.
+- [x] Completing a donation updates donor history and next eligibility.
+- [-] Completion is transactional and protected by uniqueness constraints; request-level API idempotency keys remain pending.
+- [x] Failed or rejected attempts do not incorrectly increase inventory or loyalty.
 
 ### Blood units and inventory
 
-- [ ] A completed donation creates one uniquely numbered blood unit.
-- [ ] Unit statuses support collected, testing, available, reserved, transferred, used, rejected, expired, and discarded.
+- [x] A completed donation creates one uniquely numbered blood unit.
+- [x] Unit status codes support collected, testing, available, reserved, transferred, used, rejected, expired, and discarded; the transition action remains pending.
 - [ ] Inventory is tracked by center and blood group.
 - [ ] Status transitions adjust inventory exactly once.
 - [ ] Manual adjustments require reason, notes, actor, and authorization.

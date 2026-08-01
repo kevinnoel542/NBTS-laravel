@@ -26,6 +26,7 @@ class InventoryAdjustmentFactory extends Factory
             'adjusted_by' => User::factory()->staff(),
             'blood_group' => BloodGroup::OPositive,
             'quantity_delta' => 1,
+            'reserved_quantity_delta' => 0,
             'reason' => 'Blood unit added to available inventory',
             'notes' => null,
         ];

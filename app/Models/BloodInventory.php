@@ -10,6 +10,14 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
+/**
+ * @property int $id
+ * @property int $blood_center_id
+ * @property BloodGroup $blood_group
+ * @property int $available_units
+ * @property int $reserved_units
+ * @property int $minimum_threshold
+ */
 #[Fillable([
     'blood_center_id',
     'blood_group',
