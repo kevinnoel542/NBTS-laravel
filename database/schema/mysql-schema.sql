@@ -430,6 +430,7 @@ CREATE TABLE `inventory_adjustments` (
   `adjusted_by` bigint unsigned DEFAULT NULL,
   `blood_group` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `quantity_delta` int NOT NULL,
+  `reserved_quantity_delta` int NOT NULL DEFAULT '0',
   `reason` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `notes` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
   `created_at` timestamp NULL DEFAULT NULL,
@@ -775,3 +776,4 @@ INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES (26,'2026_08_01_092
 INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES (27,'2026_08_01_092944_backfill_user_locales_from_donor_profiles',1);
 INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES (28,'2026_08_01_131334_create_audit_logs_table',2);
 INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES (29,'2026_08_01_132337_add_workflow_uniqueness_constraints',3);
+INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES (30,'2026_08_01_133218_add_reserved_quantity_delta_to_inventory_adjustments',4);

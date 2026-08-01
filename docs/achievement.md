@@ -344,6 +344,55 @@ Next dependent task:
 
 - Implement audited blood-unit transitions and exactly-once center/blood-group inventory adjustments, including low-stock alert resolution.
 
+## 2026-08-01 — Audited blood-unit and inventory transitions
+
+Status: completed
+
+Scope: backend laboratory, inventory, low-stock, authorization, and audit workflow.
+
+Delivered:
+
+- Added a blood-unit policy requiring inventory permission plus active center assignment.
+- Added a retryable transactional blood-unit transition action with row locks on both the unit and center/blood-group inventory row.
+- Enforced the explicit blood-unit transition graph and rejected repeated or terminal-state reversals.
+- Calculated available and reserved quantity deltas from old/new unit states instead of accepting caller-supplied inventory numbers.
+- Prevented either available or reserved inventory from falling below zero.
+- Added reserved quantity deltas to adjustment history so reservations, releases, and consumption reconcile independently.
+- Opened or updated low-stock alerts below threshold and resolved them when available stock recovered.
+- Added one chained audit record per successful unit transition with status, deltas, balances, and alert reference.
+- Ensured failed authorization, invalid transitions, and inconsistent negative balances write no unit, inventory, adjustment, alert, or audit changes.
+
+Database/API impact:
+
+- Added `inventory_adjustments.reserved_quantity_delta` with a zero default; `nbts_new_dev` is now at 30 migrations.
+- Existing development data is unchanged: 7 blood units, 32 inventory rows, 4 historical adjustments, and 1 low-stock alert.
+- Historical adjustment records safely received a zero reserved delta.
+- Shared `nbts` remains unchanged at 23 migrations.
+- Refreshed the clean MySQL schema snapshot.
+
+Automated verification:
+
+- Inventory workflow suite: 4 tests passed with 23 assertions.
+- Full suite: 64 tests passed with 231 assertions.
+- Reconciliation assertions prove adjustment sums match final available and reserved balances.
+- `vendor/bin/phpstan analyse --memory-limit=1G`: passed with zero errors.
+- `vendor/bin/pint --dirty --format agent`: passed.
+- `git diff --check`: passed.
+
+Browser/device verification:
+
+- Pending implementation of laboratory queues, blood-unit detail, and inventory workspaces.
+
+Known limitations:
+
+- Manual adjustments, transfers between centers, expiry sweeps, disposal confirmation, and low-stock notifications remain pending.
+- Parallel-process contention is protected by row locks and unique keys but still needs a dedicated concurrency test environment.
+- Campaign generation from alerts remains pending.
+
+Next dependent task:
+
+- Build the versioned mobile API/authentication contract and the first staff Livewire workflow surfaces on top of the verified domain actions.
+
 ## Achievement template
 
 Copy this section for future verified work.

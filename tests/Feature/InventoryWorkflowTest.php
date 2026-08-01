@@ -154,7 +154,7 @@ test('an inconsistent transition cannot make either inventory balance negative',
         $unit,
         BloodUnitStatus::Reserved,
         $manager,
-    ))->toThrow(\LogicException::class)
+    ))->toThrow(LogicException::class)
         ->and($unit->fresh()->status)->toBe(BloodUnitStatus::Available)
         ->and(InventoryAdjustment::query()->count())->toBe(0)
         ->and(AuditLog::query()->count())->toBe(0);

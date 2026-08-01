@@ -185,16 +185,16 @@ Update this file whenever work changes state. Mark an item complete only when it
 
 - [x] A completed donation creates one uniquely numbered blood unit.
 - [x] Unit status codes support collected, testing, available, reserved, transferred, used, rejected, expired, and discarded; the transition action remains pending.
-- [ ] Inventory is tracked by center and blood group.
-- [ ] Status transitions adjust inventory exactly once.
+- [x] Inventory is tracked by center and blood group.
+- [x] Audited blood-unit status transitions adjust available and reserved inventory exactly once.
 - [ ] Manual adjustments require reason, notes, actor, and authorization.
-- [ ] Inventory cannot go below zero.
+- [x] Available and reserved inventory cannot go below zero.
 - [ ] Expiry processing and disposal confirmation work.
-- [ ] Adjustment history reconciles with inventory totals.
+- [-] Automated transition adjustment history reconciles with inventory totals; manual-adjustment and full historical reconciliation commands remain pending.
 
 ### Alerts, campaigns, loyalty, and notifications
 
-- [ ] Low-stock thresholds open, update, notify, and resolve alerts.
+- [-] Low-stock thresholds open, update, and resolve alerts transactionally; notification dispatch remains pending.
 - [ ] Emergency campaigns link to the triggering alert, center, and blood group.
 - [ ] Eligible donor targeting respects location, eligibility, preferences, and consent.
 - [ ] Badges, rewards, points, tiers, and leaderboards are deterministic.
@@ -204,8 +204,8 @@ Update this file whenever work changes state. Mark an item complete only when it
 
 ### Phase 2 completion gate
 
-- [ ] End-to-end donation workflow tests pass.
-- [ ] Inventory invariants and concurrency tests pass.
+- [-] The backend completion-to-unit-to-inventory workflow tests pass; screening input, UI, and notification layers remain pending.
+- [-] Inventory locking, exactly-once deltas, reconciliation, and negative-balance tests pass; parallel-process contention tests remain pending.
 - [ ] Eligibility and deferral datasets pass.
 - [ ] Notification channels are faked and asserted in automated tests.
 - [ ] Fresh and existing database scenarios both pass.
