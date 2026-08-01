@@ -1,3 +1,28 @@
 {
-    "preset": "laravel"
+    "preset": "laravel",
+    "notPath": [
+        "database/migrations/0001_01_01_000000_create_users_table.php",
+        "database/migrations/0001_01_01_000001_create_cache_table.php",
+        "database/migrations/0001_01_01_000002_create_jobs_table.php",
+        "database/migrations/2026_03_16_055922_create_blood_centers_table.php",
+        "database/migrations/2026_03_16_055939_create_appointments_table.php",
+        "database/migrations/2026_03_16_055939_create_campaigns_table.php",
+        "database/migrations/2026_03_16_055939_create_donations_table.php",
+        "database/migrations/2026_03_16_060304_create_personal_access_tokens_table.php",
+        "database/migrations/2026_03_16_081830_create_f_c_m_tokens_table.php",
+        "database/migrations/2026_03_16_082509_align_users_table_with_flutter_specs.php",
+        "database/migrations/2026_06_12_105702_create_permission_tables.php",
+        "database/migrations/2026_06_12_110000_create_donor_profiles_table.php",
+        "database/migrations/2026_06_12_110100_create_center_staff_table.php",
+        "database/migrations/2026_06_12_120000_add_workflow_fields_to_appointments_and_donations.php",
+        "database/migrations/2026_06_13_090000_create_eligibility_and_loyalty_tables.php",
+        "database/migrations/2026_06_13_100000_create_inventory_alerts_and_reports_tables.php",
+        "database/migrations/2026_06_22_130000_add_mobile_app_support_fields.php",
+        "database/migrations/2026_06_22_140000_create_user_notifications_table.php",
+        "database/migrations/2026_06_22_150000_add_profile_photo_path_to_users_table.php",
+        "database/migrations/2026_06_30_130000_add_firebase_auth_fields_to_users_table.php",
+        "database/migrations/2026_07_01_150000_allow_nullable_user_email_for_mobile_phone_registration.php",
+        "database/migrations/2026_07_09_160000_extend_articles_for_news_management.php",
+        "database/migrations/2026_07_27_080000_create_sms_reminder_logs_table.php"
+    ]
 }

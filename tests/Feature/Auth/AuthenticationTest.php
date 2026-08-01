@@ -1,12 +1,17 @@
 <?php
 
 use App\Models\User;
+use Illuminate\Http\Request;
 use Laravel\Fortify\Features;
+use Laravel\Passkeys\Passkey;
+use Laravel\Passkeys\Passkeys;
 
 test('login screen can be rendered', function () {
     $response = $this->get(route('login'));
 
-    $response->assertOk();
+    $response
+        ->assertOk()
+        ->assertDontSee('Sign up');
 });
 
 test('users can authenticate using the login screen', function () {
@@ -35,6 +40,45 @@ test('users can not authenticate with invalid password', function () {
     $response->assertSessionHasErrorsIn('email');
 
     $this->assertGuest();
+});
+
+test('inactive staff accounts can not authenticate on the web', function () {
+    $user = User::factory()->inactive()->create();
+
+    $this->post(route('login.store'), [
+        'email' => $user->email,
+        'password' => 'password',
+    ])->assertSessionHasErrorsIn('email');
+
+    $this->assertGuest();
+});
+
+test('donor accounts can not authenticate on the staff web account', function () {
+    $user = User::factory()->donor()->create();
+
+    $this->post(route('login.store'), [
+        'email' => $user->email,
+        'password' => 'password',
+    ])->assertSessionHasErrorsIn('email');
+
+    $this->assertGuest();
+});
+
+test('passkey authorization rejects inactive and donor accounts', function () {
+    $request = Request::create('/passkeys/login', 'POST');
+
+    foreach ([User::factory()->inactive()->create(), User::factory()->donor()->create()] as $user) {
+        $passkey = new Passkey;
+        $passkey->setRelation('user', $user);
+
+        expect(Passkeys::allowsLogin($request, $passkey))->toBeFalse();
+    }
+
+    $staffUser = User::factory()->create();
+    $staffPasskey = new Passkey;
+    $staffPasskey->setRelation('user', $staffUser);
+
+    expect(Passkeys::allowsLogin($request, $staffPasskey))->toBeTrue();
 });
 
 test('users with two factor enabled are redirected to two factor challenge', function () {

@@ -17,6 +17,13 @@ return new class extends Migration
             $table->string('email')->unique();
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
+            $table->string('phone_number')->nullable();
+            $table->enum('blood_group', ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'])->nullable();
+            $table->enum('gender', ['male', 'female', 'other'])->nullable();
+            $table->date('date_of_birth')->nullable();
+            $table->text('address')->nullable();
+            $table->enum('role', ['donor', 'admin', 'staff'])->default('donor');
+            $table->boolean('is_active')->default(true);
             $table->rememberToken();
             $table->timestamps();
         });
