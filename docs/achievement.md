@@ -715,6 +715,112 @@ Next dependent task:
 
 - Install or provide a Flutter 3.41+/Dart 3.11-compatible SDK, run format/analyze/tests, then perform the Android donor-journey device pass against a configured `API_BASE_URL`.
 
+## 2026-08-01 — Public NBTS website foundation
+
+Status: completed
+
+Scope: public web, backend read models, localization, and frontend QA.
+
+Delivered:
+
+- Rebuilt the public website on Laravel 13 with a dedicated responsive layout, an NBTS editorial visual system, Lucide icons, restrained motion, accessible landmarks/focus states, and English/Kiswahili navigation and static guidance.
+- Added the home, about, donate, services, eligibility, center directory/detail, campaign directory/detail, news directory/detail, publications, FAQ, contact, download-app, and aggregate impact experiences.
+- Connected public directories to the cloned database with validated searches, bounded pagination, active-center enforcement, campaign lifecycle visibility, published-article visibility, draft/archive protection, and emergency-first campaign ordering.
+- Kept public impact data aggregate-only and withheld unverified app-store/QR destinations rather than inventing links or claims.
+- Reused selected approved visual assets from the previous workspace without copying environment files, credentials, generated dependencies, or private Firebase material.
+- Replaced the personal donor name in the reused mobile preview with the generic label `NBTS Donor`; the public project contains only the anonymized image.
+
+Main implementation:
+
+- `routes/web.php`
+- `app/Http/Controllers/Web/`
+- `app/Http/Requests/Web/`
+- `resources/views/layouts/public.blade.php`
+- `resources/views/web/`
+- `resources/views/components/public/`
+- `lang/en/public.php`
+- `lang/sw/public.php`
+- `resources/css/app.css`
+- `resources/js/app.js`
+- `tests/Feature/PublicWebsiteTest.php`
+
+Database/API impact:
+
+- No schema or existing-data changes were required.
+- Public web queries reuse the tested center, campaign, article, publication, donation, and unit/inventory records through read-only controllers and existing model visibility scopes.
+- The production-like clone correctly has no visible campaigns because all five legacy campaign dates have passed as of 2026-08-01.
+
+Automated verification:
+
+- Public website feature suite: 6 tests passed with 46 assertions.
+- Complete Laravel suite: 126 tests passed with 683 assertions.
+- `vendor/bin/phpstan analyse --memory-limit=1G --no-progress`: passed with zero errors.
+- `vendor/bin/pint --dirty --format agent`: passed.
+- `npm run build`: passed with 1,787 transformed modules.
+- Composer and npm security audits: no known vulnerabilities.
+
+Browser/device verification:
+
+- Agent-browser desktop pass at 1600×900 covered every implemented public route, including a live center detail and published news detail; all pages had the expected title/heading and no horizontal overflow.
+- English/Kiswahili switching, center filtering, FAQ expansion, desktop navigation, and the mobile navigation open/close state were exercised successfully.
+- Mobile overflow checks at 375/390-pixel widths passed for the home, centers, FAQ, download-app, and news pages.
+- Browser console and Laravel browser logs contained no application or JavaScript errors; only normal Vite development connection messages were present.
+
+Known limitations:
+
+- Managed records currently have one stored language; bilingual content fields, editorial fallback state, and staff publishing workflows remain pending.
+- Legal/privacy pages, complete social/canonical metadata, custom error pages, a dedicated publication detail route, and verified app-store/QR destinations remain pending.
+- The retained legacy official-news image is suitable only for small placements and is not used as a large hero because its source resolution is 357×210.
+
+Next dependent task:
+
+- Build the permission-aware Livewire/Flux staff shell and overview queues, then implement the workflow modules in operational order.
+
+## 2026-08-01 — Phase 0 operational and CI closure
+
+Status: completed
+
+Scope: repository automation, backup safety, operations documentation, and development access QA.
+
+Delivered:
+
+- Replaced the baseline CI setup with a MySQL 8.4 service that matches PHPUnit's `nbts_new_test` contract, locked PHP/npm installation, a clean production frontend build, and the repository's Pint/Larastan/Pest gate.
+- Added `docs/operations.md` with explicit environment boundaries, operator/approver roles, private backup handling, retention, isolated restore commands, verification evidence, deployment steps, and rollback controls without credentials.
+- Added `docs/api.md` as the current `/api/v1` and canonical Flutter endpoint/compatibility index, including the documentation/test update rule for every future contract change.
+- Moved the verified source archive from the stale package destination `storage/app/private/Laravel/` to the monitored `storage/app/private/NBTS/` destination after the application name correction and restricted it to mode `0600`.
+- Kept the agent-browser Chromium window visible at 1600×900 and verified reusable development access for the super-admin, center-manager, and center-staff web accounts plus the donor mobile API account.
+
+Database/API impact:
+
+- No schema or domain-record changes.
+- The `staff@nbts.test` development-demo password had drifted from the documented demo credential and was restored only in `nbts_new_dev`; no cloned personal-user password was changed.
+- The one live donor API token created for credential verification was immediately revoked after the request.
+
+Automated verification:
+
+- `composer ci:check`: passed Pint, Larastan level 7 with zero errors, and all 126 Pest tests with 683 assertions.
+- `npm ci`: 70 packages installed from the lockfile and zero vulnerabilities reported.
+- `npm run build`: passed with 1,787 transformed modules.
+- GitHub Actions workflow YAML parsing and `git diff --check`: passed.
+- `php artisan backup:list`: the NBTS destination is reachable and healthy with one monitored archive.
+- `unzip -t storage/app/private/NBTS/2026-08-01-09-19-58.zip`: no compressed-data errors; the expected `db-dumps/mysql-nbts.sql` member is present.
+
+Browser/device verification:
+
+- Visible 1600×900 browser login succeeded for `admin@nbts.test`, `manager@nbts.test`, and `staff@nbts.test` and reached `/dashboard` under each staff role.
+- Live password login for `donor@nbts.test` returned a valid bearer-token response through `/api/v1/auth/login`; the test token was then removed.
+- Browser QA exposed public Lucide initialization warnings that were not visible in the earlier error-only check; they remain an explicit Phase 4 fix and prevent the public phase from being marked complete.
+
+Known limitations:
+
+- The verified archive is a database-only, unencrypted, private local-development artifact. Media coverage, archive encryption, off-site storage, scheduled verification, production recovery objectives, and a production restore drill remain Phase 6 requirements.
+- CI syntax and the exact commands are locally verified; the first remote GitHub Actions run still requires a push or pull request.
+- Flutter checks remain unavailable until a compatible Flutter/Dart SDK is installed.
+
+Next dependent task:
+
+- Complete every open Phase 1 identity, rate-limiting, permission, localization, and cloned-account verification item before advancing to Phase 2.
+
 ## Achievement template
 
 Copy this section for future verified work.

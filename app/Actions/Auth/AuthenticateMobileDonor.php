@@ -28,8 +28,7 @@ final readonly class AuthenticateMobileDonor
         if ($user === null
             || ! Hash::check($password, $user->password)
             || ! $user->is_active
-            || $user->role !== RoleName::Donor->legacyValue()
-            || $user->hasAnyRole(RoleName::staffValues())) {
+            || ! $user->hasRole(RoleName::Donor->value)) {
             throw ValidationException::withMessages([
                 'identifier' => [trans('api.mobile_credentials_invalid')],
             ]);

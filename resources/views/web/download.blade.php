@@ -24,7 +24,7 @@
             </div>
             <div class="phone-stage reveal-on-scroll" aria-label="NBTS mobile donor app preview">
                 <div class="phone-frame">
-                    <img src="{{ asset('images/public/mobile-dashboard.jpeg') }}" alt="NBTS mobile donor dashboard showing eligibility, appointments, donor card, history, and profile">
+                    <img src="{{ asset('images/public/mobile-dashboard-anonymized.png') }}" alt="An anonymized NBTS mobile donor dashboard showing eligibility, appointments, donor card, history, and profile">
                 </div>
                 <div class="phone-stage__caption">
                     <span>NBTS Mobile</span>

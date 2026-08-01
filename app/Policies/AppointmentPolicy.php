@@ -63,6 +63,11 @@ class AppointmentPolicy
         return $this->reschedule($user, $appointment);
     }
 
+    public function delete(User $user, Appointment $appointment): bool
+    {
+        return $this->cancel($user, $appointment);
+    }
+
     public function transition(User $user, Appointment $appointment): bool
     {
         return $user->can(PermissionName::ManageAppointments->value)

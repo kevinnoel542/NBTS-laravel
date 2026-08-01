@@ -47,7 +47,7 @@ Update this file whenever work changes state. Mark an item complete only when it
 - [x] Verify the backup can be restored into an isolated database.
 - [x] Point automated tests at a dedicated test database.
 - [x] Point NBTS-NEW development at a clone rather than allowing both applications to write to the same working database.
-- [ ] Document the backup location, restore command, retention, and responsible operator without committing credentials.
+- [x] Document the private backup location, isolated restore command, retention, and responsible operator roles without committing credentials in `docs/operations.md`.
 
 ### Repository baseline
 
@@ -55,15 +55,15 @@ Update this file whenever work changes state. Mark an item complete only when it
 - [x] Confirm existing migrations remain marked as applied on the cloned database.
 - [x] Confirm a fresh test database can build the entire schema from zero.
 - [x] Compare table, column, index, and foreign-key definitions against the cloned database after additive security migrations.
-- [ ] Establish CI checks for Pest, Pint, Larastan, and frontend builds.
+- [x] Establish MySQL-backed GitHub Actions checks for Pest, Pint, Larastan, clean npm installation, and the production frontend build.
 
 ### Documentation controls
 
 - [x] Create `docs/task.md`.
 - [x] Create `docs/achievement.md`.
 - [x] Create `docs/workflow.md`.
-- [ ] Add deployment, backup, recovery, API, and operator documentation as those features become real.
-- [ ] Keep API and Flutter contract documentation synchronized with every API change.
+- [x] Add current deployment, backup, isolated recovery, and operator procedures in `docs/operations.md`; production disaster-recovery expansion remains explicitly tracked in Phase 6.
+- [x] Establish `docs/api.md` plus `docs/workflow.md` as the synchronized Laravel/Flutter v1 contract record, with a required change checklist and verification commands.
 
 ### Phase 0 completion gate
 
@@ -90,7 +90,7 @@ Update this file whenever work changes state. Mark an item complete only when it
 - [x] Merge the existing NBTS user fields into the new Fortify `User` model.
 - [x] Preserve Fortify two-factor and passkey traits.
 - [x] Preserve existing password hashes and remember tokens.
-- [-] Add relationships for donor profile, center assignments, appointments, donations, eligibility, deferrals, loyalty, notifications, and FCM tokens; the core donor/operations graph is complete, while loyalty, notification, and FCM-token relationships remain pending.
+- [-] Add relationships for donor profile, center assignments, appointments, donations, eligibility, deferrals, loyalty, notifications, and FCM tokens; the donor, operations, notification, and FCM-token graph is complete, while loyalty remains pending.
 - [x] Reconcile nullable mobile email with Fortify's email-first web flows.
 - [ ] Remove role duplication as a source of authority; permissions must be canonical.
 - [x] Keep legacy role data readable during migration.
@@ -140,7 +140,7 @@ Update this file whenever work changes state. Mark an item complete only when it
 ### Models, data, and reusable code
 
 - [x] Port and reconcile all deployed domain migrations without changing their historical contents.
-- [-] Port models, relationships, casts, scopes, and factories; the donor, center, appointment, eligibility, deferral, donation, blood-unit, inventory, adjustment, and low-stock core is complete.
+- [-] Port models, relationships, casts, scopes, and factories; the donor, center, appointment, eligibility, deferral, donation, blood-unit, inventory, adjustment, low-stock, campaign, article, notification, and FCM-token domains are complete, while loyalty and remaining staff-management domains are pending.
 - [ ] Port policies and authorization tests.
 - [ ] Port seeders for roles, permissions, centers, loyalty, content, and safe demo data.
 - [ ] Port repositories only where they provide a tested query boundary.
@@ -262,30 +262,30 @@ Update this file whenever work changes state. Mark an item complete only when it
 
 ### Shared public experience
 
-- [ ] Professional NBTS visual system, typography, spacing, colors, imagery, and motion.
-- [ ] Responsive header, navigation, search access, language switcher, and footer.
-- [ ] English and Kiswahili content strategy.
-- [ ] Accessibility: semantic landmarks, skip link, focus states, alt text, contrast, and keyboard operation.
-- [ ] SEO metadata, social metadata, favicon, canonical URLs, and helpful 404/500 pages.
-- [ ] No invented statistics, contacts, downloads, or app-store links.
+- [x] Professional NBTS visual system, typography, spacing, colors, imagery, and restrained motion.
+- [x] Responsive header, navigation, directory search, language switcher, and footer.
+- [x] English and Kiswahili public shell and static content, with database-managed records safely falling back to their stored language.
+- [x] Accessibility: semantic landmarks, skip link, focus states, alt text, contrast, keyboard operation, and reduced-motion handling.
+- [-] SEO metadata, social metadata, favicon, canonical URLs, and helpful 404/500 pages; descriptive page titles are complete, while the remaining metadata and error-page work is pending.
+- [x] No invented statistics, contacts, downloads, or app-store links.
 
 ### Required public pages
 
-- [ ] Home.
-- [ ] About NBTS, mission, vision, governance, and leadership.
-- [ ] Why donate and donation process.
-- [ ] Services: collection, laboratory, blood products, clinical use, and quality management.
-- [ ] Donor eligibility and deferral guidance.
-- [ ] Apheresis donation guidance.
-- [ ] Blood centers list, search, filters, and detail.
-- [ ] Campaigns list, filters, and detail.
-- [ ] News list and detail.
-- [ ] Publications list, filters, detail/download, and document metadata.
-- [ ] Public impact and analytics.
-- [ ] Regional contacts and collection schedules.
-- [ ] FAQ and donor safety guidance.
-- [ ] Contact, feedback, complaints, and customer-service charter.
-- [ ] Download app with verified links and QR target.
+- [x] Home.
+- [x] About NBTS, mission, vision, governance, and leadership.
+- [x] Why donate and donation process.
+- [x] Services: collection, laboratory, blood products, clinical use, and quality management.
+- [x] Donor eligibility and deferral guidance.
+- [x] Apheresis donation guidance.
+- [x] Blood centers list, search, filters, and detail.
+- [x] Campaigns list, filters, and detail.
+- [x] News list and detail.
+- [-] Publications list, download, and document metadata are complete; a dedicated publication detail route and staff filters remain pending.
+- [x] Public impact and analytics using aggregate, non-sensitive source records.
+- [-] Regional contacts and center opening schedules are available through center/contact pages; dedicated collection-schedule management remains pending.
+- [x] FAQ and donor safety guidance.
+- [x] Contact, feedback, complaints, and customer-service guidance.
+- [-] Download-app guidance and an anonymized app preview are complete; store links and a QR target remain intentionally absent until approved destinations are provided.
 - [ ] Privacy policy, terms, and data-protection notice.
 
 ### Public content management
@@ -297,10 +297,10 @@ Update this file whenever work changes state. Mark an item complete only when it
 
 ### Phase 4 completion gate
 
-- [ ] Public route tests pass.
+- [x] Public route, visibility, filtering, localization, and aggregate-data tests pass.
 - [ ] Content-management authorization tests pass.
-- [ ] Desktop and mobile browser smoke tests have no JavaScript or console errors.
-- [ ] Content is traceable to an approved source or managed backend record.
+- [x] Desktop 1600×900 and representative mobile browser smoke tests pass without JavaScript errors or horizontal overflow.
+- [x] Dynamic content is sourced from managed backend records; static copy and approved visual assets were reconciled from the previous NBTS workspace without copying credentials.
 
 ## Phase 5 — Workflow-driven staff and administrator accounts
 

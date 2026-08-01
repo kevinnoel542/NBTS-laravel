@@ -11,6 +11,5 @@ final readonly class VerifiedFirebaseIdentity
         public ?string $name,
         public ?string $photoUrl,
         public string $provider,
-    ) {
-    }
+    ) {}
 }

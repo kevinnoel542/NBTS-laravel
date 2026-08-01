@@ -8,6 +8,7 @@ use App\Models\BloodCenter;
 use App\Models\Campaign;
 use App\Models\Donation;
 use App\Models\User;
+use App\RoleName;
 use Illuminate\Contracts\View\View;
 
 final class ImpactController extends Controller
@@ -20,7 +21,9 @@ final class ImpactController extends Controller
         $stats = [
             'active_centers' => BloodCenter::query()->active()->count(),
             'active_campaigns' => Campaign::query()->publiclyVisible()->count(),
-            'donors' => User::query()->where('role', 'donor')->count(),
+            'donors' => User::query()
+                ->whereHas('roles', fn ($query) => $query->where('name', RoleName::Donor->value))
+                ->count(),
             'lives_supported' => $totalDonations * 3,
             'total_donations' => $totalDonations,
             'volume_litres' => (int) round(((int) (clone $completedDonations)->sum('volume_ml')) / 1000),

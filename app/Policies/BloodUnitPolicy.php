@@ -2,6 +2,7 @@
 
 namespace App\Policies;
 
+use App\Models\BloodCenter;
 use App\Models\BloodUnit;
 use App\Models\User;
 use App\PermissionName;
@@ -25,6 +26,17 @@ class BloodUnitPolicy
             && $user->hasCenterAccess($bloodUnit->blood_center_id);
     }
 
+    public function create(User $user): bool
+    {
+        return $user->can(PermissionName::ManageInventory->value);
+    }
+
+    public function createAt(User $user, BloodCenter $bloodCenter): bool
+    {
+        return $user->can(PermissionName::ManageInventory->value)
+            && $user->hasCenterAccess($bloodCenter);
+    }
+
     /**
      * Determine whether the user can create models.
      */
@@ -32,5 +44,16 @@ class BloodUnitPolicy
     {
         return $user->can(PermissionName::ManageInventory->value)
             && $user->hasCenterAccess($bloodUnit->blood_center_id);
+    }
+
+    public function update(User $user, BloodUnit $bloodUnit): bool
+    {
+        return $this->transition($user, $bloodUnit);
+    }
+
+    public function delete(User $user, BloodUnit $bloodUnit): bool
+    {
+        return $user->hasNationalScope()
+            && $this->transition($user, $bloodUnit);
     }
 }

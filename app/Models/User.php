@@ -163,6 +163,40 @@ class User extends Authenticatable implements HasLocalePreference, MustVerifyEma
             ->exists();
     }
 
+    public function hasDonorAccess(User|int $donor): bool
+    {
+        if (! $this->is_active) {
+            return false;
+        }
+
+        $donorId = $donor instanceof User ? $donor->id : $donor;
+
+        if ($this->id === $donorId || $this->hasNationalScope()) {
+            return true;
+        }
+
+        if (! $this->hasAnyRole([
+            RoleName::CenterManager->value,
+            RoleName::CenterStaff->value,
+        ])) {
+            return false;
+        }
+
+        $centerIds = $this->centerStaffAssignments()
+            ->where('is_active', true)
+            ->select('blood_center_id');
+
+        return User::query()
+            ->whereKey($donorId)
+            ->where(function (Builder $query) use ($centerIds): void {
+                $query
+                    ->whereHas('donorProfile', fn (Builder $profileQuery): Builder => $profileQuery->whereIn('preferred_center_id', clone $centerIds))
+                    ->orWhereHas('appointments', fn (Builder $appointmentQuery): Builder => $appointmentQuery->whereIn('blood_center_id', clone $centerIds))
+                    ->orWhereHas('donations', fn (Builder $donationQuery): Builder => $donationQuery->whereIn('blood_center_id', clone $centerIds));
+            })
+            ->exists();
+    }
+
     /** @return HasMany<CenterStaff, $this> */
     public function centerStaffAssignments(): HasMany
     {
@@ -211,6 +245,40 @@ class User extends Authenticatable implements HasLocalePreference, MustVerifyEma
     public function fcmTokens(): HasMany
     {
         return $this->hasMany(FcmToken::class);
+    }
+
+    /** @return HasMany<DonorBadge, $this> */
+    public function donorBadges(): HasMany
+    {
+        return $this->hasMany(DonorBadge::class);
+    }
+
+    /** @return BelongsToMany<Badge, $this> */
+    public function badges(): BelongsToMany
+    {
+        return $this->belongsToMany(Badge::class, 'donor_badges')
+            ->withPivot('awarded_at')
+            ->withTimestamps();
+    }
+
+    /** @return HasMany<DonorReward, $this> */
+    public function donorRewards(): HasMany
+    {
+        return $this->hasMany(DonorReward::class);
+    }
+
+    /** @return BelongsToMany<Reward, $this> */
+    public function rewards(): BelongsToMany
+    {
+        return $this->belongsToMany(Reward::class, 'donor_rewards')
+            ->withPivot(['status', 'awarded_at', 'redeemed_at'])
+            ->withTimestamps();
+    }
+
+    /** @return HasMany<Leaderboard, $this> */
+    public function leaderboardEntries(): HasMany
+    {
+        return $this->hasMany(Leaderboard::class);
     }
 
     /** @return HasMany<Deferral, $this> */

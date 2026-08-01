@@ -47,4 +47,16 @@ class DonationPolicy
         return $user->can(PermissionName::RecordDonations->value)
             && $user->hasCenterAccess($bloodCenter);
     }
+
+    public function update(User $user, Donation $donation): bool
+    {
+        return $user->can(PermissionName::RecordDonations->value)
+            && $user->hasCenterAccess($donation->blood_center_id);
+    }
+
+    public function delete(User $user, Donation $donation): bool
+    {
+        return $user->hasNationalScope()
+            && $this->update($user, $donation);
+    }
 }

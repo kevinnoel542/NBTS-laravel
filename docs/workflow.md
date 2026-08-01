@@ -311,6 +311,14 @@ Managed content includes articles, publications, campaigns, centers, schedules, 
 
 Public facts and contact details must come from approved backend records or a verified NBTS source. Old or unclear statistics must show their period and cannot be presented as current.
 
+Implemented public web contract:
+
+- Named Laravel routes render the home, institutional information, donation guidance, services, eligibility, center directory/detail, campaign directory/detail, news directory/detail, publications, FAQ, contact, app-download guidance, and aggregate impact pages.
+- Center, campaign, article, and publication visibility uses the same active/published lifecycle boundaries as the mobile API. Inactive centers, ended campaigns, drafts, archived records, and future publications are not exposed by detail routes.
+- Center, campaign, and news searches are validated and retain their filters through pagination. Impact totals are calculated from aggregate operational records and do not expose donor identity or sensitive stock details.
+- The public shell and static guidance are translated in English and Kiswahili. Managed database content currently displays in its stored language until bilingual content fields and editorial fallback rules are implemented.
+- App-store links and QR destinations are withheld until approved URLs exist. The app preview uses an anonymized donor label and no Firebase credentials, personal data, or service-account material is placed in public assets.
+
 ## Staff account navigation flow
 
 Navigation follows the work rather than database table names:

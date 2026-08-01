@@ -88,6 +88,28 @@ test('a donor can login using email or phone and the same device token is replac
         ->and(AuditLog::query()->where('action', 'mobile.password_authenticated')->count())->toBe(2);
 });
 
+test('canonical roles rather than the legacy role column control mobile access', function () {
+    $donor = User::factory()->donor()->create([
+        'email' => 'canonical-donor@example.test',
+    ]);
+    $donor->forceFill(['role' => 'admin'])->save();
+
+    $staff = User::factory()->staff()->create([
+        'email' => 'legacy-donor@example.test',
+    ]);
+    $staff->forceFill(['role' => 'donor'])->save();
+
+    $this->postJson(route('api.v1.auth.login'), [
+        'identifier' => $donor->email,
+        'password' => 'password',
+    ])->assertOk()->assertJsonPath('user.id', $donor->id);
+
+    $this->postJson(route('api.v1.auth.login'), [
+        'identifier' => $staff->email,
+        'password' => 'password',
+    ])->assertUnprocessable()->assertJsonValidationErrors('identifier');
+});
+
 test('invalid inactive and staff credentials all receive the same safe error', function () {
     $inactiveDonor = User::factory()->donor()->inactive()->create([
         'email' => 'inactive@example.test',

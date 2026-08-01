@@ -26,6 +26,7 @@ import {
     Megaphone,
     Menu,
     Microscope,
+    Newspaper,
     Phone,
     Search,
     SearchX,
@@ -41,6 +42,8 @@ import {
     Users,
     X,
 } from 'lucide';
+
+document.documentElement.classList.add('has-reveal');
 
 createIcons({
     icons: {
@@ -70,6 +73,7 @@ createIcons({
         Megaphone,
         Menu,
         Microscope,
+        Newspaper,
         Phone,
         Search,
         SearchX,
@@ -99,7 +103,10 @@ const setMenuState = (isOpen) => {
     }
 
     menuButton.setAttribute('aria-expanded', String(isOpen));
-    menuButton.setAttribute('aria-label', isOpen ? 'Close navigation' : 'Open navigation');
+    menuButton.setAttribute(
+        'aria-label',
+        isOpen ? menuButton.dataset.closeLabel : menuButton.dataset.openLabel,
+    );
     mobileMenu.hidden = !isOpen;
     document.body.classList.toggle('menu-is-open', isOpen);
 

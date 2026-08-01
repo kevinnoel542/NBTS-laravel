@@ -89,7 +89,16 @@
                     {{ __('public.nav.download') }}
                     <x-public.icon name="arrow-right" :size="17" />
                 </a>
-                <button class="menu-button" type="button" data-menu-button aria-expanded="false" aria-controls="mobile-navigation" aria-label="{{ __('public.nav.open_menu') }}">
+                <button
+                    class="menu-button"
+                    type="button"
+                    data-menu-button
+                    data-open-label="{{ __('public.nav.open_menu') }}"
+                    data-close-label="{{ __('public.nav.close_menu') }}"
+                    aria-expanded="false"
+                    aria-controls="mobile-navigation"
+                    aria-label="{{ __('public.nav.open_menu') }}"
+                >
                     <x-public.icon name="menu" :size="22" />
                 </button>
             </div>

@@ -114,7 +114,7 @@ final readonly class AuthenticateFirebaseUser
             throw new AuthorizationException(trans('api.mobile_account_inactive'));
         }
 
-        if ($user->role !== RoleName::Donor->legacyValue() || $user->hasAnyRole(RoleName::staffValues())) {
+        if (! $user->hasRole(RoleName::Donor->value)) {
             throw new AuthorizationException(trans('api.mobile_staff_link_denied'));
         }
 

@@ -9,6 +9,7 @@ use App\Models\BloodCenter;
 use App\Models\Campaign;
 use App\Models\Donation;
 use App\Models\User;
+use App\RoleName;
 use Illuminate\Contracts\View\View;
 
 final class HomeController extends Controller
@@ -23,7 +24,9 @@ final class HomeController extends Controller
             'campaigns' => Campaign::query()->publiclyVisible()->count(),
             'centers' => BloodCenter::query()->active()->count(),
             'donations' => $completedDonations,
-            'donors' => User::query()->where('role', 'donor')->count(),
+            'donors' => User::query()
+                ->whereHas('roles', fn ($query) => $query->where('name', RoleName::Donor->value))
+                ->count(),
             'lives_supported' => $completedDonations * 3,
         ];
 
