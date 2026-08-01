@@ -3,6 +3,7 @@
 namespace App\Livewire\Settings;
 
 use App\Concerns\ProfileValidationRules;
+use App\Concerns\ThrottlesSensitiveActions;
 use Flux\Flux;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Support\Facades\Auth;
@@ -14,6 +15,7 @@ use Livewire\Component;
 class Profile extends Component
 {
     use ProfileValidationRules;
+    use ThrottlesSensitiveActions;
 
     public string $name = '';
 
@@ -33,6 +35,8 @@ class Profile extends Component
      */
     public function updateProfileInformation(): void
     {
+        $this->throttleSensitiveAction('profile-update');
+
         $user = Auth::user();
 
         $validated = $this->validate($this->profileRules($user->id));
@@ -53,6 +57,8 @@ class Profile extends Component
      */
     public function resendVerificationNotification(): void
     {
+        $this->throttleSensitiveAction('verification-resend');
+
         $user = Auth::user();
 
         if ($user->hasVerifiedEmail()) {

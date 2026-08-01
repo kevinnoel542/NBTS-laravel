@@ -3,6 +3,7 @@
 namespace App\Livewire\Settings;
 
 use App\Concerns\PasswordValidationRules;
+use App\Concerns\ThrottlesSensitiveActions;
 use Exception;
 use Flux\Flux;
 use Illuminate\Support\Facades\Auth;
@@ -23,6 +24,7 @@ use Livewire\Component;
 class Security extends Component
 {
     use PasswordValidationRules;
+    use ThrottlesSensitiveActions;
 
     public string $current_password = '';
 
@@ -97,6 +99,8 @@ class Security extends Component
      */
     public function updatePassword(): void
     {
+        $this->throttleSensitiveAction('password-update');
+
         try {
             $validated = $this->validate([
                 'current_password' => $this->currentPasswordRules(),
@@ -157,6 +161,8 @@ class Security extends Component
             return;
         }
 
+        $this->throttleSensitiveAction('passkey-delete');
+
         $user = Auth::user();
         $passkey = $user->passkeys()->findOrFail($this->deletingPasskeyId);
 
@@ -181,6 +187,8 @@ class Security extends Component
      */
     public function enable(EnableTwoFactorAuthentication $enableTwoFactorAuthentication): void
     {
+        $this->throttleSensitiveAction('two-factor-enable');
+
         $enableTwoFactorAuthentication(auth()->user());
 
         if (! $this->requiresConfirmation) {
@@ -230,6 +238,8 @@ class Security extends Component
      */
     public function confirmTwoFactor(ConfirmTwoFactorAuthentication $confirmTwoFactorAuthentication): void
     {
+        $this->throttleSensitiveAction('two-factor-confirm');
+
         $this->validate();
 
         $confirmTwoFactorAuthentication(auth()->user(), $this->code);
@@ -254,6 +264,8 @@ class Security extends Component
      */
     public function disable(DisableTwoFactorAuthentication $disableTwoFactorAuthentication): void
     {
+        $this->throttleSensitiveAction('two-factor-disable');
+
         $disableTwoFactorAuthentication(auth()->user());
 
         $this->twoFactorEnabled = false;

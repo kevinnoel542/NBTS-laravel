@@ -821,6 +821,44 @@ Next dependent task:
 
 - Complete every open Phase 1 identity, rate-limiting, permission, localization, and cloned-account verification item before advancing to Phase 2.
 
+## 2026-08-01 — Phase 1 canonical roles and record authorization
+
+Status: completed
+
+Scope: backend identity, authorization, center isolation, and loyalty relationships.
+
+Delivered:
+
+- Completed the `User` relationship graph for badges, donor badges, rewards, donor rewards, and leaderboard entries with typed loyalty models, casts, scopes, enums, and factories.
+- Removed the legacy `users.role` column from runtime mobile authentication and public donor counts; Spatie roles and permissions are now canonical, while the column remains readable only for migration/backfill compatibility.
+- Added automatically discovered policies for all 22 application record models and completed the supported actions on the four existing policies.
+- Enforced donor ownership for personal notification, device-token, eligibility, deferral, and loyalty records.
+- Enforced assigned-center boundaries for donor visibility, center staffing, eligibility, deferrals, appointments, donations, blood units, inventory, adjustments, alerts, and non-public campaign records.
+- Preserved the national operations boundary: NBTS administrators can operate nationally without user/role, backup, or settings authority; active super administrators retain the explicit whole-system override.
+
+Database/API impact:
+
+- No schema or existing-data changes.
+- Mobile password and Firebase authentication now reject accounts without the canonical donor role even when the legacy role column says `donor`.
+
+Automated verification:
+
+- Canonical-role mobile/Firebase/public regression group: 21 tests passed with 169 assertions.
+- Record-policy, center authorization, appointment, donation, and inventory workflow group: 24 tests passed with 157 assertions.
+- Laravel Pint formatted all touched PHP files before both test groups.
+
+Browser/device verification:
+
+- No UI was added for this backend authorization milestone; the existing visible 1600×900 authenticated staff browser remains open for the later Phase 1 locale smoke pass.
+
+Known limitations:
+
+- Phase 1 remains open for sensitive-action throttling, complete English/Kiswahili coverage, bilingual managed-content rules, stable API-code verification, and cloned-account authentication evidence.
+
+Next dependent task:
+
+- Complete and test sensitive Fortify and Livewire action throttling before starting the remaining Phase 1 localization work.
+
 ## Achievement template
 
 Copy this section for future verified work.

@@ -90,9 +90,9 @@ Update this file whenever work changes state. Mark an item complete only when it
 - [x] Merge the existing NBTS user fields into the new Fortify `User` model.
 - [x] Preserve Fortify two-factor and passkey traits.
 - [x] Preserve existing password hashes and remember tokens.
-- [-] Add relationships for donor profile, center assignments, appointments, donations, eligibility, deferrals, loyalty, notifications, and FCM tokens; the donor, operations, notification, and FCM-token graph is complete, while loyalty remains pending.
+- [x] Add relationships for donor profile, center assignments, appointments, donations, eligibility, deferrals, loyalty, notifications, and FCM tokens.
 - [x] Reconcile nullable mobile email with Fortify's email-first web flows.
-- [ ] Remove role duplication as a source of authority; permissions must be canonical.
+- [x] Remove role duplication as a source of authority; permissions must be canonical, with `users.role` retained only as migration/backfill compatibility data.
 - [x] Keep legacy role data readable during migration.
 - [x] Update the user factory with realistic donor/staff/admin states.
 
@@ -111,12 +111,12 @@ Update this file whenever work changes state. Mark an item complete only when it
 
 - [x] Restore `super_admin`, `nbts_admin`, `center_manager`, `center_staff`, and `donor` roles.
 - [x] Define permissions for users, donors, centers, appointments, eligibility, donations, inventory, campaigns, content, notifications, reports, audits, backups, and settings.
-- [ ] Super admins can manage the whole system.
-- [ ] NBTS admins can manage national operations without unrestricted infrastructure access.
-- [-] Center managers are restricted to assigned centers; the reusable center scope and blood-center policy are complete, while remaining record policies are pending.
-- [-] Center staff can perform only assigned operational tasks at assigned centers; the permission matrix and center scope are complete, while remaining record policies are pending.
+- [x] Super admins can manage the whole system through the active-account global authorization override.
+- [x] NBTS admins can manage national operations without unrestricted infrastructure access.
+- [x] Center managers are restricted to assigned centers across donor and operational record policies.
+- [x] Center staff can perform only assigned operational tasks at assigned centers.
 - [x] Donors cannot enter staff/admin routes.
-- [ ] Policies cover every record-level action.
+- [x] Policies cover every application record model and its supported record-level actions.
 
 ### English and Kiswahili
 

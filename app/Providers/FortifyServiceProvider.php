@@ -9,6 +9,7 @@ use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\RateLimiter;
+use Illuminate\Support\Facades\Route;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Str;
 use Laravel\Fortify\Fortify;
@@ -35,6 +36,7 @@ class FortifyServiceProvider extends ServiceProvider
         $this->configureAuthentication();
         $this->configureViews();
         $this->configureRateLimiting();
+        $this->configureSensitiveRoutes();
     }
 
     /**
@@ -107,6 +109,42 @@ class FortifyServiceProvider extends ServiceProvider
             return Limit::perMinute(10)->by(
                 ($credentialId ?: $request->session()->getId()).'|'.$request->ip(),
             );
+        });
+
+        RateLimiter::for('sensitive-auth', function (Request $request) {
+            $routeName = $request->route()?->getName() ?? 'sensitive-auth';
+            $identity = $request->user()?->getAuthIdentifier()
+                ?? Str::lower((string) $request->input('email'))
+                ?: $request->session()->getId();
+            $key = $routeName.'|'.$identity.'|'.$request->ip();
+
+            return [
+                Limit::perMinute(5)->by('minute:'.$key),
+                Limit::perHour(30)->by('hour:'.$key),
+            ];
+        });
+    }
+
+    /**
+     * Attach the shared limiter after Fortify has registered its routes.
+     */
+    private function configureSensitiveRoutes(): void
+    {
+        $this->app->booted(function (): void {
+            foreach ([
+                'password.email',
+                'password.update',
+                'password.confirm.store',
+                'two-factor.enable',
+                'two-factor.confirm',
+                'two-factor.disable',
+                'two-factor.regenerate-recovery-codes',
+                'passkey.destroy',
+            ] as $routeName) {
+                Route::getRoutes()
+                    ->getByName($routeName)
+                    ?->middleware('throttle:sensitive-auth');
+            }
         });
     }
 }
