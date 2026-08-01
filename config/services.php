@@ -8,7 +8,7 @@ return [
     |--------------------------------------------------------------------------
     |
     | This file is for storing the credentials for third party services such
-    | as Mailgun, Postmark, AWS and more. This file provides the de facto
+    | as Resend, Postmark, AWS, and more. This file provides the de facto
     | location for this type of information, allowing packages to have
     | a conventional file to locate the various service credentials.
     |
@@ -32,36 +32,6 @@ return [
         'notifications' => [
             'bot_user_oauth_token' => env('SLACK_BOT_USER_OAUTH_TOKEN'),
             'channel' => env('SLACK_BOT_USER_DEFAULT_CHANNEL'),
-        ],
-    ],
-
-    'firebase' => [
-        'enabled' => env('FIREBASE_NOTIFICATIONS_ENABLED', false),
-        'server_key' => env('FIREBASE_SERVER_KEY'),
-        'project_id' => env('FIREBASE_PROJECT_ID'),
-        'credentials' => env('FIREBASE_CREDENTIALS'),
-    ],
-
-    'sms' => [
-        'driver' => env('SMS_DRIVER', 'log'),
-        'from' => env('SMS_FROM', 'NBTS'),
-
-        'africas_talking' => [
-            'username' => env('AFRICASTALKING_USERNAME'),
-            'api_key' => env('AFRICASTALKING_API_KEY'),
-            'sender_id' => env('AFRICASTALKING_SENDER_ID', env('SMS_FROM', 'NBTS')),
-        ],
-
-        'beem' => [
-            'source_addr' => env('BEEM_SOURCE_ADDR', env('SMS_FROM', 'NBTS')),
-            'api_key' => env('BEEM_API_KEY'),
-            'secret_key' => env('BEEM_SECRET_KEY'),
-        ],
-
-        'twilio' => [
-            'sid' => env('TWILIO_SID'),
-            'token' => env('TWILIO_TOKEN'),
-            'from' => env('TWILIO_FROM'),
         ],
     ],
 
