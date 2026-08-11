@@ -1,7 +1,9 @@
 <?php
 
 use App\Livewire\Settings\Security;
+use App\Models\AuditLog;
 use App\Models\User;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Laravel\Fortify\Features;
 use Livewire\Livewire;
@@ -111,4 +113,126 @@ test('correct password must be provided to update password', function () {
         ->call('updatePassword');
 
     $response->assertHasErrors(['current_password']);
+});
+
+test('active database sessions are listed with device context', function () {
+    config(['session.driver' => 'database']);
+
+    $user = User::factory()->create();
+    $this->actingAs($user);
+
+    DB::table('sessions')->insert([
+        'id' => 'firefox-mobile-session',
+        'user_id' => $user->id,
+        'ip_address' => '192.0.2.24',
+        'user_agent' => 'Mozilla/5.0 (Android 14; Mobile; rv:126.0) Gecko/126.0 Firefox/126.0',
+        'payload' => base64_encode(serialize([])),
+        'last_activity' => now()->getTimestamp(),
+    ]);
+
+    Livewire::test(Security::class)
+        ->assertSee('Active sessions')
+        ->assertSee('Firefox')
+        ->assertSee('Android')
+        ->assertSee('192.0.2.24')
+        ->assertSee('This device');
+});
+
+test('a user can revoke another session after confirming their password', function () {
+    config(['session.driver' => 'database']);
+
+    $user = User::factory()->create([
+        'password' => Hash::make('correct-password'),
+    ]);
+    $this->actingAs($user);
+
+    DB::table('sessions')->insert([
+        'id' => 'unrecognized-session',
+        'user_id' => $user->id,
+        'ip_address' => '198.51.100.18',
+        'user_agent' => 'Mozilla/5.0 (Windows NT 10.0) AppleWebKit/537.36 Chrome/126.0',
+        'payload' => base64_encode(serialize([])),
+        'last_activity' => now()->getTimestamp(),
+    ]);
+
+    Livewire::test(Security::class)
+        ->call('confirmSessionRevocation', 'unrecognized-session')
+        ->assertSet('showSessionModal', true)
+        ->set('session_password', 'correct-password')
+        ->call('revokeSessions')
+        ->assertHasNoErrors()
+        ->assertSet('showSessionModal', false);
+
+    $this->assertDatabaseMissing('sessions', ['id' => 'unrecognized-session']);
+    $this->assertDatabaseHas('audit_logs', [
+        'actor_id' => $user->id,
+        'action' => 'account.session_revoked',
+        'subject_id' => $user->id,
+        'subject_type' => $user->getMorphClass(),
+    ]);
+});
+
+test('another users session cannot be selected or revoked', function () {
+    config(['session.driver' => 'database']);
+
+    $user = User::factory()->create();
+    $otherUser = User::factory()->create();
+    $this->actingAs($user);
+
+    DB::table('sessions')->insert([
+        'id' => 'other-users-session',
+        'user_id' => $otherUser->id,
+        'ip_address' => '203.0.113.45',
+        'user_agent' => 'Mozilla/5.0 (Macintosh) AppleWebKit/605.1.15 Safari/605.1.15',
+        'payload' => base64_encode(serialize([])),
+        'last_activity' => now()->getTimestamp(),
+    ]);
+
+    Livewire::test(Security::class)
+        ->call('confirmSessionRevocation', 'other-users-session')
+        ->assertSet('showSessionModal', false);
+
+    $this->assertDatabaseHas('sessions', [
+        'id' => 'other-users-session',
+        'user_id' => $otherUser->id,
+    ]);
+    expect(AuditLog::query()->where('action', 'account.session_revoked')->exists())->toBeFalse();
+});
+
+test('all other sessions require a valid current password and preserve this device', function () {
+    config(['session.driver' => 'database']);
+
+    $user = User::factory()->create([
+        'password' => Hash::make('correct-password'),
+    ]);
+    $this->actingAs($user);
+
+    foreach (['other-session-one', 'other-session-two'] as $sessionId) {
+        DB::table('sessions')->insert([
+            'id' => $sessionId,
+            'user_id' => $user->id,
+            'ip_address' => '198.51.100.8',
+            'user_agent' => 'Mozilla/5.0 (Linux) AppleWebKit/537.36 Chrome/126.0',
+            'payload' => base64_encode(serialize([])),
+            'last_activity' => now()->getTimestamp(),
+        ]);
+    }
+
+    $component = Livewire::test(Security::class)
+        ->call('confirmOtherSessionRevocation')
+        ->assertSet('revokeAllOtherSessions', true)
+        ->set('session_password', 'incorrect-password')
+        ->call('revokeSessions')
+        ->assertHasErrors(['session_password']);
+
+    expect(DB::table('sessions')->where('user_id', $user->id)->count())->toBe(2);
+
+    $component
+        ->set('session_password', 'correct-password')
+        ->call('revokeSessions')
+        ->assertHasNoErrors()
+        ->assertSee('This device');
+
+    expect(DB::table('sessions')->where('user_id', $user->id)->count())->toBe(0)
+        ->and(AuditLog::query()->where('action', 'account.other_sessions_revoked')->count())->toBe(1);
 });

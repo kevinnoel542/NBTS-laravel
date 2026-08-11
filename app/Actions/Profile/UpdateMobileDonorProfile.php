@@ -63,6 +63,7 @@ final readonly class UpdateMobileDonorProfile
                 'emergency_contact_name',
                 'emergency_contact_phone',
                 'push_notifications_enabled',
+                'email_notifications_enabled',
                 'sms_reminders_enabled',
                 'share_anonymized_data',
                 'language',

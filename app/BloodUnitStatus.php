@@ -17,12 +17,13 @@ enum BloodUnitStatus: string
     public function canTransitionTo(self $status): bool
     {
         return in_array($status, match ($this) {
-            self::Collected => [self::Testing, self::Rejected, self::Discarded],
-            self::Testing => [self::Available, self::Rejected, self::Discarded],
+            self::Collected => [self::Testing, self::Rejected, self::Expired, self::Discarded],
+            self::Testing => [self::Available, self::Rejected, self::Expired, self::Discarded],
             self::Available => [self::Reserved, self::Transferred, self::Used, self::Expired, self::Discarded],
             self::Reserved => [self::Available, self::Transferred, self::Used, self::Expired, self::Discarded],
             self::Transferred => [self::Testing, self::Available, self::Reserved, self::Used, self::Expired, self::Discarded],
-            self::Used, self::Rejected, self::Expired, self::Discarded => [],
+            self::Rejected, self::Expired => [self::Discarded],
+            self::Used, self::Discarded => [],
         }, true);
     }
 

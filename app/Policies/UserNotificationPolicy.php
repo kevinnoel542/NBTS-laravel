@@ -32,8 +32,7 @@ class UserNotificationPolicy
      */
     public function create(User $user): bool
     {
-        return $user->hasNationalScope()
-            && $user->can(PermissionName::ManageNotifications->value);
+        return $user->can(PermissionName::ManageNotifications->value);
     }
 
     /**

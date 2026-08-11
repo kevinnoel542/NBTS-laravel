@@ -1,10 +1,19 @@
 # NBTS system workflow
 
-Last updated: 2026-08-01
+Last updated: 2026-08-11
 
 ## Purpose
 
 This document is the target operating model for NBTS-NEW. It merges the useful behavior from the previous NBTS workspace with the new Laravel 13, Fortify, Livewire 4, Flux UI, Tailwind CSS 4, Pest 5, Firebase, and Flutter foundation.
+
+## Document authority and implementation boundary
+
+This document defines the target operating model. It intentionally distinguishes:
+
+- **Verified current foundation:** donor accounts, reception/search, public/mobile discovery, appointments and staff rescheduling/check-in, donor card, staff-led screening and deferrals, donation history and idempotent completion, blood-group verification, auditable blood-unit/inventory transitions, expiry/disposal/reconciliation, center scoping, low-stock response, campaigns, deterministic donor recognition, multi-channel notification orchestration, reminder idempotency, delivery observability, public website, and stable API contracts recorded in `docs/achievement.md`.
+- **Target national extension:** detailed center hierarchy, operational roles, unique donation/barcode chain, laboratory/QC, hard quarantine, authorized release, component production and lineage, component-level inventory, cold chain, hospital requests, compatibility, issue/dispatch/receipt, bedside transfusion, haemovigilance, recall/look-back, quality management, interoperability, downtime, disaster recovery, and controlled rollout.
+
+Target sections are requirements, not claims of implementation. Clinical, laboratory, quality, hospital, data-protection, legal, Ministry, and operational rules remain subject to formal approval and versioning.
 
 Legacy sources reconciled:
 
@@ -39,18 +48,117 @@ Center staff, center managers, NBTS administrators, and super administrators use
 
 Laravel owns authentication, authorization, API contracts, business transactions, audit logging, queues, scheduling, reporting, document generation, notification orchestration, and data integrity.
 
+
+### National coordination and command layer
+
+NBTS national users coordinate approved policy, master data, quality, inventory balancing, emergency allocation, donor engagement, haemovigilance, analytics, service support, data governance, and rollout across centers. National visibility does not remove center accountability or clinical separation of duties.
+
+### Blood-center operating layer
+
+Each approved center has a defined type, services, departments, staff assignments, storage/work locations, equipment, routes, hospitals served, capacity, operating hours, downtime method, and escalation contacts. A center can perform only functions approved for its type and current status.
+
+### Hospital and transfusion layer
+
+Hospitals use an approved portal or interoperable local system for clinical requests, patient/specimen identification, compatibility, allocation, issue/receipt, bedside verification, transfusion outcomes, returns, reactions, and look-back. Hospital access is organization-scoped and minimum-necessary.
+
+### Integration, devices, and field operations
+
+The platform connects approved laboratory analyzers/LIS, HMIS/DHIS2, barcode printers/scanners, temperature sensors, GPS/fleet tools, messaging providers, identity services, and offline field devices through validated interfaces. No integration writes directly to authoritative tables.
+
 ## Roles and operating scope
+
+Permissions, center/hospital assignments, department, competency, active status, and separation-of-duties rules decide access. Role names are convenient permission bundles, not the only authorization boundary.
+
+### Current canonical roles
 
 | Role | Primary responsibility | Data scope |
 | --- | --- | --- |
 | Public visitor | Learn, locate services, read approved content, contact NBTS | Published public data |
-| Donor | Manage personal donor journey through Flutter | Own records and public data |
-| Center staff | Reception, screening, donation and blood operations | Assigned active centers |
-| Center manager | Supervise center operations, stock, staff and center reports | Assigned active centers |
-| NBTS admin | National operations, campaigns, content, analytics and governance | National operational data |
-| Super admin | Security, configuration, recovery and full administration | Entire system |
+| Donor | Manage the personal donor journey through Flutter | Own records and public data |
+| Center staff | Compatibility role for permitted center operations | Assigned active centers and permitted actions |
+| Center manager | Supervise assigned-center operations, staff, stock, incidents, and reports | Assigned active centers |
+| NBTS admin | National operational administration without unrestricted infrastructure authority | Approved national operational data |
+| Super admin | Technical security, configuration, recovery, and full administration | Entire system, but not automatic clinical release authority |
 
-Permissions, not role names, decide whether a page, action, metric, or export is available. Center assignments further restrict record scope.
+### National operational profiles
+
+- National operations administrator.
+- National quality and haemovigilance officer.
+- National inventory and logistics coordinator.
+- National donor engagement/content officer.
+- National data-protection and governance officer.
+- National auditor/inspector with read-only evidence access.
+- ICT/security/support operator.
+
+### Blood-center operational profiles
+
+- Center manager.
+- Reception officer.
+- Screening and counselling officer.
+- Collection/phlebotomy officer.
+- Laboratory technician.
+- Laboratory approver/quality officer.
+- Component-processing officer.
+- Inventory/storage officer.
+- Logistics/cold-chain officer.
+- Center haemovigilance/quality officer.
+- Center read-only auditor/viewer.
+
+### Hospital operational profiles
+
+- Hospital clinician/requester.
+- Hospital blood-bank officer.
+- Compatibility/crossmatch officer.
+- Transfusion nurse/officer.
+- Hospital haemovigilance officer.
+- Hospital read-only reviewer.
+
+A person may hold more than one profile where staffing requires it, but the system must still enforce prohibited combinations. The person who performs a test must not be the sole person who verifies and releases the same component when dual control is required. Technical administrators cannot grant themselves clinical release authority through infrastructure access.
+
+## Center hierarchy, types, departments, and assignments
+
+Target hierarchy:
+
+`National NBTS → approved zone/region where applicable → blood center → department → work/storage location`
+
+The exact national and regional structure must be approved during discovery. Candidate center types for assessment—not assumed current policy—include full collection/testing/processing centers, collection-only sites/mobile teams, testing/processing hubs, storage/distribution hubs, and hospital blood-bank interfaces.
+
+Each center record controls:
+
+- Stable code, type, status, region/zone, location, contacts, opening hours, capacity, and emergency contacts.
+- Approved donation methods, laboratory tests, component processing, storage, issue/distribution, hospitals served, mobile teams, and downtime capability.
+- Departments, storage/work locations, equipment, vehicles/routes, stock thresholds, and responsible owners.
+- Staff assignment with department/profile, shift, effective dates, approver, active state, and competency restrictions.
+
+## Overview and work-queue workflow
+
+### National overview
+
+Shows component-level stock and days of supply, shortages, quarantine, release, collection and usable yield, expiry/discard, hospital request fill, transfers, cold-chain incidents, adverse events, recalls, center performance, service health, and data-quality exceptions.
+
+### Center-manager overview
+
+Shows today’s donors and appointments, reception/screening/collection queues, specimens/tests pending, quarantine/release work, component stock/reservations/expiry, hospital requests, dispatch/receipt, temperature alarms, incidents, CAPA, staff coverage, and overdue tasks for assigned centers.
+
+### Department overview
+
+Each staff member sees the selected-center context and only queues permitted by assignment, for example reception waiting list, screening queue, collection handoff, laboratory samples/tests, release approvals, processing work, inventory exceptions, dispatches, transfusion outcomes, or quality investigations.
+
+### Hospital overview
+
+Shows requests, compatibility work, allocations, issued/in-transit components, receipt exceptions, pending transfusion outcomes, returns, reactions, and overdue reconciliation for the hospital.
+
+### ICT/super-admin overview
+
+Shows outages, failed jobs, interface/dead-letter backlogs, security alerts, audit-integrity status, backup age, restore-test status, certificate expiry, sensor/device connectivity, and support incidents.
+
+All dashboard cards link to the queue or source records that explain them. Critical work includes age, owner, SLA, escalation state, and overdue status.
+
+### Verified Phase 2 operational workspaces
+
+The staff command center now provides compact, center-aware workspaces for donor reception, appointments, eligibility, donations, blood operations, response, engagement, and content. Each workspace has a descriptive heading, workflow tabs, search, role-appropriate status/date filters, clear/reset controls, configurable columns, sorting, pagination, CSV export, and audited record actions. Tables contract to their content so short queues do not create oversized empty cards.
+
+Notification orchestration records one delivery plan per recipient and channel. In-app delivery is native; email, SMS, and push use retryable channel adapters and retain status, attempts, provider identifiers, and safe failure details. External SMS and push default to construction-safe log transports. Setting `PUSH_TRANSPORT=fcm` with approved Firebase credentials activates the Phase 3 HTTP v1 transport without changing the delivery contract.
 
 ## Language workflow
 
@@ -74,6 +182,12 @@ Permissions, not role names, decide whether a page, action, metric, or export is
 6. Authorization resolves roles, permissions, and active center assignments.
 7. The user enters the first permitted workflow queue, normally Overview.
 8. The audit trail records successful and failed security-relevant events without storing secrets.
+
+Current construction decision:
+
+- Staff email verification, verification notices, and resend routes are disabled while the system and local demo accounts are being built.
+- Firebase's trusted verified-email claim remains required where the mobile identity-linking workflow states it is required; this is separate from staff web email verification.
+- Before pilot or production acceptance, the product and security owners must decide whether staff email verification is re-enabled and update the access tests and operating procedure accordingly.
 
 ### Passkey login
 
@@ -117,7 +231,7 @@ Permissions, not role names, decide whether a page, action, metric, or export is
 9. Staff confirms identity and profile details.
 10. Staff performs and records the health/eligibility screening.
 11. If eligible, staff records the collection and later confirms the blood group and unit status.
-12. The transaction updates the appointment, donation history, next eligibility, loyalty, blood unit, inventory, alerts, audit trail, and notifications.
+12. The verified current foundation updates the appointment, donation history, next eligibility, legacy blood-unit record, basic inventory controls, audit trail, and notifications. The target workflow then continues through specimens, laboratory/QC, quarantine/release, component production, component inventory, hospital issue, transfusion outcome, and haemovigilance.
 13. The donor sees updated history and receives appropriate in-app/push/SMS/email communication based on consent and configuration.
 
 ## Reception and donor identification
@@ -196,16 +310,16 @@ Eligibility codes:
 3. Staff chooses appointment or walk-in and records collection details.
 4. Laravel rechecks eligibility at the moment of completion.
 5. One database transaction:
-   - Creates the donation.
+   - Creates the donation/collection episode.
    - Links and completes the appointment when applicable.
    - Updates donor and donor-profile history.
    - Calculates the next eligible date.
-   - Creates one blood unit with a unique unit number and expiry date.
-   - Applies the initial inventory effect appropriate to the initial unit status.
-   - Awards deterministic loyalty milestones.
-   - Writes audit events/outbox records.
+   - Creates or assigns the unique donation identifier and original collection-container record in quarantine.
+   - Links the expected specimen/label set without adding usable inventory.
+   - Records donor-care outcomes and audit/outbox evidence.
+   - Preserves the current legacy blood-unit compatibility record during migration until the approved component model replaces it.
 6. Notifications and other remote effects run after commit through queued work.
-7. Repeating the same request cannot create a second donation or blood unit.
+7. Repeating the same request cannot create a second donation, collection identifier, original container, or duplicate specimen-label set. Derived components are created only through the later controlled processing workflow.
 
 ## Blood-group verification
 
@@ -219,45 +333,159 @@ Blood-group confidence moves through:
 4. Donation, donor, and donor-profile fields remain consistent.
 5. Changing an already verified blood group is high risk: it requires reason, elevated permission, confirmation, and audit before/after values.
 
-## Blood-unit lifecycle and inventory
+## Donation identification, specimens, and barcode chain
 
-### Unit lifecycle
+1. After the final eligibility decision and identity confirmation, the collection workflow creates or receives one approved unique donation identification number.
+2. Chair-side labels link the donor episode, original collection container, every specimen, and later components.
+3. Every scan records operator, center/location, time, device, and action. Reprints require reason and void previous unused labels.
+4. Unmatched, duplicated, damaged, replaced, or unaccounted labels open an exception and block the affected chain.
+5. The current one-donation/one-legacy-blood-unit invariant is transitional. The target creates one collection record and may produce zero or more traceable components.
+6. Adoption of ISBT 128 or a national equivalent requires approved national policy, product coding, label design, printer/scanner validation, and migration planning.
 
-`collected → testing → available → reserved → used`
+## Laboratory, quarantine, and authorized release
 
-Additional controlled outcomes:
+### Specimen and test workflow
 
-- `testing → rejected → discarded`
-- `available|reserved → transferred`
-- `collected|testing|available|reserved → expired → discarded`
+1. Laboratory staff receive each specimen by barcode and confirm its donation/container match.
+2. Rejected, missing, damaged, insufficient, or mismatched specimens are recorded and cannot silently disappear.
+3. Approved rules create required blood-group, transfusion-transmissible-infection, and other test orders.
+4. Each test run records method/instrument, reagent and control lots, operator, time, raw/result value, validity, repeats, discrepancies, and interface provenance.
+5. Internal QC, EQA, analyzer maintenance, reagent expiry/recall, and staff competency are part of the routine workflow rather than separate paperwork.
+6. Results are reviewed and authorized by permitted laboratory staff.
+
+### Hard quarantine
+
+Original containers and all components remain in physical and digital quarantine until every configured test, interpretation, processing, QC, identification, expiry, and cold-chain criterion is satisfied. Quarantined, incomplete, reactive, discrepant, invalid, failed-QC, recalled, expired, unlabelled, or unresolved-excursion components never contribute to available inventory.
+
+### Release workflow
+
+1. The release service evaluates the approved versioned criteria on the authoritative system.
+2. It records tests and QC evaluated, criteria version, decision, approver, second approver where required, time, signature, reason, and exceptions.
+3. The same technician cannot be the sole tester, verifier, and releaser where separation is required.
+4. Failed criteria lead to repeat testing, investigation, rejection, discard, donor counselling/referral, recall/look-back, or another approved disposition.
+5. Emergency release cannot transform untested or unsafe donor blood into routine released stock.
+
+Representative laboratory/component states:
+
+`identified → quarantined → specimen_received → testing → results_pending_review → processing/QC_pending → release_review → released | rejected | investigation_hold | recalled`
+
+## Component production and lineage
+
+1. Approved processing converts an original collection into zero or more products such as red-cell, plasma, platelet, or other nationally approved components.
+2. Every component receives a unique product identifier while retaining the original donation identifier.
+3. Parent-child lineage records splits, pools, modifications, processing method/device, operator, time, yields, QC, deviations, labels, storage requirements, and component-specific expiry.
+4. Orphan products, unexplained yield differences, missing labels, or incomplete lineage remain held.
+5. Product catalog, codes, shelf lives, additive solutions, quality criteria, and storage conditions are versioned national master data.
+
+## Component inventory, storage, transfer, and distribution
+
+### Component lifecycle
+
+`quarantined → processing → QC_pending → release_review → released → available → reserved → allocated → issued → dispatched → received → transfused | returned | discarded | recalled`
+
+Additional controlled states include `investigation_hold`, `expired`, `rejected`, `lost`, and `transfer_in_transit`. No user may jump directly from collection/testing to available.
 
 ### Inventory effects
 
-- Inventory is grouped by blood center and blood group.
-- Only statuses defined as available stock contribute to `available_units`.
-- A status transition applies its inventory delta exactly once.
-- Transfers create traceable source and destination effects.
-- Manual adjustments cannot make inventory negative and require a reason.
-- Every automatic or manual delta creates an inventory-adjustment record and audit event.
-- Reconciliation reports compare blood-unit states with aggregate inventory.
+- Inventory is component-level, not only center/blood-group totals.
+- Authoritative state tracks product, ABO/Rh, special attributes, center, storage device/location, release, expiry, reservation, allocation, transfer, issue, dispatch, receipt, return, disposal, recall, and investigation hold.
+- FEFO selects the earliest-expiring compatible component under approved rules; an exception requires reason and authority.
+- Reservations and allocations prevent double promise and have controlled expiry/release.
+- Every automatic or manual delta is auditable and cannot make stock negative.
+- Reconciliation compares component records, aggregate balances, physical counts, transfers, issues, returns, disposal, and adjustments.
 
-### Expiry and disposal
+### Expiry, return, and disposal
 
-1. The scheduler identifies due units in eligible nonterminal states.
-2. A controlled service marks them expired and removes any counted availability.
-3. Staff sees an expiry/disposal queue.
-4. Authorized staff confirms disposal with method, time, notes, and actor.
-5. Alerts are reevaluated after each stock effect.
+1. Scheduled checks identify expiry risk and remove expired components from usable stock without deleting history.
+2. Returned components require chain-of-custody, time, package, and temperature assessment before restocking.
+3. Disposal records reason, method, actor, witness/approval where required, time, location, and evidence.
+4. Wastage reasons distinguish collection failure, testing/release failure, processing loss, expiry, cold-chain excursion, damage, return failure, inappropriate request, and other approved causes.
+
+### Center-to-center transfer
+
+1. A transfer request records shortage/surplus reason, source, destination, components, urgency, requester, and approval.
+2. Source staff reserve, pack, seal, add temperature monitoring, record custody, and dispatch.
+3. Destination staff confirm count, label, seal, package, time, temperature evidence, discrepancies, and acceptance/hold/rejection.
+4. Source and destination inventory update only through approved transfer states.
+
+## Cold-chain and equipment workflow
+
+1. Register storage/transport equipment, capacity, location, calibration, maintenance, alarm, backup power, responsible staff, and service state.
+2. Capture continuous or approved interval temperature readings with device and synchronization provenance.
+3. Alarm escalation records acknowledgement, response, backup storage, and overdue state.
+4. An excursion automatically identifies and holds potentially affected components.
+5. Quality investigation records duration/range, affected products, disposition, root cause, CAPA, and release/restock authority.
+
+## Hospital request, compatibility, issue, and transfusion
+
+### Electronic request
+
+1. An authorized clinician submits patient reference, hospital/ward, indication, haemoglobin/relevant observations, bleeding state, urgency, component, quantity, and required time.
+2. The system checks completeness and presents approved patient-blood-management guidance without replacing clinical judgment.
+3. Outside-guidance requests require an override reason.
+4. Request states expose review, shortage, partial fill, alternative, cancellation, and timestamps.
+
+### Compatibility and emergency release
+
+1. Patient and patient specimen are positively identified and linked to the request.
+2. Hospital blood-bank/laboratory staff record ABO/Rh confirmation, antibody testing, compatibility/crossmatch, method, reagent/control context, validity, operator, and reviewer.
+3. Incompatible, expired, recalled, unreceived, unapproved, wrong-patient, or wrong-request components are blocked.
+4. Emergency release requires named clinical authorization, reason, acknowledgement of risk, selected component, and retrospective completion.
+
+### Allocation, issue, dispatch, and receipt
+
+1. Compatible FEFO components are allocated without double allocation.
+2. Final issue confirms request, patient, component, release, compatibility/emergency authority, expiry, label, package, and staff.
+3. Dispatch records vehicle/courier, route, package, logger, custody handoffs, departure, ETA, status, and proof of delivery.
+4. Hospital receipt records receiving officer, time, package/seal, temperature evidence, count, discrepancies, and acceptance/hold.
+
+### Bedside verification and outcome
+
+1. Bedside verification confirms the right patient, component, request, time, expiry, compatibility/emergency authorization, and staff.
+2. The transfusion record stores start, required observations, interruptions, completion, volume, outcome, and staff.
+3. Every issued component ends as transfused, returned, discarded, recalled, lost, or another approved final disposition. Missing outcomes enter an overdue reconciliation queue.
+
+## Haemovigilance, adverse events, recall, and look-back
+
+### Donor and recipient events
+
+- Record donor reactions and recipient transfusion events with severity, timing, treatment, referral, outcome, staff, equipment/supplies, and follow-up.
+- Serious events escalate to the responsible hospital, center, NBTS quality/haemovigilance, and national authority according to policy.
+
+### Recall and look-back
+
+1. A case may start from later donor information, changed/reactive result, equipment/reagent concern, processing deviation, label error, cold-chain incident, or other approved trigger.
+2. The platform locates every related donation, specimen, component, storage location, transfer, hospital, recipient, return, discard, and unaccounted item in both directions.
+3. The case records containment, notifications, recovery/disposition, patient follow-up, deadlines, regulator communication, decision authority, and closure approval.
+4. Closure is prohibited while critical components or recipients remain unexplained unless an authorized risk decision records the unresolved exception.
+
+## Quality-management workflow
+
+- Deviations and nonconformities connect containment, affected records, root cause, correction, corrective action, preventive action, owner, due date, effectiveness check, and closure.
+- SOPs, questionnaires, test/release rules, labels, forms, and work instructions are versioned, approved, effective-dated, and linked to transactions.
+- Staff training and task competency determine who may perform or approve work.
+- EQA, internal audits, findings, CAPA, and hospital transfusion-committee reviews are tracked.
+- Critical configuration and software changes follow formal clinical, quality, privacy, and technical change control.
+
+## Offline, downtime, and reconciliation workflow
+
+1. Offline field devices receive only the minimum assigned campaign dataset and controlled identifiers.
+2. Local records are encrypted and show unsynchronized/conflict state.
+3. Synchronization performs duplicate, deferral, identity, sequence, and server-rule validation.
+4. Laboratory, release, allocation, and transfusion controls remain authoritative; sync success alone never releases blood.
+5. Approved downtime forms preserve identifiers, custody, decisions, and later reconciliation.
+6. Downtime activation, unresolved forms, recovery, and post-incident review are monitored.
 
 ## Low-stock and emergency response
 
-1. Every inventory effect compares available units with the center/blood-group threshold.
-2. A shortage opens or updates one active low-stock alert.
-3. Center managers and permitted national staff are notified.
-4. Staff may create one linked emergency campaign; duplicate requests return the existing campaign.
-5. Donor targeting selects only active, eligible, consented donors using approved geographic rules.
-6. Push, SMS, and email jobs are queued, deduplicated, retried, and logged.
-7. When stock recovers to the configured threshold, the alert resolves while retaining history.
+1. Every released-component inventory effect compares usable stock and days of supply with the approved center/region, component, blood-group, shelf-life, and demand threshold.
+2. A shortage opens or updates one active low-stock alert with severity, owner, age, and escalation state.
+3. Center managers, inventory/logistics coordinators, and permitted national staff are notified.
+4. Staff first review reservations, transfers, component alternatives, expiry risk, transport time, laboratory/processing capacity, and hospital demand before creating a campaign.
+5. Staff may create one linked emergency campaign; duplicate requests return the existing campaign.
+6. Donor targeting selects only active, eligible, consented donors using approved blood-group, component need, location, timing, language, and communication rules.
+7. Push, SMS, email, or other approved jobs are queued after commit, deduplicated, retried, and logged.
+8. When stock and demand recover to the configured threshold, the alert resolves while retaining full history.
 
 Alert states:
 
@@ -332,22 +560,25 @@ Implemented public web contract:
 
 ## Staff account navigation flow
 
-Navigation follows the work rather than database table names:
+Navigation follows work, center context, assignment, competency, and permission—not table names:
 
-1. **Overview** — urgent queues, today's activity, center context, and shortcuts.
-2. **Donor reception** — scan/search, register, profile, donor card.
-3. **Appointments** — pending, today, upcoming, check-in, exceptions.
-4. **Eligibility** — screening queue, history, deferrals.
-5. **Donations** — record, verify blood group, history.
-6. **Blood operations** — testing queue, units, inventory, transfers, expiry, disposal.
-7. **Response** — low-stock alerts, campaigns, targeted communication.
-8. **Engagement** — notifications, loyalty, rewards, leaderboard.
-9. **Content** — articles, publications, FAQs, schedules, regional contacts, public metrics.
-10. **Intelligence** — operational reports, analytics, PDFs, exports.
-11. **Administration** — users, roles, permissions, centers, audit, backup/recovery, settings.
-12. **Account** — profile, language, appearance, password, 2FA, passkeys, sessions.
+1. **Overview** — national/center/department/hospital queues, incidents, SLA, and shortcuts.
+2. **Donor reception** — scan/search, duplicates, register, identity, profile, donor card, appointment/check-in.
+3. **Screening & counselling** — questionnaire, eligibility, deferrals, referral, re-entry, history.
+4. **Collection** — donor confirmation, donation identifier, labels, collection, specimens, donor reactions, handoff.
+5. **Laboratory & release** — specimen receipt, test orders/runs, QC, repeats, discrepancies, review, quarantine, and authorized release.
+6. **Components** — processing, parent-child lineage, labels, QC, production deviations, and yields.
+7. **Inventory & storage** — component stock, FEFO, reservations, locations/devices, expiry, returns, disposal, and reconciliation.
+8. **Logistics** — transfer, pack-out, cold chain, dispatch, custody, delivery, and receipt exceptions.
+9. **Hospitals & transfusion** — requests, compatibility, emergency release, allocation, issue, receipt, bedside verification, outcomes, and returns.
+10. **Quality & haemovigilance** — donor/recipient events, recall, look-back, deviations, CAPA, SOPs, competency, EQA, and audits.
+11. **Response & engagement** — low-stock alerts, campaigns, targeted communication, notifications, loyalty, and feedback.
+12. **Content** — news, publications, FAQs, schedules, regional contacts, legal pages, and approved public metrics.
+13. **Intelligence** — operational, clinical, laboratory, inventory, hospital, quality, safety, security, cost, PDF, and export reports.
+14. **Administration** — hierarchy, centers, departments, users, assignments, permissions, master data, configuration, integrations, audit, recovery, support, and change control.
+15. **Account** — profile, language, appearance, password, 2FA, passkeys, sessions/devices, and security history.
 
-Dashboard numbers always link to the queue that explains or resolves them.
+Dashboard numbers always link to the queue or evidence that explains them. High-risk actions require reason, confirmation, current competency, and independent approval where configured.
 
 ## Audit workflow
 
@@ -395,7 +626,7 @@ The target API prefix is `/api/v1`. Required capability groups:
 - Donor: donor card, eligibility, loyalty, leaderboard, donation history and summary.
 - Appointments: list, upcoming, create, reschedule/update, cancel.
 - Notifications: list, unread count, register token, mark all read, read one, delete one.
-- Staff: donor search, screening, deferrals, appointment operations, donation recording, blood-group verification, unit/inventory operations, alerts, campaigns, and reports.
+- Staff: donor search/reception, screening/deferrals, collection/identifiers, specimen/laboratory/QC, quarantine/release, component processing, inventory/cold chain, transfers/logistics, hospital request/compatibility/issue, transfusion outcomes, haemovigilance/recall/CAPA, alerts, campaigns, and reports. New safety-critical endpoints require their own approved versioned contracts rather than silent expansion of donor API v1.
 
 Implemented authentication contract:
 
@@ -432,6 +663,13 @@ Implemented donor card, eligibility, and history contract:
 - `GET /api/v1/donations/summary` calculates totals from completed donation records rather than trusting cached profile counters. The legacy `lives_touched` value remains an explicitly flagged estimate.
 - All four endpoints require an active Sanctum token with `donor:read`; donor role and record ownership are enforced server-side.
 
+Implemented loyalty and leaderboard contract:
+
+- `GET /api/v1/loyalty` returns the authenticated donor's points, tier, completed-donation count, all-time rank, badges, and rewards. Compatibility aliases expose both `points`/`loyalty_points` and `tier`/`loyalty_tier`.
+- `GET /api/v1/leaderboard?period=all_time&per_page=20` is bounded to 50 entries and exposes only donors who enabled anonymized sharing.
+- Leaderboard entries never expose a donor's real name or contact details. Stable display labels use rank-based values such as `Donor 001`, and `is_current_user` identifies the authenticated donor without de-anonymizing other entries.
+- Both endpoints require an active donor token with `donor:read`; donor role and ownership/privacy policies are enforced server-side.
+
 Implemented public/mobile discovery contract:
 
 - `GET /api/v1/campaigns` and `/campaigns/{id}` expose only `upcoming` or `ongoing` campaigns whose end time has not passed and whose owning blood center is active.
@@ -451,10 +689,11 @@ Implemented notification and device-token contract:
 - `DELETE /api/v1/notifications/device-token` unregisters only a token owned by the authenticated donor and is idempotent for missing or foreign tokens.
 - Device registration/removal is audited with the platform and SHA-256 token fingerprint. Raw FCM tokens never enter audit metadata.
 - Registering a token does not override notification consent; queued delivery must still check `push_notifications_enabled` and retire provider-invalid tokens.
+- The optional Firebase push transport sends HTTP v1 multicast messages, retires invalid and unknown tokens only for the intended recipient, records the provider message identifier, and lets the existing retry tracker handle provider failures. A real service-account key and test device are still required for production delivery proof.
 
 Compatibility fields currently required by Flutter include:
 
-- User: `id`, `name`, `email`, `phone`, `blood_group`, `gender`, `region`, `date_of_birth`, `donor_id`, `preferred_center`, `loyalty_tier`, `loyalty_points`, `total_donations`, `total_volume_ml`, `next_eligible_date`.
+- User: `id`, `name`, `email`, `phone`, `blood_group`, `gender`, `region`, `date_of_birth`, `donor_id`, `preferred_center`, `loyalty_tier`, `loyalty_points`, `total_donations`, authoritative completed-donation `total_volume_ml`, `next_eligible_date`, channel-consent fields, and `share_anonymized_data`.
 - Campaign: `id`, `title`, `summary`, `description`, `category`, `type`, `blood_group`, `blood_type`, `starts_at`, `start_date`, `ends_at`, `end_date`, `urgent`.
 - Center: `id`, `name`, `address`, `phone`, `phone_number`, `opening_hours`, `hours`, `wait_time`, `capacity_label`, `services`, `is_open`.
 - Appointment: `id`, `scheduled_at`, `blood_center_id`, `center_id`, `center_name`, `status`, `notes`.
@@ -462,39 +701,77 @@ Compatibility fields currently required by Flutter include:
 - Donor card: `donor_id`, `qr_payload`, `qr_expires_at`, `donor`, `stats`.
 - Notification: `id`, `title`, `body`, `message`, `type`, `read`, `read_at`, `sent_at`, `created_at`.
 
+The canonical Flutter repository is `NBTS/nbts-mobile`. Its API client sends bearer tokens and the current locale, unregisters the device token before logout, and includes models/repositories for loyalty, leaderboard, publications, and donation schedules. Dashboard discovery and recognition surfaces consume those repositories. Flutter 3.44/Dart 3.12 analysis and the 8-test API/model/repository plus welcome/registration suite pass in an isolated SDK container. Authentication-provider checks and Android device execution remain acceptance gates; iOS is unsupported until its bundle and Firebase configuration are approved.
+
+Further Flutter implementation and device acceptance belong to the separate mobile owner. Laravel changes must publish exact requests, responses, aliases, security boundaries, and verification commands in `docs/api.md`; requested mobile workarounds must be reviewed as versioned API-contract decisions rather than silently changing server behavior.
+
 Aliases can remain during transition but should be normalized in a future versioned API, never silently removed from v1.
 
 ## Reports and operational intelligence
 
-Reports must be filterable by authorized center, period, blood group, campaign, status, and other relevant dimensions. Required outputs include:
+Reports are center/facility/department scoped and filterable by authorized period, donor group, component, blood group, request, campaign, status, event, and other approved dimensions. The KPI dictionary defines numerator, denominator, exclusions, source, owner, frequency, target, and data-quality checks.
 
-- Donor registrations, active/eligible donors, return rate, and deferrals.
-- Appointments, attendance, cancellation, no-show, and conversion to donation.
-- Donations by period, center, blood group, type, and status.
-- Blood units by lifecycle state, expiry risk, transfer, rejection, and disposal.
-- Inventory by center/blood group and reconciliation exceptions.
-- Low-stock duration, emergency response, and campaign outcomes.
-- Notification delivery and engagement.
-- Loyalty milestones and reward redemption.
-- Content publishing and customer-service performance.
-- Audit/security and backup/recovery status.
+Required outputs include:
 
-Every displayed metric must link to its definition and source period. Exported totals must reconcile with the filtered source records.
+- Donor awareness, registration, appointment, waiting, screening, deferral, re-entry, repeat donation, reactions, and satisfaction.
+- Collection attempts, completed collections, usable yield, incomplete/failed collections, blood group, center, method, and donor type.
+- Specimen rejection, test turnaround, invalid/repeat runs, reactive/discrepant results, QC, EQA, reagent stock, analyzer/interface downtime, and release time.
+- Component production, lineage completeness, yield, processing deviation, quarantine, release, rejection, and component-specific expiry.
+- Inventory by component/group/location/state, FEFO exceptions, reservations, allocations, stock days, transfer, return, expiry, discard reason, and reconciliation exception.
+- Hospital request completeness, appropriateness indicators, fill/partial-fill/unmet demand, compatibility time, emergency release, issue, delivery, receipt, transfusion outcome, return, and wastage.
+- Cold-chain readings, alarms, acknowledgement, excursion, affected components, disposition, and CAPA.
+- Donor/recipient adverse events, investigation, recurrence, recall/look-back completion, unresolved components/recipients, CAPA, SOP, competency, audit, and EQA.
+- Notification delivery, campaign response, content/customer service, privacy, access review, security, incident/SLA, backup, restore, downtime, and change success.
+- Cost and sustainability indicators where approved, without allowing cost pressure to override safety rules.
+
+Balanced scorecards must prevent collection totals from hiding discard, expiry, inappropriate use, adverse events, or failed traceability. Every metric shows definition, source period, data-quality status, and a path to supporting records.
 
 ## Core invariants
 
-- A donor has at most one donor profile and one stable donor ID.
-- A completed donation creates at most one blood unit.
-- The same appointment cannot produce multiple completed donations.
-- A unit transition affects inventory at most once.
-- Inventory cannot be negative.
-- Center-scoped users cannot read or mutate records outside assigned centers.
-- Donor-provided blood group is never presented as staff verified.
-- Inactive users cannot authenticate or continue privileged work.
-- Remote notifications never run before the originating transaction commits.
-- Audit evidence never stores authentication secrets or full private tokens.
-- Public content is not visible before publication.
-- API v1 fields are not removed without a coordinated versioned migration.
+### Identity and donor safety
+
+- A person has one approved donor master identity and stable donor ID; duplicate resolution cannot erase provenance.
+- Deferred, inactive, duplicate, not-yet-eligible, or unresolved donors cannot be collected through another channel or offline copy.
+- Donor-provided blood group is never represented as laboratory verified.
+- Sensitive deferral/test information is not disclosed through unsafe messages or unauthorized roles.
+
+### Collection, specimen, and laboratory safety
+
+- Every collection has one unique donation identifier and every bag, specimen, test, and component remains linked to it.
+- A collection may create zero or more components; component lineage must reconcile to the parent collection.
+- An unmatched/mislabeled specimen or component cannot proceed as normal.
+- Required tests, QC, interpretation, and approvals are complete before release.
+- Quarantined, reactive, discrepant, invalid, failed-QC, expired, recalled, unlabelled, or excursion-affected stock is never available.
+- The person performing a test cannot be the sole verifier/releaser where independent control is required.
+
+### Inventory, logistics, and clinical-use safety
+
+- A component transition affects authoritative inventory at most once and inventory cannot be negative.
+- A component cannot be simultaneously available to multiple allocations or locations.
+- A transfer or dispatch remains in transit until the destination records receipt/discrepancy.
+- Incompatible, expired, recalled, unreleased, wrong-patient, wrong-request, or unissued components cannot be transfused.
+- Every issued component reaches a final accounted disposition.
+- Donor-to-recipient and recipient-to-donor traceability remains available for the approved retention period.
+
+### Access, evidence, resilience, and change
+
+- Center/hospital-scoped users cannot read or mutate records outside assignments and minimum necessary purpose.
+- Inactive users, expired assignments, missing competency, or conflicting duties remove the affected authority.
+- Remote effects run only after the originating transaction commits and use idempotency/reconciliation.
+- Audit evidence never stores passwords, private tokens, service credentials, or unnecessary health data.
+- Public content is not visible before approval/publication and public metrics are aggregated and dated.
+- Offline/downtime operation preserves identifiers, custody, quarantine, and later reconciliation.
+- Backup/restore, change control, and rule versioning preserve the ability to explain which logic governed every safety-critical decision.
+- API v1 fields are not silently removed without coordinated versioned migration.
+
+## Implementation and rollout sequence
+
+1. **Foundation and discovery:** current-state mapping, legal/policy review, center/facility/equipment inventory, baseline KPIs, data dictionary, risk register, safety case, target process, identifiers, component/test/release/hospital/offline/DR decisions. Indicative 6–10 weeks.
+2. **Core safety pilot:** unique IDs/barcodes, collection/specimens, laboratory/QC, quarantine/release, component lineage, component inventory, one hospital request/compatibility/issue/dispatch/receipt/transfusion chain, traceability and recall drills. Indicative 4–6 months after approval.
+3. **Controlled regional scale:** offline/mobile collection, additional hospitals, transfers, cold-chain telemetry, haemovigilance, interfaces, support, DR, data-quality and adoption gates. Indicative 4–8 months.
+4. **National optimization:** national balancing, forecasting, de-identified analytics, more integrations, donor segmentation, continuous quality improvement, sustainable budget, and vendor-exit proof. Indicative 6–12 months.
+
+These are planning ranges, not contractual estimates. Each stage exits on safety, quality, traceability, recovery, training, adoption, and approval evidence—not elapsed time alone.
 
 ## Known legacy corrections carried forward
 

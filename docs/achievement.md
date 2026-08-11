@@ -1,6 +1,6 @@
 # NBTS achievement log
 
-Last updated: 2026-08-01
+Last updated: 2026-08-11
 
 ## Evidence rule
 
@@ -16,6 +16,52 @@ Each entry must record:
 - Automated tests and commands that passed.
 - Browser/device verification when the feature has a user interface.
 - Known limitations and the next dependent task.
+
+## 2026-08-03 — National blood-management roadmap expansion
+
+Status: completed
+
+Scope: project planning, operating-model design, clinical-safety roadmap, center hierarchy, roles, workflows, and implementation sequencing.
+
+Requirement IDs: DOC-ROADMAP-001, GOV-STRUCT-001, SAFE-CHAIN-001.
+
+Delivered:
+
+- Reclassified the current verified system as a donor-engagement and foundational blood-operations platform rather than a complete national blood-management system.
+- Expanded `docs/task.md` into the implementation roadmap for national, center, laboratory, component, logistics, hospital, transfusion, haemovigilance, quality, security, resilience, and rollout work.
+- Expanded `docs/workflow.md` into the target operating model from donor recruitment through recipient outcome, recall, and look-back.
+- Defined national, blood-center, department, hospital, quality, audit, and technical operating roles while preserving permissions and center assignments as the real authorization boundary.
+- Added explicit center hierarchy, candidate center types, departments, role assignments, data visibility, work queues, dashboards, approval levels, escalation paths, and separation-of-duties rules.
+- Added the missing safety-critical capabilities: unique donation identification, bag–sample–component barcode linkage, laboratory orders/results/QC, hard quarantine, authorized release, component parent-child lineage, component-level FEFO inventory, cold chain, hospital requests, compatibility, dispatch/receipt, bedside verification, transfusion outcomes, adverse-event investigation, recall, look-back, deviations, CAPA, SOPs, competency, EQA, downtime, disaster recovery, interoperability, and formal change control.
+- Replaced the future assumption that one donation permanently equals one usable blood product with a compatibility plan: one donation/collection identifier may produce zero or more traceable components.
+- Added Must/Should/Could priority, safety classification, requirement IDs, dependencies, completion gates, approvals, and evidence expectations for future work.
+- Added a controlled implementation sequence: discovery, core safety pilot, regional scale, national optimization, and formal acceptance.
+
+Database/API impact: none. This milestone changes documentation and roadmap scope only.
+
+Automated verification:
+
+- Updated Markdown files exist and render as plain Markdown.
+- Existing achievement entries remain preserved.
+- New roadmap items are marked pending unless direct implementation evidence already exists.
+- Current completed features remain separated from target national-service capabilities.
+
+Browser/device verification: not applicable to this documentation milestone.
+
+Clinical/operational approval:
+
+- The roadmap requires NBTS clinical, laboratory, quality, operations, ICT, data-protection, hospital, and Ministry stakeholders to approve final rules before safety-critical implementation.
+- Candidate center types, component catalog, test algorithms, shelf lives, release rules, retention periods, identifiers, labels, hospital data requirements, and service levels are not treated as approved policy merely because they appear in the roadmap.
+
+Known limitations:
+
+- No newly listed laboratory, component, hospital, cold-chain, haemovigilance, interoperability, or national-rollout feature is claimed as implemented.
+- Publicly available operational evidence does not define every current NBTS center workflow, device, hospital interface, legal requirement, or staffing arrangement.
+- The implementation sequence and duration ranges remain planning guidance, not contractual estimates.
+
+Next dependent task:
+
+- Conduct the approved foundation-and-discovery phase, produce the current-state workflow map and safety case, then approve the unique donation identifier, barcode standard, component model, laboratory rule set, quarantine/release authority, center taxonomy, hospital integration boundary, and pilot sites before schema implementation.
 
 ## 2026-08-01 — Modernization control documents
 
@@ -103,7 +149,7 @@ Scope: backend, staff web authentication, localization, and test infrastructure.
 Delivered:
 
 - Reconciled the Laravel 13 `User` model with the deployed NBTS profile, security, role, Firebase, and mobile fields while preserving existing password hashes and remember tokens.
-- Connected Sanctum API tokens, Spatie roles, Fortify two-factor authentication, passkeys, email verification, and locale preference to the same user model.
+- Connected Sanctum API tokens, Spatie roles, Fortify two-factor authentication, passkeys, email verification, and locale preference to the same user model. Staff email verification was later disabled by the 2026-08-11 construction decision recorded below.
 - Restricted Fortify web authentication and passkey login to active staff-role accounts; donor accounts remain outside staff/admin web access.
 - Disabled public web registration and removed the obsolete registration prompt from the staff login page.
 - Added active-account and staff-account middleware, including deactivation enforcement during an active session or two-factor challenge.
@@ -983,6 +1029,168 @@ Known limitations:
 Next dependent task:
 
 - Complete donor and center operational services, including donor creation/search, preferred centers, and center-staff lifecycle, before moving to eligibility workflows.
+
+## 2026-08-11 - Staff email verification disabled during construction
+
+Status: completed
+
+Scope: staff web authentication, profile settings, routes, and documentation.
+
+Delivered:
+
+- Disabled Fortify email verification and removed the `MustVerifyEmail` requirement from the staff user model.
+- Removed the verification gate from dashboard, operational, appearance, and security routes.
+- Removed the unverified-email warning and resend action from Profile settings.
+- Preserved Firebase verified-email checks for donor mobile identity linking because they are a separate security boundary.
+- Recorded re-enablement as a product/security production-readiness decision.
+
+Main implementation:
+
+- `config/fortify.php`
+- `app/Models/User.php`
+- `app/Livewire/Settings/Profile.php`
+- `resources/views/livewire/settings/profile.blade.php`
+- `routes/web.php`
+- `routes/settings.php`
+
+Database/API impact:
+
+- No schema or API contract changes.
+- Existing `email_verified_at` values are retained as historical/identity metadata but no longer gate staff web access.
+
+Automated verification:
+
+- Focused Fortify, Profile, sensitive-action, and dashboard suite: 15 tests passed with 77 assertions.
+- Laravel Pint passed for all touched PHP files.
+- `php artisan route:list --name=verification --except-vendor` confirmed that no verification or resend route is registered.
+
+Browser/device verification:
+
+- The visible headed Chromium session remains open at 1600x900 on the current NBTS login page.
+- The Profile component regression test proves that the verification warning and resend text are not rendered for an unverified staff account; authenticated visual verification remains part of the active Phase 2 browser gate.
+
+Known limitations:
+
+- Product and security owners must decide whether to re-enable staff email verification before pilot or production acceptance.
+
+Next dependent task:
+
+- Resume the locked Phase 2 audit and complete every remaining Phase 2 sub-item before starting Phase 3.
+
+## 2026-08-11 — Phase 2 core operations completion gate
+
+Status: completed
+
+Scope: staff web operations, backend domain workflows, inventory integrity, donor engagement, notifications, scheduling, localization, and evidence.
+
+Delivered:
+
+- Completed center-aware donor reception with staff registration, stable donor IDs, QR/donor ID/phone/email/name search, preferred-center handling, center maintenance actions, and center-staff assignment lifecycle.
+- Completed staff-led eligibility screening, temporary/permanent deferrals, safe deferral lifting, official donation-interval enforcement, and auditable staff authority.
+- Completed appointment confirmation, staff rescheduling, check-in, cancellation, no-show, completion, capacity enforcement, and walk-in handling.
+- Completed transactional donation recording with center/eligibility authorization, blood-group verification, donor/unit/inventory updates, and replay-safe idempotency keys.
+- Completed blood-unit transitions, exactly-once inventory deltas, controlled manual corrections, negative-balance protection, expiry processing, final disposal, reconciliation UI/command, and real two-worker contention verification.
+- Completed transactional low-stock response, linked emergency campaigns, consented and center/blood-group-aware donor targeting, deterministic recognition, rewards, tiers, and leaderboards.
+- Completed in-app, push, SMS, and email notification orchestration with per-channel preferences, duplicate-safe appointment reminders, retry metadata, failure tracking, and a filterable Engagement delivery-status table.
+- Completed the compact premium staff shell for all Phase 2 workspaces with page summaries, workflow tabs, search, filters, clear/reset controls, configurable columns, sorting, pagination, CSV export, Lucide icons, and content-sized table panels.
+
+Main implementation:
+
+- `app/Livewire/Operations/Workspace.php` and `resources/views/livewire/operations/workspace.blade.php`.
+- `app/Actions/Donors`, `app/Actions/Centers`, `app/Actions/Eligibility`, `app/Actions/Appointments`, `app/Actions/Donations`, `app/Actions/Inventory`, `app/Actions/Response`, `app/Actions/Engagement`, and `app/Actions/Content`.
+- `app/Services/DonorSearchService.php`, `app/Services/DonorRecognitionService.php`, `app/Services/AppointmentReminderService.php`, `app/Services/InventoryStockAlertService.php`, and `app/Services/Notifications`.
+- `app/Notifications`, `app/Contracts/PushTransport.php`, `app/Contracts/SmsTransport.php`, and `app/Console/Commands/ReconcileInventoryCommand.php`.
+- `resources/css/app.css`, `config/operations.php`, `lang/en`, and `lang/sw`.
+
+Database/API impact:
+
+- Added donation idempotency keys, notification delivery records, notification source keys, and donor email-notification preferences through additive migrations.
+- Applied all Phase 2 migrations successfully to the existing `nbts_new_dev` clone while preserving its operational records.
+- Proved a clean database path through the Feature and Unit suites, which rebuilt `nbts_new_test` from the schema/migrations.
+- Kept SMS and push provider transports construction-safe and log-backed; Phase 3 supplies approved Firebase/provider credentials behind the tested transport contracts.
+
+Automated verification:
+
+- `php artisan test --compact tests/Feature`: 191 tests passed with 2,209 assertions.
+- `php artisan test --compact tests/Unit`: 4 tests passed with 15 assertions, including two-process inventory contention.
+- `vendor/bin/pint --dirty --format agent`: passed.
+- `npm run build`: passed; Vite transformed 1,787 modules and emitted the production manifest.
+- `php artisan view:cache`: passed.
+- `php artisan schedule:list`: confirmed the hourly duplicate-safe appointment-reminder command.
+- `git diff --check`: passed.
+
+Browser/device verification:
+
+- Headed Chromium remained visible at 1600x900 and authenticated as the local super-administrator account.
+- Verified Overview, Donor reception, Appointments, Eligibility, Donations, Blood operations, Response, Engagement, Delivery status, and Content.
+- Verified headings, summaries, workflow tabs, filter status URL state, clear/reset action, configurable columns, responsive table width, current QR/registration tab transitions, and absence of current browser errors.
+- The audit found and removed a forced 390px table-panel height; one-row queues now end immediately after their content with no oversized empty card.
+
+Known limitations:
+
+- External SMS and push delivery currently use explicit construction log transports. Approved production Firebase/messaging provider configuration is Phase 3 work.
+- Expanded national laboratory, component, hospital, cold-chain, and haemovigilance workflows remain in the later safety roadmap and are not claimed by this phase.
+
+Next dependent task:
+
+- Begin Phase 3 mobile API, Firebase, and Flutter work without reopening Phase 2 except for regressions required by Phase 3 integration.
+
+## 2026-08-11 — Phase 3 local mobile/API and Firebase implementation gate
+
+Status: local implementation and SDK verification complete; external device acceptance pending
+
+Scope: mobile API, Firebase push transport, Flutter API contract, and documentation
+
+Delivered:
+
+- Completed the donor loyalty summary and privacy-safe anonymized leaderboard API with Sanctum abilities, donor ownership/privacy policy checks, validation, bounded pagination, stable aliases, and tests.
+- Added the optional FCM HTTP v1 push transport behind the existing notification delivery contract, including recipient-scoped invalid-token retirement, provider identifiers, retry-compatible failures, and fingerprint-only audit metadata.
+- Completed the Laravel-to-Flutter handoff in `docs/api.md` with all 40 v1 routes, request bodies, filters, response envelopes, errors, field/alias contracts, Firebase backend configuration, and implementation guidance.
+- Added authoritative completed-donation `total_volume_ml` plus readable `share_anonymized_data` to every mobile user response, keeping failed donation attempts out of the volume total and making privacy-consent state round-trip correctly.
+- Confirmed Android package `com.nbts.mobile` belongs to Firebase project `nbts-d567e`; kept the backend service-account boundary outside Git.
+- Extended the canonical `NBTS/nbts-mobile` client with loyalty, leaderboard, publication, and donation-schedule models/repositories, service registration, localized dashboard discovery, and repository/model contract tests.
+- Explicitly marked iOS unsupported until an approved bundle ID and `GoogleService-Info.plist` are supplied.
+
+Main implementation:
+
+- `app/Http/Controllers/Api/V1/LoyaltyController.php`, `app/Http/Controllers/Api/V1/LeaderboardController.php`, and their requests/resources.
+- `app/Services/Notifications/FcmPushTransport.php`, `config/services.php`, and `app/Providers/AppServiceProvider.php`.
+- `app/Actions/Profile/PrepareMobileUserResource.php`, `app/Http/Resources/Api/V1/UserResource.php`, and `docs/api.md`.
+- Canonical mobile `lib/core/data/models`, `lib/core/data/repositories`, `lib/core/api/service_locator.dart`, and `lib/features/dashboard/screens/dashboard_screen.dart`.
+
+Database/API impact:
+
+- Added `GET /api/v1/loyalty` and `GET /api/v1/leaderboard`; no new Phase 3 migration was required.
+- Added `total_volume_ml` and `share_anonymized_data` to existing mobile user representations without removing or renaming any v1 field.
+- Added `PUSH_TRANSPORT=log` as the safe default. `fcm` requires approved credentials outside source control.
+
+Automated verification:
+
+- Phase 3 Laravel API/FCM group: 64 tests passed with 490 assertions.
+- Consolidated Laravel Phase 3 contract rerun after the user-response/documentation handoff: 60 tests passed with 475 assertions.
+- Focused password/Firebase/profile response group: 20 tests passed with 193 assertions.
+- Eligibility deferral regression: 5 tests passed with 22 assertions.
+- `vendor/bin/phpstan analyse --no-progress`: passed with 0 errors.
+- `vendor/bin/pint --dirty --format agent`: passed.
+- `php artisan route:list --path=api/v1 --except-vendor`: confirmed 40 v1 routes.
+- Flutter 3.44/Dart 3.12 `flutter analyze`: passed with no issues.
+- Flutter `flutter test --reporter compact`: all 8 API/model/repository and welcome/registration tests passed.
+- `git diff --check`: passed.
+
+Browser/device verification:
+
+- Laravel contract behavior is covered by the API tests. Flutter analysis/tests ran against a read-only repository copy in an isolated SDK container; `adb` still reports no attached device, so Android execution is pending.
+- No iOS Firebase file is present and the placeholder bundle ID remains; iOS support is not claimed.
+
+Known limitations:
+
+- A freshly rotated Firebase service-account key, approved external login providers, Android device/emulator, and real push delivery proof are external acceptance inputs.
+- Google authentication and real FCM delivery are not claimed until an approved Android test target and fresh backend credentials are available.
+- Further Flutter implementation and device evidence are owned by the separate mobile developer; this Laravel work provides the tested API contract and does not claim those external acceptance gates.
+
+Next dependent task:
+
+- Supply an Android test target and fresh Firebase credentials, then run the remaining Phase 3 authentication/device/push gates before starting Phase 4 implementation.
 
 ## Achievement template
 

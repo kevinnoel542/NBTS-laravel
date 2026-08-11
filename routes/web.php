@@ -51,7 +51,7 @@ Route::post('locale/{locale}', LocaleController::class)
     ->whereIn('locale', ['en', 'sw'])
     ->name('locale.update');
 
-Route::middleware(['auth', 'active', 'staff', 'verified'])->group(function () {
+Route::middleware(['auth', 'active', 'staff'])->group(function () {
     Route::livewire('dashboard', Overview::class)->name('dashboard');
 
     Route::livewire('operations/{workspace}', Workspace::class)

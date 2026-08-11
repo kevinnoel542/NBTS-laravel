@@ -84,7 +84,10 @@ final readonly class DonorSearchService
         }
     }
 
-    /** @param Builder<User> $query */
+    /**
+     * @param  Builder<User>  $query
+     * @return Builder<User>
+     */
     private function scopeToCenter(Builder $query, ?BloodCenter $bloodCenter): Builder
     {
         $bloodCenterId = $bloodCenter?->id;

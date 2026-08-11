@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 /**
  * @property int $id
@@ -15,6 +16,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property string $title
  * @property string $body
  * @property string $type
+ * @property string|null $source_key
  * @property string|null $action_url
  * @property array<string, mixed>|null $data
  * @property CarbonImmutable|null $read_at
@@ -26,6 +28,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
     'title',
     'body',
     'type',
+    'source_key',
     'action_url',
     'data',
     'read_at',
@@ -59,5 +62,11 @@ class UserNotification extends Model
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
+    }
+
+    /** @return HasMany<NotificationDelivery, $this> */
+    public function deliveries(): HasMany
+    {
+        return $this->hasMany(NotificationDelivery::class);
     }
 }

@@ -11,7 +11,7 @@ Route::middleware(['auth', 'active', 'staff'])->group(function () {
     Route::livewire('settings/profile', Profile::class)->name('profile.edit');
 });
 
-Route::middleware(['auth', 'active', 'staff', 'verified'])->group(function () {
+Route::middleware(['auth', 'active', 'staff'])->group(function () {
     Route::livewire('settings/appearance', Appearance::class)->name('appearance.edit');
 
     Route::livewire('settings/security', Security::class)

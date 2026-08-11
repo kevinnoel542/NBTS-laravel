@@ -2,11 +2,16 @@
 
 namespace App\Livewire\Settings;
 
+use App\Actions\Auth\RevokeUserSession;
 use App\Concerns\PasswordValidationRules;
 use App\Concerns\ThrottlesSensitiveActions;
+use App\Models\User;
+use Carbon\CarbonImmutable;
 use Exception;
 use Flux\Flux;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Session;
 use Illuminate\Validation\ValidationException;
 use Laravel\Fortify\Actions\ConfirmTwoFactorAuthentication;
 use Laravel\Fortify\Actions\DisableTwoFactorAuthentication;
@@ -31,6 +36,16 @@ class Security extends Component
     public string $password = '';
 
     public string $password_confirmation = '';
+
+    public string $session_password = '';
+
+    public bool $showSessionModal = false;
+
+    #[Locked]
+    public ?string $revokingSessionId = null;
+
+    #[Locked]
+    public bool $revokeAllOtherSessions = false;
 
     #[Locked]
     public bool $canManageTwoFactor;
@@ -119,6 +134,175 @@ class Security extends Component
         $this->reset('current_password', 'password', 'password_confirmation');
 
         Flux::toast(variant: 'success', text: __('Password updated.'));
+    }
+
+    /**
+     * @return array<int, array{id: string, ip_address: string, browser: string, platform: string, device_type: string, last_active: string, last_activity_at: string, is_current: bool}>
+     */
+    #[Computed]
+    public function browserSessions(): array
+    {
+        $user = Auth::user();
+
+        if (! $user instanceof User || config('session.driver') !== 'database') {
+            return [];
+        }
+
+        $currentSessionId = Session::getId();
+        $activeAfter = now()->subMinutes((int) config('session.lifetime', 120))->getTimestamp();
+        $sessions = DB::table((string) config('session.table', 'sessions'))
+            ->where('user_id', $user->id)
+            ->where('last_activity', '>=', $activeAfter)
+            ->latest('last_activity')
+            ->get(['id', 'ip_address', 'user_agent', 'last_activity']);
+
+        if (! $sessions->contains(fn (object $session): bool => hash_equals($currentSessionId, (string) $session->id))) {
+            $sessions->prepend((object) [
+                'id' => $currentSessionId,
+                'ip_address' => request()->ip(),
+                'user_agent' => request()->userAgent(),
+                'last_activity' => now()->getTimestamp(),
+            ]);
+        }
+
+        return $sessions
+            ->map(function (object $session) use ($currentSessionId): array {
+                $userAgent = $this->describeUserAgent((string) ($session->user_agent ?? ''));
+                $lastActivity = CarbonImmutable::createFromTimestamp((int) $session->last_activity);
+
+                return [
+                    'id' => (string) $session->id,
+                    'ip_address' => (string) ($session->ip_address ?: __('Unknown IP')),
+                    'browser' => $userAgent['browser'],
+                    'platform' => $userAgent['platform'],
+                    'device_type' => $userAgent['device_type'],
+                    'last_active' => $lastActivity->diffForHumans(),
+                    'last_activity_at' => $lastActivity->toIso8601String(),
+                    'is_current' => hash_equals($currentSessionId, (string) $session->id),
+                ];
+            })
+            ->values()
+            ->all();
+    }
+
+    #[Computed]
+    public function otherSessionCount(): int
+    {
+        return collect($this->browserSessions())
+            ->where('is_current', false)
+            ->count();
+    }
+
+    public function confirmSessionRevocation(string $sessionId): void
+    {
+        $session = collect($this->browserSessions())
+            ->firstWhere('id', $sessionId);
+
+        if ($session === null || $session['is_current']) {
+            return;
+        }
+
+        $this->resetErrorBag();
+        $this->reset('session_password');
+        $this->revokingSessionId = $sessionId;
+        $this->revokeAllOtherSessions = false;
+        $this->showSessionModal = true;
+    }
+
+    public function confirmOtherSessionRevocation(): void
+    {
+        if ($this->otherSessionCount() === 0) {
+            return;
+        }
+
+        $this->resetErrorBag();
+        $this->reset('session_password');
+        $this->revokingSessionId = null;
+        $this->revokeAllOtherSessions = true;
+        $this->showSessionModal = true;
+    }
+
+    public function revokeSessions(RevokeUserSession $revokeUserSession): void
+    {
+        $this->throttleSensitiveAction('session-revoke');
+
+        try {
+            $this->validate([
+                'session_password' => $this->currentPasswordRules(),
+            ]);
+        } catch (ValidationException $exception) {
+            $this->reset('session_password');
+
+            throw $exception;
+        }
+
+        $user = Auth::user();
+
+        if (! $user instanceof User) {
+            return;
+        }
+
+        $currentSessionId = Session::getId();
+
+        if ($this->revokeAllOtherSessions) {
+            $revokedCount = $revokeUserSession->revokeOthers($user, $currentSessionId);
+            $message = trans_choice('{0} No other sessions were active.|{1} One other session was signed out.|[2,*] :count other sessions were signed out.', $revokedCount, [
+                'count' => $revokedCount,
+            ]);
+        } elseif ($this->revokingSessionId !== null) {
+            $wasRevoked = $revokeUserSession->handle($user, $this->revokingSessionId, $currentSessionId);
+            $message = $wasRevoked
+                ? __('The selected session was signed out.')
+                : __('That session is no longer active.');
+        } else {
+            return;
+        }
+
+        $this->closeSessionModal();
+
+        Flux::toast(variant: 'success', text: $message);
+    }
+
+    public function closeSessionModal(): void
+    {
+        $this->showSessionModal = false;
+        $this->revokingSessionId = null;
+        $this->revokeAllOtherSessions = false;
+        $this->reset('session_password');
+        $this->resetErrorBag('session_password');
+    }
+
+    /** @return array{browser: string, platform: string, device_type: string} */
+    private function describeUserAgent(string $userAgent): array
+    {
+        $browser = match (true) {
+            str_contains($userAgent, 'Edg/') => 'Microsoft Edge',
+            str_contains($userAgent, 'Firefox/') => 'Firefox',
+            str_contains($userAgent, 'Chrome/') => 'Chrome',
+            str_contains($userAgent, 'Safari/') => 'Safari',
+            default => __('Unknown browser'),
+        };
+
+        $platform = match (true) {
+            str_contains($userAgent, 'Android') => 'Android',
+            str_contains($userAgent, 'iPhone'), str_contains($userAgent, 'iPad') => 'iOS',
+            str_contains($userAgent, 'Windows') => 'Windows',
+            str_contains($userAgent, 'Macintosh') => 'macOS',
+            str_contains($userAgent, 'Linux') => 'Linux',
+            default => __('Unknown system'),
+        };
+
+        $deviceType = match (true) {
+            str_contains($userAgent, 'iPad'), str_contains($userAgent, 'Tablet') => 'tablet',
+            str_contains($userAgent, 'Mobile'), str_contains($userAgent, 'Android') => 'mobile',
+            default => 'desktop',
+        };
+
+        return [
+            'browser' => $browser,
+            'platform' => $platform,
+            'device_type' => $deviceType,
+        ];
     }
 
     /**

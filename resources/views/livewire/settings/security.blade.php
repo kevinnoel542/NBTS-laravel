@@ -1,10 +1,10 @@
-<section class="w-full">
+<section class="settings-page operations-page w-full">
     @include('partials.settings-heading')
 
     <flux:heading class="sr-only">{{ __('Security settings') }}</flux:heading>
 
     <x-settings.layout :heading="__('Update password')" :subheading="__('Ensure your account is using a long, random password to stay secure')">
-        <form method="POST" wire:submit="updatePassword" class="mt-6 space-y-6">
+        <form method="POST" wire:submit="updatePassword" class="settings-form-grid">
             <flux:input
                 wire:model="current_password"
                 :label="__('Current password')"
@@ -37,8 +37,75 @@
             </div>
         </form>
 
+        <section class="settings-security-section">
+            <div class="settings-section-heading">
+                <div>
+                    <flux:heading>{{ __('Active sessions') }}</flux:heading>
+                    <flux:subheading>{{ __('Review where your account is signed in and remove devices you no longer recognize.') }}</flux:subheading>
+                </div>
+
+                @if ($this->otherSessionCount > 0)
+                    <flux:button
+                        variant="danger"
+                        size="sm"
+                        icon="arrow-right-start-on-rectangle"
+                        wire:click="confirmOtherSessionRevocation"
+                    >
+                        {{ __('Sign out other devices') }}
+                    </flux:button>
+                @endif
+            </div>
+
+            <div class="settings-session-list" wire:loading.class="opacity-60" wire:target="revokeSessions">
+                @forelse ($this->browserSessions as $session)
+                    <article class="settings-session-row" wire:key="session-{{ hash('sha256', $session['id']) }}">
+                        <div class="settings-session-row__icon">
+                            @if ($session['device_type'] === 'mobile')
+                                <flux:icon.device-phone-mobile class="size-5" />
+                            @elseif ($session['device_type'] === 'tablet')
+                                <flux:icon.device-tablet class="size-5" />
+                            @else
+                                <flux:icon.computer-desktop class="size-5" />
+                            @endif
+                        </div>
+
+                        <div class="settings-session-row__copy">
+                            <div>
+                                <strong>{{ $session['browser'] }} <span>{{ __('on :platform', ['platform' => $session['platform']]) }}</span></strong>
+                                @if ($session['is_current'])
+                                    <flux:badge size="sm" color="green">{{ __('This device') }}</flux:badge>
+                                @endif
+                            </div>
+                            <p>
+                                <span>{{ $session['ip_address'] }}</span>
+                                <span aria-hidden="true">·</span>
+                                <time datetime="{{ $session['last_activity_at'] }}">{{ __('Active :time', ['time' => $session['last_active']]) }}</time>
+                            </p>
+                        </div>
+
+                        @unless ($session['is_current'])
+                            <flux:button
+                                variant="ghost"
+                                size="sm"
+                                icon="x-mark"
+                                wire:click="confirmSessionRevocation('{{ $session['id'] }}')"
+                                :aria-label="__('Sign out :browser session', ['browser' => $session['browser']])"
+                            >
+                                {{ __('Sign out') }}
+                            </flux:button>
+                        @endunless
+                    </article>
+                @empty
+                    <div class="settings-empty-state">
+                        <flux:icon.shield-check class="size-6" />
+                        <p>{{ __('Session details are available when database sessions are enabled.') }}</p>
+                    </div>
+                @endforelse
+            </div>
+        </section>
+
         @if ($canManageTwoFactor)
-            <section class="mt-12">
+            <section class="settings-security-section">
                 <flux:heading>{{ __('Two-factor authentication') }}</flux:heading>
                 <flux:subheading>{{ __('Manage your two-factor authentication settings') }}</flux:subheading>
 
@@ -239,7 +306,7 @@
         @endif
 
         @if ($canManagePasskeys)
-            <section class="mt-12">
+            <section class="settings-security-section">
                 <flux:heading>{{ __('Passkeys') }}</flux:heading>
                 <flux:subheading>{{ __('Manage your passkeys for passwordless sign-in') }}</flux:subheading>
 
@@ -293,6 +360,49 @@
             </section>
         @endif
     </x-settings.layout>
+
+    <flux:modal
+        name="revoke-session-modal"
+        class="max-w-md md:min-w-md"
+        @close="closeSessionModal"
+        wire:model="showSessionModal"
+    >
+        <form wire:submit="revokeSessions" class="space-y-6">
+            <div class="space-y-2">
+                <flux:heading size="lg">
+                    {{ $revokeAllOtherSessions ? __('Sign out other devices?') : __('Sign out this device?') }}
+                </flux:heading>
+                <flux:text>
+                    {{ $revokeAllOtherSessions
+                        ? __('Every other active session will need to sign in again. Your current session will remain active.')
+                        : __('This session will immediately lose access. Confirm your password to continue.') }}
+                </flux:text>
+            </div>
+
+            <flux:input
+                wire:model="session_password"
+                :label="__('Current password')"
+                type="password"
+                required
+                autocomplete="current-password"
+                viewable
+                autofocus
+            />
+
+            @error('rateLimit')
+                <flux:callout variant="danger" icon="clock" heading="{{ $message }}" />
+            @enderror
+
+            <div class="flex justify-end gap-3">
+                <flux:button variant="outline" type="button" wire:click="closeSessionModal">
+                    {{ __('Cancel') }}
+                </flux:button>
+                <flux:button variant="danger" type="submit" wire:loading.attr="disabled" wire:target="revokeSessions">
+                    {{ __('Confirm sign out') }}
+                </flux:button>
+            </div>
+        </form>
+    </flux:modal>
 
     <flux:modal
         name="delete-passkey-modal"

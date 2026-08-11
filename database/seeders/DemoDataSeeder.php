@@ -3,8 +3,13 @@
 namespace Database\Seeders;
 
 use App\Actions\Auth\EnsureDonorProfile;
+use App\AppointmentStatus;
+use App\BloodGroup;
+use App\EligibilityStatus;
+use App\Models\Appointment;
 use App\Models\BloodCenter;
 use App\Models\CenterStaff;
+use App\Models\EligibilityRecord;
 use App\Models\User;
 use App\RoleName;
 use Illuminate\Database\Seeder;
@@ -81,7 +86,40 @@ class DemoDataSeeder extends Seeder
         ])->save();
 
         $profile = app(EnsureDonorProfile::class)->handle($donor);
-        $profile->forceFill(['preferred_center_id' => $primaryCenter->id])->save();
+        $profile->forceFill([
+            'eligibility_status' => EligibilityStatus::Eligible,
+            'next_eligible_donation_date' => null,
+            'preferred_center_id' => $primaryCenter->id,
+        ])->save();
+
+        $donor->forceFill(['blood_group' => BloodGroup::OPositive])->save();
+
+        EligibilityRecord::query()->firstOrCreate(
+            [
+                'notes' => 'NBTS demo screening '.today()->toDateString(),
+                'user_id' => $donor->id,
+            ],
+            [
+                'age' => $donor->date_of_birth?->age,
+                'answers' => ['consent_confirmed' => true, 'feels_well' => true],
+                'checked_by' => $staff->id,
+                'status' => EligibilityStatus::Eligible,
+                'weight_kg' => 64.5,
+            ],
+        );
+
+        Appointment::query()->firstOrCreate(
+            [
+                'notes' => 'NBTS demo workflow '.today()->toDateString(),
+                'user_id' => $donor->id,
+            ],
+            [
+                'blood_center_id' => $primaryCenter->id,
+                'confirmed_at' => now(),
+                'scheduled_at' => today()->setTime(9, 30),
+                'status' => AppointmentStatus::Confirmed,
+            ],
+        );
     }
 
     private function demoUser(

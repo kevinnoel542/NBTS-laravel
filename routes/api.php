@@ -10,7 +10,9 @@ use App\Http\Controllers\Api\V1\DonationScheduleController;
 use App\Http\Controllers\Api\V1\DonorCardController;
 use App\Http\Controllers\Api\V1\EligibilityController;
 use App\Http\Controllers\Api\V1\FirebaseAuthenticationController;
+use App\Http\Controllers\Api\V1\LeaderboardController;
 use App\Http\Controllers\Api\V1\LogoutController;
+use App\Http\Controllers\Api\V1\LoyaltyController;
 use App\Http\Controllers\Api\V1\MobileLoginController;
 use App\Http\Controllers\Api\V1\MobileRegistrationController;
 use App\Http\Controllers\Api\V1\NotificationController;
@@ -79,6 +81,12 @@ Route::prefix('v1')->name('api.v1.')->group(function (): void {
         Route::get('/donations/summary', [DonationController::class, 'summary'])
             ->middleware('abilities:donor:read')
             ->name('donations.summary');
+        Route::get('/loyalty', LoyaltyController::class)
+            ->middleware('abilities:donor:read')
+            ->name('loyalty.show');
+        Route::get('/leaderboard', LeaderboardController::class)
+            ->middleware('abilities:donor:read')
+            ->name('leaderboard.index');
 
         Route::get('/appointments', [AppointmentController::class, 'index'])
             ->middleware('abilities:donor:read')

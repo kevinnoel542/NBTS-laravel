@@ -1,8 +1,10 @@
 <?php
 
 use App\BloodGroupStatus;
+use App\DonationStatus;
 use App\Models\AuditLog;
 use App\Models\BloodCenter;
+use App\Models\Donation;
 use App\Models\DonorProfile;
 use App\Models\User;
 use Database\Seeders\RolePermissionSeeder;
@@ -29,6 +31,18 @@ test('current user and profile routes expose the Flutter compatibility fields', 
         'donor_id' => 'DNR-COMPAT-1',
         'loyalty_points' => 120,
         'loyalty_tier' => 'Silver',
+        'share_anonymized_data' => true,
+    ]);
+    Donation::factory()->count(2)->create([
+        'user_id' => $donor,
+        'blood_center_id' => $center,
+        'volume_ml' => 450,
+    ]);
+    Donation::factory()->create([
+        'user_id' => $donor,
+        'blood_center_id' => $center,
+        'status' => DonationStatus::Failed,
+        'volume_ml' => 800,
     ]);
     $token = $donor->createToken('Profile Phone', ['donor:read'])->plainTextToken;
 
@@ -40,6 +54,9 @@ test('current user and profile routes expose the Flutter compatibility fields', 
             ->assertJsonPath('data.preferred_center_id', $center->id)
             ->assertJsonPath('data.loyalty_points', 120)
             ->assertJsonPath('data.loyalty_tier', 'Silver')
+            ->assertJsonPath('data.total_volume_ml', 900)
+            ->assertJsonPath('data.share_anonymized_data', true)
+            ->assertJsonPath('data.donor_profile.share_anonymized_data', true)
             ->assertJsonPath('data.language', 'sw')
             ->assertJsonPath('data.profile_complete', true);
 

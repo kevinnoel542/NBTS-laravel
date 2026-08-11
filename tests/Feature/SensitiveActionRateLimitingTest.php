@@ -1,7 +1,6 @@
 <?php
 
 use App\Http\Middleware\ThrottleSensitiveAuthenticationActions;
-use App\Livewire\Settings\Profile;
 use App\Livewire\Settings\Security;
 use App\Models\User;
 use Illuminate\Support\Facades\Notification;
@@ -73,24 +72,5 @@ test('livewire password updates are rate limited independently of route throttle
         ->set('password', 'new-password')
         ->set('password_confirmation', 'new-password')
         ->call('updatePassword')
-        ->assertHasErrors('rateLimit');
-});
-
-test('livewire email verification resends are rate limited', function () {
-    Notification::fake();
-
-    $user = User::factory()->unverified()->create();
-    $this->actingAs($user);
-
-    $component = Livewire::test(Profile::class);
-
-    foreach (range(1, 5) as $attempt) {
-        $component
-            ->call('resendVerificationNotification')
-            ->assertHasNoErrors();
-    }
-
-    $component
-        ->call('resendVerificationNotification')
         ->assertHasErrors('rateLimit');
 });

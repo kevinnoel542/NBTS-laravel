@@ -26,7 +26,7 @@ test('profile information can be updated', function () {
 
     expect($user->name)->toEqual('Test User');
     expect($user->email)->toEqual('test@example.com');
-    expect($user->email_verified_at)->toBeNull();
+    expect($user->email_verified_at)->not->toBeNull();
 });
 
 test('email verification status is unchanged when email address is unchanged', function () {
@@ -42,6 +42,16 @@ test('email verification status is unchanged when email address is unchanged', f
     $response->assertHasNoErrors();
 
     expect($user->refresh()->email_verified_at)->not->toBeNull();
+});
+
+test('profile settings do not show email verification controls', function () {
+    $user = User::factory()->unverified()->create();
+
+    $this->actingAs($user);
+
+    Livewire::test(Profile::class)
+        ->assertDontSee('Your email address is unverified.')
+        ->assertDontSee('Click here to re-send the verification email.');
 });
 
 test('user can delete their account', function () {

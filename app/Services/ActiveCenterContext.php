@@ -76,7 +76,10 @@ final class ActiveCenterContext
             return __('console.context.national');
         }
 
-        return $this->selectedCenter($user, $selection)?->name
-            ?? __('console.context.no_assignment');
+        $selectedCenter = $this->selectedCenter($user, $selection);
+
+        return $selectedCenter instanceof BloodCenter
+            ? $selectedCenter->name
+            : __('console.context.no_assignment');
     }
 }

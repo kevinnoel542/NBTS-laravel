@@ -2,10 +2,15 @@
 
 namespace App\Providers;
 
+use App\Contracts\PushTransport;
+use App\Contracts\SmsTransport;
 use App\Firebase\FirebaseTokenVerifier;
 use App\Firebase\KreaitFirebaseTokenVerifier;
 use App\Models\User;
 use App\RoleName;
+use App\Services\Notifications\FcmPushTransport;
+use App\Services\Notifications\LogPushTransport;
+use App\Services\Notifications\LogSmsTransport;
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\DB;
@@ -21,6 +26,13 @@ class AppServiceProvider extends ServiceProvider
     public function register(): void
     {
         $this->app->bind(FirebaseTokenVerifier::class, KreaitFirebaseTokenVerifier::class);
+        $this->app->bind(
+            PushTransport::class,
+            fn ($app): PushTransport => config('services.notifications.push_transport') === 'fcm'
+                ? $app->make(FcmPushTransport::class)
+                : $app->make(LogPushTransport::class),
+        );
+        $this->app->bind(SmsTransport::class, LogSmsTransport::class);
     }
 
     /**

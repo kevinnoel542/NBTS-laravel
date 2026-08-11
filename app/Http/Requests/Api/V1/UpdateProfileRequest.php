@@ -43,6 +43,7 @@ class UpdateProfileRequest extends FormRequest
             'emergency_contact_name' => ['sometimes', 'nullable', 'string', 'max:255'],
             'emergency_contact_phone' => ['sometimes', 'nullable', 'string', 'max:30'],
             'push_notifications_enabled' => ['sometimes', 'boolean'],
+            'email_notifications_enabled' => ['sometimes', 'boolean'],
             'sms_reminders_enabled' => ['sometimes', 'boolean'],
             'share_anonymized_data' => ['sometimes', 'boolean'],
             'language' => ['sometimes', 'required', Rule::in(['en', 'sw'])],

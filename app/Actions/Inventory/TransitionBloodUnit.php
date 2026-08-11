@@ -4,20 +4,22 @@ namespace App\Actions\Inventory;
 
 use App\BloodUnitStatus;
 use App\Exceptions\InvalidBloodUnitTransition;
-use App\LowStockAlertStatus;
 use App\Models\BloodInventory;
 use App\Models\BloodUnit;
 use App\Models\InventoryAdjustment;
-use App\Models\LowStockAlert;
 use App\Models\User;
+use App\Services\InventoryStockAlertService;
 use App\Support\AuditLogger;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 use LogicException;
 
-class TransitionBloodUnit
+final readonly class TransitionBloodUnit
 {
-    public function __construct(private AuditLogger $auditLogger) {}
+    public function __construct(
+        private AuditLogger $auditLogger,
+        private InventoryStockAlertService $inventoryStockAlertService,
+    ) {}
 
     public function execute(
         BloodUnit $bloodUnit,
@@ -91,7 +93,7 @@ class TransitionBloodUnit
                 ]);
             }
 
-            $lowStockAlert = $this->evaluateLowStock($inventory->refresh());
+            $lowStockAlert = $this->inventoryStockAlertService->evaluate($inventory->refresh());
 
             $this->auditLogger->record(
                 actor: $actor,
@@ -111,51 +113,5 @@ class TransitionBloodUnit
 
             return $lockedUnit->refresh()->load(['bloodCenter', 'inventoryAdjustments']);
         }, attempts: 3);
-    }
-
-    private function evaluateLowStock(BloodInventory $inventory): ?LowStockAlert
-    {
-        $activeAlert = LowStockAlert::query()
-            ->where('blood_center_id', $inventory->blood_center_id)
-            ->where('blood_group', $inventory->blood_group)
-            ->whereIn('status', [
-                LowStockAlertStatus::Open,
-                LowStockAlertStatus::Notified,
-                LowStockAlertStatus::CampaignCreated,
-            ])
-            ->lockForUpdate()
-            ->latest('id')
-            ->first();
-
-        if ($inventory->available_units < $inventory->minimum_threshold) {
-            if (! $activeAlert) {
-                return LowStockAlert::query()->create([
-                    'available_units' => $inventory->available_units,
-                    'blood_center_id' => $inventory->blood_center_id,
-                    'blood_group' => $inventory->blood_group,
-                    'minimum_threshold' => $inventory->minimum_threshold,
-                    'status' => LowStockAlertStatus::Open,
-                ]);
-            }
-
-            $activeAlert->forceFill([
-                'available_units' => $inventory->available_units,
-                'minimum_threshold' => $inventory->minimum_threshold,
-            ])->save();
-
-            return $activeAlert->refresh();
-        }
-
-        if ($activeAlert) {
-            $activeAlert->forceFill([
-                'available_units' => $inventory->available_units,
-                'resolved_at' => now(),
-                'status' => LowStockAlertStatus::Resolved,
-            ])->save();
-
-            return $activeAlert->refresh();
-        }
-
-        return null;
     }
 }

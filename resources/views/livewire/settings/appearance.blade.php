@@ -1,4 +1,4 @@
-<section class="w-full">
+<section class="settings-page operations-page w-full">
     @include('partials.settings-heading')
 
     <flux:heading class="sr-only">{{ __('Appearance settings') }}</flux:heading>

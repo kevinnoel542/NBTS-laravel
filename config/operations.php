@@ -58,7 +58,7 @@ return [
             'icon' => 'heart-handshake',
             'group' => 'coordination',
             'permissions' => [PermissionName::ManageNotifications->value, PermissionName::ManageLoyalty->value],
-            'tabs' => ['notifications', 'loyalty', 'rewards', 'leaderboard'],
+            'tabs' => ['notifications', 'deliveries', 'loyalty', 'rewards', 'leaderboard'],
         ],
         'content' => [
             'title' => 'console.workspaces.content.title',

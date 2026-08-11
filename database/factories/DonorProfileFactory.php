@@ -36,6 +36,7 @@ class DonorProfileFactory extends Factory
             'emergency_contact_name' => fake()->name(),
             'emergency_contact_phone' => fake()->e164PhoneNumber(),
             'push_notifications_enabled' => true,
+            'email_notifications_enabled' => true,
             'sms_reminders_enabled' => true,
             'share_anonymized_data' => false,
             'language' => 'en',

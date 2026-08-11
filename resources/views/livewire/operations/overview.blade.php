@@ -1,4 +1,4 @@
-<div class="operations-page mx-auto w-full max-w-[1500px] space-y-8 pb-12">
+<div class="operations-page mx-auto w-full max-w-[1500px] space-y-0">
     <header class="operations-page-header">
         <div class="min-w-0">
             <p class="operations-kicker">{{ __('console.overview.greeting', ['name' => auth()->user()->name]) }}</p>
@@ -64,7 +64,7 @@
         @endcan
     </section>
 
-    <div class="grid gap-6 xl:grid-cols-[minmax(0,1.2fr)_minmax(340px,0.8fr)]">
+    <div class="grid gap-3 xl:grid-cols-[minmax(0,1.2fr)_minmax(340px,0.8fr)]">
         <section class="operations-panel">
             <div class="operations-panel__header">
                 <div>

@@ -4,6 +4,7 @@ namespace App\Policies;
 
 use App\AppointmentStatus;
 use App\Models\Appointment;
+use App\Models\BloodCenter;
 use App\Models\User;
 use App\PermissionName;
 use App\RoleName;
@@ -72,5 +73,13 @@ class AppointmentPolicy
     {
         return $user->can(PermissionName::ManageAppointments->value)
             && $user->hasCenterAccess($appointment->blood_center_id);
+    }
+
+    public function rescheduleStaff(User $user, Appointment $appointment, BloodCenter $bloodCenter): bool
+    {
+        return $user->can(PermissionName::ManageAppointments->value)
+            && $user->hasCenterAccess($appointment->blood_center_id)
+            && $user->hasCenterAccess($bloodCenter)
+            && in_array($appointment->status, [AppointmentStatus::Pending, AppointmentStatus::Confirmed], true);
     }
 }

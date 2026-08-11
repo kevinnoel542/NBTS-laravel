@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api\V1;
 
 use App\Actions\Auth\CreateMobileDonor;
 use App\Actions\Auth\IssueMobileToken;
+use App\Actions\Profile\PrepareMobileUserResource;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Api\V1\MobileRegistrationRequest;
 use App\Http\Resources\Api\V1\UserResource;
@@ -15,6 +16,7 @@ final class MobileRegistrationController extends Controller
         MobileRegistrationRequest $request,
         CreateMobileDonor $createMobileDonor,
         IssueMobileToken $issueMobileToken,
+        PrepareMobileUserResource $prepareMobileUserResource,
     ): JsonResponse {
         $user = $createMobileDonor->handle($request->registrationData());
         $token = $issueMobileToken->handle($user, $request->deviceName());
@@ -23,7 +25,7 @@ final class MobileRegistrationController extends Controller
             'token_type' => 'Bearer',
             'token' => $token->plainTextToken,
             'expires_at' => $token->expiresAt->toIso8601String(),
-            'user' => new UserResource($user),
+            'user' => new UserResource($prepareMobileUserResource->handle($user)),
         ], 201);
     }
 }

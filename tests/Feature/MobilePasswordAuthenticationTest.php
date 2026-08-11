@@ -31,6 +31,7 @@ test('a donor can register with the legacy Flutter payload and receives a scoped
         ->assertJsonPath('user.phone', '+255712345678')
         ->assertJsonPath('user.blood_group', 'O+')
         ->assertJsonPath('user.profile_complete', true)
+        ->assertJsonPath('user.total_volume_ml', 0)
         ->assertJsonPath('user.roles.0', RoleName::Donor->value)
         ->assertJsonStructure(['token', 'expires_at', 'user' => ['donor_id']]);
 

@@ -19,6 +19,7 @@ final readonly class RecordDonationData
         public bool $bloodGroupVerified,
         public ?int $appointmentId = null,
         public ?string $notes = null,
+        public ?string $idempotencyKey = null,
     ) {
         if ($this->volumeMl <= 0) {
             throw new InvalidArgumentException('Donation volume must be greater than zero.');
@@ -30,6 +31,11 @@ final readonly class RecordDonationData
 
         if ($this->donationType === DonationType::WalkIn && $this->appointmentId !== null) {
             throw new InvalidArgumentException('Walk-in donations cannot reference an appointment.');
+        }
+
+        if ($this->idempotencyKey !== null
+            && (mb_strlen(trim($this->idempotencyKey)) < 16 || mb_strlen(trim($this->idempotencyKey)) > 100)) {
+            throw new InvalidArgumentException('Donation idempotency keys must contain between 16 and 100 characters.');
         }
     }
 }

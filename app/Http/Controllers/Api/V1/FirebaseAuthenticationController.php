@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api\V1;
 
 use App\Actions\Auth\AuthenticateFirebaseUser;
 use App\Actions\Auth\IssueMobileToken;
+use App\Actions\Profile\PrepareMobileUserResource;
 use App\Firebase\FirebaseTokenVerifier;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Api\V1\FirebaseAuthenticationRequest;
@@ -17,6 +18,7 @@ final class FirebaseAuthenticationController extends Controller
         FirebaseTokenVerifier $tokenVerifier,
         AuthenticateFirebaseUser $authenticateFirebaseUser,
         IssueMobileToken $issueMobileToken,
+        PrepareMobileUserResource $prepareMobileUserResource,
     ): JsonResponse {
         $credentials = $request->credentials();
         $identity = $tokenVerifier->verify($credentials['firebase_id_token']);
@@ -27,7 +29,7 @@ final class FirebaseAuthenticationController extends Controller
             'token_type' => 'Bearer',
             'token' => $token->plainTextToken,
             'expires_at' => $token->expiresAt->toIso8601String(),
-            'user' => new UserResource($user),
+            'user' => new UserResource($prepareMobileUserResource->handle($user)),
         ]);
     }
 }

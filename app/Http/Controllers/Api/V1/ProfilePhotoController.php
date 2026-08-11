@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api\V1;
 
+use App\Actions\Profile\PrepareMobileUserResource;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Api\V1\UpdateProfilePhotoRequest;
 use App\Http\Resources\Api\V1\UserResource;
@@ -17,6 +18,7 @@ final class ProfilePhotoController extends Controller
     public function __invoke(
         UpdateProfilePhotoRequest $request,
         AuditLogger $auditLogger,
+        PrepareMobileUserResource $prepareMobileUserResource,
     ): UserResource {
         $user = $request->user();
 
@@ -54,6 +56,6 @@ final class ProfilePhotoController extends Controller
             Storage::disk('public')->delete($oldPath);
         }
 
-        return new UserResource($user->load(['roles', 'donorProfile.preferredCenter']));
+        return new UserResource($prepareMobileUserResource->handle($user));
     }
 }

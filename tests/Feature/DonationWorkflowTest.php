@@ -15,10 +15,13 @@ use App\Models\BloodInventory;
 use App\Models\CenterStaff;
 use App\Models\Deferral;
 use App\Models\Donation;
+use App\Models\DonorBadge;
 use App\Models\DonorProfile;
 use App\Models\EligibilityRecord;
+use App\Models\Leaderboard;
 use App\Models\User;
 use Carbon\CarbonImmutable;
+use Database\Seeders\LoyaltySeeder;
 use Database\Seeders\RolePermissionSeeder;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Validation\ValidationException;
@@ -28,6 +31,8 @@ beforeEach(function () {
 });
 
 test('appointment donation completion updates donor history and creates a collected unit atomically', function () {
+    $this->seed(LoyaltySeeder::class);
+
     $donationDate = CarbonImmutable::today();
     $center = BloodCenter::factory()->create();
     $manager = User::factory()->centerManager()->create();
@@ -66,10 +71,66 @@ test('appointment donation completion updates donor history and creates a collec
         ->and($profile->next_eligible_donation_date?->toDateString())
         ->toBe($donationDate->addMonthsNoOverflow(3)->toDateString())
         ->and($profile->total_donations)->toBe(1)
+        ->and($profile->loyalty_points)->toBe(100)
+        ->and($profile->loyalty_tier)->toBe('Bronze')
         ->and($bloodUnit->status)->toBe(BloodUnitStatus::Collected)
         ->and($bloodUnit->expiry_date->toDateString())->toBe($donationDate->addDays(35)->toDateString())
         ->and(BloodInventory::query()->count())->toBe(0)
+        ->and(DonorBadge::query()->where('user_id', $donor->id)->count())->toBe(1)
+        ->and(Leaderboard::query()->where('user_id', $donor->id)->value('rank'))->toBe(1)
         ->and(AuditLog::query()->where('action', 'donations.completed')->count())->toBe(1);
+});
+
+test('replaying the same donation request key returns the original donation without duplicate side effects', function () {
+    $donationDate = CarbonImmutable::today();
+    $center = BloodCenter::factory()->create();
+    $manager = User::factory()->centerManager()->create();
+    $donor = createDonationReadyDonor(Gender::Male, $donationDate);
+    $appointment = Appointment::factory()->confirmed()->create([
+        'blood_center_id' => $center,
+        'user_id' => $donor,
+    ]);
+    CenterStaff::factory()->manager()->create([
+        'blood_center_id' => $center,
+        'user_id' => $manager,
+    ]);
+    $idempotencyKey = 'donation-request-20260811-0001';
+    $data = new RecordDonationData(
+        donorId: $donor->id,
+        bloodCenterId: $center->id,
+        donationType: DonationType::Appointment,
+        bloodGroup: BloodGroup::ONegative,
+        volumeMl: 450,
+        donationDate: $donationDate,
+        bloodGroupVerified: true,
+        appointmentId: $appointment->id,
+        idempotencyKey: $idempotencyKey,
+    );
+
+    $first = app(RecordDonation::class)->execute($data, $manager);
+    $replayed = app(RecordDonation::class)->execute($data, $manager);
+
+    expect($replayed->id)->toBe($first->id)
+        ->and($replayed->idempotency_key)->toBe($idempotencyKey)
+        ->and(Donation::query()->count())->toBe(1)
+        ->and($first->bloodUnit()->count())->toBe(1)
+        ->and(AuditLog::query()->where('action', 'donations.completed')->count())->toBe(1);
+
+    $conflictingData = new RecordDonationData(
+        donorId: $donor->id,
+        bloodCenterId: $center->id,
+        donationType: DonationType::Appointment,
+        bloodGroup: BloodGroup::ONegative,
+        volumeMl: 475,
+        donationDate: $donationDate,
+        bloodGroupVerified: true,
+        appointmentId: $appointment->id,
+        idempotencyKey: $idempotencyKey,
+    );
+
+    expect(fn () => app(RecordDonation::class)->execute($conflictingData, $manager))
+        ->toThrow(ValidationException::class)
+        ->and(Donation::query()->count())->toBe(1);
 });
 
 test('walk in donation uses the official four month interval for female donors', function () {

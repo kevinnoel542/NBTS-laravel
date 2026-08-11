@@ -19,7 +19,9 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
  * @property CarbonImmutable $scheduled_at
  * @property AppointmentStatus $status
  * @property CarbonImmutable|null $confirmed_at
+ * @property CarbonImmutable|null $checked_in_at
  * @property CarbonImmutable|null $cancelled_at
+ * @property CarbonImmutable|null $no_show_at
  * @property CarbonImmutable|null $rescheduled_at
  * @property int|null $handled_by
  * @property string|null $notes
@@ -31,7 +33,9 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
     'scheduled_at',
     'status',
     'confirmed_at',
+    'checked_in_at',
     'cancelled_at',
+    'no_show_at',
     'rescheduled_at',
     'handled_by',
     'notes',
@@ -46,7 +50,9 @@ class Appointment extends Model
     {
         return [
             'cancelled_at' => 'datetime',
+            'checked_in_at' => 'datetime',
             'confirmed_at' => 'datetime',
+            'no_show_at' => 'datetime',
             'rescheduled_at' => 'datetime',
             'scheduled_at' => 'datetime',
             'status' => AppointmentStatus::class,

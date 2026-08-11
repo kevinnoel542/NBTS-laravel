@@ -3,11 +3,10 @@
 namespace App\Models;
 
 use App\BloodGroup;
+use App\DonationStatus;
 use App\Gender;
 use App\RoleName;
 use Database\Factories\UserFactory;
-use Illuminate\Auth\MustVerifyEmail as MustVerifyEmailTrait;
-use Illuminate\Contracts\Auth\MustVerifyEmail as MustVerifyEmailContract;
 use Illuminate\Contracts\Translation\HasLocalePreference;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
@@ -73,7 +72,7 @@ use Spatie\Permission\Traits\HasRoles;
     'two_factor_secret',
     'two_factor_recovery_codes',
 ])]
-class User extends Authenticatable implements HasLocalePreference, MustVerifyEmailContract, PasskeyUser
+class User extends Authenticatable implements HasLocalePreference, PasskeyUser
 {
     use HasApiTokens;
 
@@ -83,7 +82,6 @@ class User extends Authenticatable implements HasLocalePreference, MustVerifyEma
     use HasRoles {
         hasPermissionTo as protected hasPermissionToIgnoringAccountStatus;
     }
-    use MustVerifyEmailTrait;
     use Notifiable;
     use PasskeyAuthenticatable;
     use TwoFactorAuthenticatable;
@@ -229,6 +227,12 @@ class User extends Authenticatable implements HasLocalePreference, MustVerifyEma
         return $this->hasMany(Donation::class);
     }
 
+    /** @return HasMany<Donation, $this> */
+    public function completedDonations(): HasMany
+    {
+        return $this->donations()->where('status', DonationStatus::Completed);
+    }
+
     /** @return HasMany<EligibilityRecord, $this> */
     public function eligibilityRecords(): HasMany
     {
@@ -245,6 +249,12 @@ class User extends Authenticatable implements HasLocalePreference, MustVerifyEma
     public function fcmTokens(): HasMany
     {
         return $this->hasMany(FcmToken::class);
+    }
+
+    /** @return HasMany<NotificationDelivery, $this> */
+    public function notificationDeliveries(): HasMany
+    {
+        return $this->hasMany(NotificationDelivery::class);
     }
 
     /** @return HasMany<DonorBadge, $this> */

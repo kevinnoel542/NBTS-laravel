@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api\V1;
 
 use App\Actions\Auth\AuthenticateMobileDonor;
 use App\Actions\Auth\IssueMobileToken;
+use App\Actions\Profile\PrepareMobileUserResource;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Api\V1\MobileLoginRequest;
 use App\Http\Resources\Api\V1\UserResource;
@@ -15,6 +16,7 @@ final class MobileLoginController extends Controller
         MobileLoginRequest $request,
         AuthenticateMobileDonor $authenticateMobileDonor,
         IssueMobileToken $issueMobileToken,
+        PrepareMobileUserResource $prepareMobileUserResource,
     ): JsonResponse {
         $credentials = $request->credentials();
         $user = $authenticateMobileDonor->handle(
@@ -27,7 +29,7 @@ final class MobileLoginController extends Controller
             'token_type' => 'Bearer',
             'token' => $token->plainTextToken,
             'expires_at' => $token->expiresAt->toIso8601String(),
-            'user' => new UserResource($user),
+            'user' => new UserResource($prepareMobileUserResource->handle($user)),
         ]);
     }
 }

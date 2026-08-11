@@ -16,6 +16,7 @@ use App\Models\BloodUnit;
 use App\Models\Donation;
 use App\Models\User;
 use App\Services\DonorEligibilityService;
+use App\Services\DonorRecognitionService;
 use App\Support\AuditLogger;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
@@ -26,6 +27,7 @@ class RecordDonation
 {
     public function __construct(
         private DonorEligibilityService $eligibilityService,
+        private DonorRecognitionService $recognitionService,
         private AuditLogger $auditLogger,
     ) {}
 
@@ -55,6 +57,27 @@ class RecordDonation
                 ->lockForUpdate()
                 ->whereKey($data->donorId)
                 ->firstOrFail();
+
+            $idempotencyKey = $data->idempotencyKey === null
+                ? null
+                : trim($data->idempotencyKey);
+            $existingDonation = $idempotencyKey === null
+                ? null
+                : Donation::query()
+                    ->where('idempotency_key', $idempotencyKey)
+                    ->first();
+
+            if ($existingDonation instanceof Donation) {
+                $this->assertSameIdempotentOperation($existingDonation, $data);
+
+                return $existingDonation->load([
+                    'appointment',
+                    'bloodCenter',
+                    'bloodUnit',
+                    'donor.donorProfile',
+                ]);
+            }
+
             $donorProfile = $this->eligibilityService->assertEligibleForDonation($donor, $data->donationDate);
             $appointment = $this->resolveAppointment($data, $donor, $bloodCenter);
 
@@ -63,6 +86,7 @@ class RecordDonation
                 'blood_center_id' => $bloodCenter->id,
                 'blood_group' => $data->bloodGroup,
                 'blood_group_verified' => true,
+                'idempotency_key' => $idempotencyKey,
                 'donation_date' => $data->donationDate,
                 'donation_type' => $data->donationType,
                 'notes' => $data->notes,
@@ -100,6 +124,8 @@ class RecordDonation
                     ->count(),
             ])->save();
 
+            $recognition = $this->recognitionService->refreshDonor($donor);
+
             $bloodUnit = BloodUnit::query()->create([
                 'blood_center_id' => $bloodCenter->id,
                 'blood_group' => $data->bloodGroup,
@@ -124,6 +150,8 @@ class RecordDonation
                     'blood_unit_id' => $bloodUnit->id,
                     'donation_type' => $data->donationType->value,
                     'next_eligible_donation_date' => $nextEligibleDate->toDateString(),
+                    'loyalty_points' => $recognition['points'],
+                    'loyalty_tier' => $recognition['tier'],
                     'volume_ml' => $data->volumeMl,
                 ],
             );
@@ -160,9 +188,9 @@ class RecordDonation
             ]);
         }
 
-        if ($appointment->status !== AppointmentStatus::Confirmed) {
+        if (! in_array($appointment->status, [AppointmentStatus::Confirmed, AppointmentStatus::CheckedIn], true)) {
             throw ValidationException::withMessages([
-                'appointment_id' => ['The appointment must be confirmed before donation completion.'],
+                'appointment_id' => ['The appointment must be confirmed or checked in before donation completion.'],
             ]);
         }
 
@@ -186,6 +214,24 @@ class RecordDonation
         }
 
         return $intervalMonths;
+    }
+
+    /** @throws ValidationException */
+    private function assertSameIdempotentOperation(Donation $donation, RecordDonationData $data): void
+    {
+        $isSameOperation = $donation->user_id === $data->donorId
+            && $donation->blood_center_id === $data->bloodCenterId
+            && $donation->donation_type === $data->donationType
+            && $donation->blood_group === $data->bloodGroup
+            && $donation->volume_ml === $data->volumeMl
+            && $donation->donation_date->isSameDay($data->donationDate)
+            && $donation->appointment_id === $data->appointmentId;
+
+        if (! $isSameOperation) {
+            throw ValidationException::withMessages([
+                'idempotency_key' => [__('console.workflow.idempotency_conflict')],
+            ]);
+        }
     }
 
     private function wholeBloodShelfLifeDays(): int

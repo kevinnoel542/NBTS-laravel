@@ -20,6 +20,7 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
  * @property int $blood_center_id
  * @property int|null $recorded_by
  * @property int|null $appointment_id
+ * @property string|null $idempotency_key
  * @property DonationType $donation_type
  * @property BloodGroup $blood_group
  * @property bool $blood_group_verified
@@ -32,6 +33,7 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
     'blood_center_id',
     'recorded_by',
     'appointment_id',
+    'idempotency_key',
     'donation_type',
     'blood_group',
     'blood_group_verified',

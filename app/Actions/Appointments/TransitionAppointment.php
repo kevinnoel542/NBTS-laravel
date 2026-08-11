@@ -38,7 +38,9 @@ class TransitionAppointment
 
             match ($status) {
                 AppointmentStatus::Confirmed => $lockedAppointment->confirmed_at = $timestamp,
+                AppointmentStatus::CheckedIn => $lockedAppointment->checked_in_at = $timestamp,
                 AppointmentStatus::Cancelled => $lockedAppointment->cancelled_at = $timestamp,
+                AppointmentStatus::NoShow => $lockedAppointment->no_show_at = $timestamp,
                 AppointmentStatus::Completed, AppointmentStatus::Pending => null,
             };
 

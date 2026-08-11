@@ -57,6 +57,7 @@ test('a verified Firebase identity creates a donor and a scoped device token', f
             ->where('user.name', 'Asha Donor')
             ->where('user.email', 'asha@example.test')
             ->where('user.locale', 'en')
+            ->where('user.total_volume_ml', 0)
             ->where('user.roles.0', RoleName::Donor->value)
             ->where('user.donor_profile.blood_group_status', 'unknown')
             ->hasAll(['token', 'expires_at', 'user.donor_profile.donor_id'])
