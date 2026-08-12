@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\AppointmentStatus;
+use App\Services\ActiveAssignmentContext;
 use Carbon\CarbonImmutable;
 use Database\Factories\AppointmentFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
@@ -10,6 +11,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 
 /**
@@ -69,6 +71,15 @@ class Appointment extends Model
             return $query;
         }
 
+        $assignment = app(ActiveAssignmentContext::class)->selectedAssignment($user);
+        $selectedCenterId = $assignment?->organizationUnit->bloodCenter?->id;
+
+        if ($assignment instanceof StaffAssignment) {
+            return $selectedCenterId === null
+                ? $query->whereRaw('1 = 0')
+                : $query->where('blood_center_id', $selectedCenterId);
+        }
+
         return $query->whereIn(
             'blood_center_id',
             $user->centerStaffAssignments()->where('is_active', true)->select('blood_center_id'),
@@ -97,5 +108,17 @@ class Appointment extends Model
     public function donation(): HasOne
     {
         return $this->hasOne(Donation::class);
+    }
+
+    /** @return HasMany<DonorIdentityCheck, $this> */
+    public function identityChecks(): HasMany
+    {
+        return $this->hasMany(DonorIdentityCheck::class);
+    }
+
+    /** @return HasOne<CollectionEpisode, $this> */
+    public function collectionEpisode(): HasOne
+    {
+        return $this->hasOne(CollectionEpisode::class);
     }
 }

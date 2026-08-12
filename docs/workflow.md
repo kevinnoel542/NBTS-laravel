@@ -1,6 +1,6 @@
 # NBTS system workflow
 
-Last updated: 2026-08-11
+Last updated: 2026-08-12
 
 ## Purpose
 
@@ -10,8 +10,8 @@ This document is the target operating model for NBTS-NEW. It merges the useful b
 
 This document defines the target operating model. It intentionally distinguishes:
 
-- **Verified current foundation:** donor accounts, reception/search, public/mobile discovery, appointments and staff rescheduling/check-in, donor card, staff-led screening and deferrals, donation history and idempotent completion, blood-group verification, auditable blood-unit/inventory transitions, expiry/disposal/reconciliation, center scoping, low-stock response, campaigns, deterministic donor recognition, multi-channel notification orchestration, reminder idempotency, delivery observability, public website, and stable API contracts recorded in `docs/achievement.md`.
-- **Target national extension:** detailed center hierarchy, operational roles, unique donation/barcode chain, laboratory/QC, hard quarantine, authorized release, component production and lineage, component-level inventory, cold chain, hospital requests, compatibility, issue/dispatch/receipt, bedside transfusion, haemovigilance, recall/look-back, quality management, interoperability, downtime, disaster recovery, and controlled rollout.
+- **Verified current foundation:** donor accounts, reception/search and duplicate review, expiring identity confirmation, versioned construction screening, checked-in donor queues, locked construction collection identifiers, Code 128 label/scan controls, quarantined collection containers, specimens/handoffs, collection outcomes, donor reactions, encrypted offline receipts/reconciliation, public/mobile discovery, appointments, donor card, donation history, blood-group verification, auditable blood-unit/inventory transitions, center/assignment scoping, role-aware dashboards, notification delivery, public website, and stable API contracts recorded in `docs/achievement.md`.
+- **Target national extension:** externally approved production donor rules and identifier/barcode standards, laboratory/QC, hard release authority, component production and lineage, component-level inventory, cold chain, hospital requests, compatibility, issue/dispatch/receipt, bedside transfusion, recipient haemovigilance, recall/look-back, quality management, interoperability, production device controls, disaster recovery, and controlled rollout.
 
 Target sections are requirements, not claims of implementation. Clinical, laboratory, quality, hospital, data-protection, legal, Ministry, and operational rules remain subject to formal approval and versioning.
 
@@ -69,7 +69,7 @@ The platform connects approved laboratory analyzers/LIS, HMIS/DHIS2, barcode pri
 
 Permissions, center/hospital assignments, department, competency, active status, and separation-of-duties rules decide access. Role names are convenient permission bundles, not the only authorization boundary.
 
-### Current canonical roles
+### Current canonical compatibility roles
 
 | Role | Primary responsibility | Data scope |
 | --- | --- | --- |
@@ -80,40 +80,47 @@ Permissions, center/hospital assignments, department, competency, active status,
 | NBTS admin | National operational administration without unrestricted infrastructure authority | Approved national operational data |
 | Super admin | Technical security, configuration, recovery, and full administration | Entire system, but not automatic clinical release authority |
 
-### National operational profiles
+The five authenticated compatibility roles (`super_admin`, `nbts_admin`, `center_manager`, `center_staff`, and `donor`) remain in place during migration. They are not the final operating-role catalogue. The target catalogue contains 26 role profiles:
 
-- National operations administrator.
-- National quality and haemovigilance officer.
-- National inventory and logistics coordinator.
-- National donor engagement/content officer.
-- National data-protection and governance officer.
-- National auditor/inspector with read-only evidence access.
-- ICT/security/support operator.
+| No. | Operating layer | Target role profile |
+| ---: | --- | --- |
+| 1 | Platform | Super administrator |
+| 2 | Platform | ICT/security operator |
+| 3 | National | National operations administrator |
+| 4 | National | National quality/haemovigilance officer |
+| 5 | National | National inventory/logistics coordinator |
+| 6 | National | National donor engagement/content officer |
+| 7 | National | Data-protection/governance officer |
+| 8 | National | National auditor/inspector |
+| 9 | Blood center | Center manager |
+| 10 | Blood center | Reception officer |
+| 11 | Blood center | Screening/counselling officer |
+| 12 | Blood center | Collection/phlebotomy officer |
+| 13 | Blood center | Laboratory technician |
+| 14 | Blood center | Laboratory approver/quality officer |
+| 15 | Blood center | Component-processing officer |
+| 16 | Blood center | Inventory officer |
+| 17 | Blood center | Logistics/cold-chain officer |
+| 18 | Blood center | Center haemovigilance/quality officer |
+| 19 | Blood center | Center read-only auditor |
+| 20 | Hospital | Hospital clinician/requester |
+| 21 | Hospital | Hospital blood-bank officer |
+| 22 | Hospital | Compatibility/crossmatch officer |
+| 23 | Hospital | Transfusion nurse/officer |
+| 24 | Hospital | Hospital haemovigilance officer |
+| 25 | Hospital | Hospital read-only reviewer |
+| 26 | Donor | Donor |
 
-### Blood-center operational profiles
+### Account and assignment policy
 
-- Center manager.
-- Reception officer.
-- Screening and counselling officer.
-- Collection/phlebotomy officer.
-- Laboratory technician.
-- Laboratory approver/quality officer.
-- Component-processing officer.
-- Inventory/storage officer.
-- Logistics/cold-chain officer.
-- Center haemovigilance/quality officer.
-- Center read-only auditor/viewer.
+- One person has one identity account. The system must not create duplicate accounts merely because that person works in several roles, departments, centers, or hospitals.
+- A staff account may hold multiple scoped assignments. Every assignment records its role profile, organization/center/hospital, department, shift where applicable, effective dates, status, approver, reason, and competency restrictions.
+- Users with more than one active assignment select an active role and location context. Navigation, dashboard content, queues, actions, and data scope recalculate from that context.
+- Prohibited role combinations and dual-control rules still apply when one person has several assignments. The person who performs a test must not be the sole verifier and releaser of the same component where independent approval is required.
+- Technical administrators cannot grant themselves clinical release authority through infrastructure access, and super-administrator access does not imply clinical competency.
+- Deactivating an account or assignment removes current access without deleting historical responsibility, audit evidence, or records signed by that person.
 
-### Hospital operational profiles
-
-- Hospital clinician/requester.
-- Hospital blood-bank officer.
-- Compatibility/crossmatch officer.
-- Transfusion nurse/officer.
-- Hospital haemovigilance officer.
-- Hospital read-only reviewer.
-
-A person may hold more than one profile where staffing requires it, but the system must still enforce prohibited combinations. The person who performs a test must not be the sole person who verifies and releases the same component when dual control is required. Technical administrators cannot grant themselves clinical release authority through infrastructure access.
+During construction, the minimum representative local demo set is five accounts: super administrator, NBTS administrator, center manager, center staff, and donor. These accounts validate the current compatibility boundary; specialized Phase 5 demo identities are added only when their scoped permissions and workflows are implemented. Credentials remain documented only in `docs/local-demo credentials.md` and must never be production credentials.
 
 ## Center hierarchy, types, departments, and assignments
 
@@ -132,33 +139,54 @@ Each center record controls:
 
 ## Overview and work-queue workflow
 
-### National overview
+The dashboard is one role-aware Laravel shell, not 26 duplicated pages. It uses shared components and one visual system while composing the data, queues, actions, and explanations permitted by the active role and location assignment. The 26 target profiles map to 13 staff dashboard configurations plus one donor mobile dashboard:
 
-Shows component-level stock and days of supply, shortages, quarantine, release, collection and usable yield, expiry/discard, hospital request fill, transfers, cold-chain incidents, adverse events, recalls, center performance, service health, and data-quality exceptions.
+| Dashboard configuration | Roles served | Primary content |
+| --- | --- | --- |
+| 1. System control | Super administrator and ICT/security operator | Availability, failed jobs, integration/dead-letter backlogs, security alerts, audit integrity, backup age, restore tests, certificate expiry, devices, and support incidents |
+| 2. National operations | National operations administrator | National stock, collections, usable yield, shortages, center performance, service exceptions, and emergency coordination |
+| 3. National quality and governance | National quality/haemovigilance, data-protection/governance, and national audit profiles | Adverse events, recalls, CAPA, audit findings, privacy controls, overdue reviews, and evidence queues, with actions restricted per profile |
+| 4. National inventory and logistics | National inventory/logistics coordinator | Component/group/region stock, days of supply, transfers, expiry, cold-chain exceptions, hospital demand, and balancing decisions |
+| 5. Engagement and content | National donor engagement/content officer | Campaigns, eligible audiences, communication delivery, approval queues, publications, schedules, and content performance |
+| 6. Center management | Center manager | Today’s donors, staff coverage, department queues, stock, reservations, expiry, incidents, alarms, hospital demand, and unresolved exceptions |
+| 7. Reception | Reception officer | Arrivals, appointments, walk-ins, donor search, identity/duplicate checks, registration, and check-in |
+| 8. Screening and counselling | Screening/counselling officer | Donors awaiting screening, eligibility decisions, deferrals, re-entry reviews, counselling, and overdue appointments |
+| 9. Collection | Collection/phlebotomy officer | Cleared donors, collections in progress, identifiers/labels, reactions, incomplete records, specimens, and handoffs |
+| 10. Laboratory and components | Laboratory technician, laboratory approver/quality officer, and component-processing officer | Specimens, tests, QC, repeats, discrepancies, quarantine, independent release queues, component processing, lineage, and yields |
+| 11. Center inventory and logistics | Inventory officer and logistics/cold-chain officer | Available/reserved stock, FEFO, expiry risk, locations, transfers, dispatch/receipt, temperature excursions, and reconciliation |
+| 12. Center quality and haemovigilance | Center haemovigilance/quality officer and center read-only auditor | Incidents, donor/recipient reactions, recalls, deviations, investigations, CAPA, evidence, and overdue actions |
+| 13. Hospital operations | All six hospital profiles | Requests, compatibility, allocation, emergency release, issue, receipt, bedside verification, outcomes, returns, and reactions, filtered to each role’s authority |
+| 14. Donor home (Flutter) | Donor | Eligibility, next donation date, donor card, appointments, history, recognition, notifications, centers, and campaigns |
 
-### Center-manager overview
+### Shared dashboard composition
 
-Shows today’s donors and appointments, reception/screening/collection queues, specimens/tests pending, quarantine/release work, component stock/reservations/expiry, hospital requests, dispatch/receipt, temperature alarms, incidents, CAPA, staff coverage, and overdue tasks for assigned centers.
+- The heading identifies the user’s active role, center/hospital or national scope, and gives a short explanation of that dashboard’s responsibility.
+- Users with multiple assignments receive a role/location context switcher; changing it refreshes navigation and dashboard authorization without requiring another account.
+- Urgent, unsafe, overdue, and blocked work appears before routine totals. Critical queues show age, SLA, owner, escalation state, and overdue status.
+- Use compact connected metric strips and content-sized work panels rather than oversized isolated cards. Hide sections that have no permission or purpose instead of leaving empty gaps.
+- Every metric links to the queue or source records that explain it. Decorative totals are prohibited.
+- Quick actions are role-appropriate, permission checked, and placed next to the queue they affect. High-risk actions retain reason, confirmation, competency, audit, and independent-approval controls.
+- The visual shell, responsive behavior, English/Kiswahili support, focus states, reduced-motion behavior, loading states, and empty/error states remain consistent across every dashboard configuration.
 
-### Department overview
+### Verified Phase 5 operating foundation
 
-Each staff member sees the selected-center context and only queues permitted by assignment, for example reception waiting list, screening queue, collection handoff, laboratory samples/tests, release approvals, processing work, inventory exceptions, dispatches, transfusion outcomes, or quality investigations.
+The additive organization, department, work-location, competency, and effective-dated staff-assignment foundation is implemented. All 26 target profiles and two compatibility-only role codes seed with explicit permissions; 25 staff profiles map to exactly 13 shared Laravel dashboard configurations, while donor access remains mobile/API-only. Active assignment changes are ownership checked and recalculate scope, permissions, navigation, real metrics, queues, and quick actions. The compatibility backfill is dry-run capable, non-destructive, and idempotent.
 
-### Hospital overview
-
-Shows requests, compatibility work, allocations, issued/in-transit components, receipt exceptions, pending transfusion outcomes, returns, reactions, and overdue reconciliation for the hospital.
-
-### ICT/super-admin overview
-
-Shows outages, failed jobs, interface/dead-letter backlogs, security alerts, audit-integrity status, backup age, restore-test status, certificate expiry, sensor/device connectivity, and support incidents.
-
-All dashboard cards link to the queue or source records that explain them. Critical work includes age, owner, SLA, escalation state, and overdue status.
+The five local compatibility accounts are seeded and recorded in `local-demo credentials.md`. The complete Laravel baseline suite passed 213 tests with 2,473 assertions; after visible QA found the final national inventory aggregation defect, the affected dashboard file passed 6 tests with 51 assertions and PHPStan passed with zero errors. Headed 1600×900 browser QA covers all five account boundaries, assignment switching, collapsed navigation, dark/light presentation, overflow, and browser errors. Later clinical panels remain omitted or explicitly unavailable until the affected workflow and external authority are approved.
 
 ### Verified Phase 2 operational workspaces
 
 The staff command center now provides compact, center-aware workspaces for donor reception, appointments, eligibility, donations, blood operations, response, engagement, and content. Each workspace has a descriptive heading, workflow tabs, search, role-appropriate status/date filters, clear/reset controls, configurable columns, sorting, pagination, CSV export, and audited record actions. Tables contract to their content so short queues do not create oversized empty cards.
 
 Notification orchestration records one delivery plan per recipient and channel. In-app delivery is native; email, SMS, and push use retryable channel adapters and retain status, attempts, provider identifiers, and safe failure details. External SMS and push default to construction-safe log transports. Setting `PUSH_TRANSPORT=fcm` with approved Firebase credentials activates the Phase 3 HTTP v1 transport without changing the delivery contract.
+
+### Verified Phase 6 donor-to-quarantine foundation
+
+- `Donor reception` provides scoped donor search, signed-card lookup, registration consent/preferences, possible-duplicate review, immutable merge provenance, and expiring identity confirmation.
+- `Eligibility & counselling` provides checked-in queues, versioned protocol/rule snapshots, confidential self-exclusion, controlled deferrals, private counselling/referral/re-entry evidence, and generic follow-up notifications that omit sensitive reasons.
+- `Collection control` provides ready queues, locked identifiers, Code 128 labels, print/scan/replacement controls, original quarantined containers, required specimens, handoff, outcomes, donor reactions, and private aftercare communication.
+- Offline collection provides assigned/revocable devices, expiring server-reserved identifiers, encrypted and idempotent receipts, authoritative reconciliation, conflict/rejection queues, and controlled downtime forms.
+- The active thresholds, identifier format, label layout, and offline dataset are construction controls only. Production activation remains blocked until the external approvals recorded in `docs/task.md` are complete.
 
 ## Language workflow
 
@@ -230,18 +258,19 @@ Current construction decision:
 8. The center receives the donor through QR, donor ID, phone, email, or name search.
 9. Staff confirms identity and profile details.
 10. Staff performs and records the health/eligibility screening.
-11. If eligible, staff records the collection and later confirms the blood group and unit status.
-12. The verified current foundation updates the appointment, donation history, next eligibility, legacy blood-unit record, basic inventory controls, audit trail, and notifications. The target workflow then continues through specimens, laboratory/QC, quarantine/release, component production, component inventory, hospital issue, transfusion outcome, and haemovigilance.
+11. If eligible, collection staff prepare a locked identifier, print and scan-apply every current bag/specimen label, start the episode, collect/handoff required specimens, and record the outcome and donor aftercare.
+12. The verified current foundation updates the appointment, donation history, next eligibility, original quarantined container, specimen/label chain, transitional quarantined blood-unit record, reactions, audit trail, and private notifications. The target workflow then continues through laboratory/QC, authorized release, component production, component inventory, hospital issue, transfusion outcome, and haemovigilance.
 13. The donor sees updated history and receives appropriate in-app/push/SMS/email communication based on consent and configuration.
 
 ## Reception and donor identification
 
 1. Staff opens Donor reception.
 2. Staff scans an expiring signed QR payload or searches by donor ID, phone, email, or name.
-3. The system shows a concise donor summary: identity, photo, preferred center, blood-group confidence, eligibility state, deferrals, last donation, next eligible date, and today's appointment.
-4. Staff confirms the correct donor before opening sensitive details.
-5. New walk-in donors can be registered under permission and duplicate-detection controls.
-6. Access and profile changes are audited.
+3. The system shows a privacy-limited identity preview and current operating center; clinical actions remain separate.
+4. Staff confirms the correct donor with an approved expiring method before screening or collection. Failed checks are retained for audit and do not grant access.
+5. New walk-in donors capture the current privacy-notice version, consent, language, preferred center, and channel preferences before duplicate detection.
+6. A likely match blocks creation unless an authorized reason opens a review case. Merge never deletes the source identity: operational history moves, the source sign-in is disabled, and an immutable alias preserves provenance.
+7. Approved national-identifier lookup is not active until its authoritative source and data-governance controls are approved.
 
 ## Appointment workflow
 
@@ -292,9 +321,10 @@ Legacy records without the expanded states remain readable until an additive mig
    - Active temporary or permanent deferrals.
    - Other approved clinical answers.
 5. Staff makes the final safety decision.
-6. Laravel stores an immutable screening record and updates the current donor eligibility summary.
-7. A temporary deferral includes an end date when known; a permanent deferral has no automatic expiry.
-8. Lifting a deferral requires authorization, reason, actor, and reevaluation.
+6. Laravel stores the identity link, immutable screening record, exact protocol/rule/questionnaire versions, stable decision code, actor, center, source mode, and current donor eligibility summary.
+7. Confidential self-exclusion always becomes a controlled temporary deferral and does not require an unsafe “eligible” override.
+8. A temporary deferral includes a private re-entry date, counselling/referral plan, and a generic notification that never copies the reason into ordinary channels; a permanent deferral has no automatic expiry.
+9. Lifting a deferral requires authorization, reason, actor, and reevaluation.
 
 Eligibility codes:
 
@@ -318,7 +348,7 @@ Eligibility codes:
    - Links the expected specimen/label set without adding usable inventory.
    - Records donor-care outcomes and audit/outbox evidence.
    - Preserves the current legacy blood-unit compatibility record during migration until the approved component model replaces it.
-6. Notifications and other remote effects run after commit through queued work.
+6. Private after-visit notification delivery is queued after commit; the message contains no blood group, identifier, outcome, deferral, or other clinical detail.
 7. Repeating the same request cannot create a second donation, collection identifier, original container, or duplicate specimen-label set. Derived components are created only through the later controlled processing workflow.
 
 ## Blood-group verification
@@ -335,10 +365,10 @@ Blood-group confidence moves through:
 
 ## Donation identification, specimens, and barcode chain
 
-1. After the final eligibility decision and identity confirmation, the collection workflow creates or receives one approved unique donation identification number.
-2. Chair-side labels link the donor episode, original collection container, every specimen, and later components.
-3. Every scan records operator, center/location, time, device, and action. Reprints require reason and void previous unused labels.
-4. Unmatched, duplicated, damaged, replaced, or unaccounted labels open an exception and block the affected chain.
+1. After same-day eligibility and expiring identity confirmation, the construction workflow creates or receives one database-unique donation identifier from a locked center/year range.
+2. Chair-side labels link the donor episode, original quarantined collection container, and every required specimen. Later test/component entities must extend this same identifier chain.
+3. Print and scan-application record template, symbology, printer, count, operator, and time. Controlled replacement voids the old label with a reason and requires the new label to be printed and applied again.
+4. Unmatched, duplicated, unreadable, voided, unapplied, replaced, or unaccounted labels block collection. Silent relabeling after collection starts is prohibited.
 5. The current one-donation/one-legacy-blood-unit invariant is transitional. The target creates one collection record and may produce zero or more traceable components.
 6. Adoption of ISBT 128 or a national equivalent requires approved national policy, product coding, label design, printer/scanner validation, and migration planning.
 
@@ -469,12 +499,12 @@ Additional controlled states include `investigation_hold`, `expired`, `rejected`
 
 ## Offline, downtime, and reconciliation workflow
 
-1. Offline field devices receive only the minimum assigned campaign dataset and controlled identifiers.
-2. Local records are encrypted and show unsynchronized/conflict state.
-3. Synchronization performs duplicate, deferral, identity, sequence, and server-rule validation.
-4. Laboratory, release, allocation, and transfusion controls remain authoritative; sync success alone never releases blood.
-5. Approved downtime forms preserve identifiers, custody, decisions, and later reconciliation.
-6. Downtime activation, unresolved forms, recovery, and post-incident review are monitored.
+1. An authorized center registers an assigned device and receives a one-time credential. Server-reserved identifier batches are bounded, non-overlapping, expiring, and immediately revocable.
+2. Laravel stores received payloads encrypted, fingerprinted, idempotent, and linked to device/operator/center/batch. The separately owned field client must provide approved protected local storage and wipe behavior.
+3. Synchronization performs active-account, duplicate, deferral, interval, identity, screening, center, capacity, sequence, label, specimen, outcome, and quarantine validation.
+4. Received, conflict, reconciled, and rejected states preserve the encrypted source and review evidence. A corrected conflict may be retried; an irreconcilable record is rejected with a reason, never deleted.
+5. Laboratory, release, allocation, and transfusion controls remain authoritative; sync success creates quarantine only and never makes stock available.
+6. Numbered no-store downtime forms preserve identifiers and later reconciliation. Production activation still requires the approved field dataset, device baseline, retention, loss, and remote-wipe procedure.
 
 ## Low-stock and emergency response
 
@@ -579,6 +609,8 @@ Navigation follows work, center context, assignment, competency, and permission�
 15. **Account** — profile, language, appearance, password, 2FA, passkeys, sessions/devices, and security history.
 
 Dashboard numbers always link to the queue or evidence that explains them. High-risk actions require reason, confirmation, current competency, and independent approval where configured.
+
+The implemented staff command-center navigation presents only destinations permitted for the signed-in user and groups them in workflow order. On desktop, staff can collapse the 244-pixel navigation to a persistent 60-pixel icon rail; every destination remains available, exposes its translated label as a tooltip, and the active location remains visually distinct. The reduced-motion preference disables the width and item-motion transitions. Mobile continues to use the sidebar toggle rather than the saved desktop state.
 
 ## Audit workflow
 

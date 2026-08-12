@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\BloodGroup;
 use App\BloodUnitStatus;
+use App\Services\ActiveAssignmentContext;
 use Carbon\CarbonImmutable;
 use Database\Factories\BloodUnitFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
@@ -62,6 +63,15 @@ class BloodUnit extends Model
     {
         if ($user->hasNationalScope()) {
             return $query;
+        }
+
+        $assignment = app(ActiveAssignmentContext::class)->selectedAssignment($user);
+        $selectedCenterId = $assignment?->organizationUnit->bloodCenter?->id;
+
+        if ($assignment instanceof StaffAssignment) {
+            return $selectedCenterId === null
+                ? $query->whereRaw('1 = 0')
+                : $query->where('blood_center_id', $selectedCenterId);
         }
 
         return $query->whereIn(

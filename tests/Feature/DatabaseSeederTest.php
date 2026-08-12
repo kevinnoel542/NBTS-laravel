@@ -5,6 +5,7 @@ use App\Models\Badge;
 use App\Models\BloodCenter;
 use App\Models\CenterStaff;
 use App\Models\DonorProfile;
+use App\Models\OrganizationUnit;
 use App\Models\Reward;
 use App\Models\User;
 use App\PermissionName;
@@ -39,15 +40,18 @@ test('reference and demo seeders are idempotent and preserve existing credential
         ->and(Article::query()->count())->toBe(3)
         ->and(User::query()->whereIn('email', [
             'admin@nbts.test',
+            'nbts-admin@nbts.test',
             'manager@nbts.test',
             'staff@nbts.test',
             'donor@nbts.test',
-        ])->count())->toBe(4)
+        ])->count())->toBe(5)
         ->and(CenterStaff::query()->count())->toBe(2)
         ->and(DonorProfile::query()->count())->toBe(1)
+        ->and(OrganizationUnit::query()->whereNotNull('short_name')->pluck('short_name')->duplicates()->all())->toBe([])
         ->and(Hash::check('Existing-cloned-password!', $staff->fresh()->password))->toBeTrue();
 
     expect(User::query()->where('email', 'admin@nbts.test')->sole()->hasRole(RoleName::SuperAdmin->value))->toBeTrue()
+        ->and(User::query()->where('email', 'nbts-admin@nbts.test')->sole()->hasRole(RoleName::NbtsAdmin->value))->toBeTrue()
         ->and(User::query()->where('email', 'manager@nbts.test')->sole()->hasRole(RoleName::CenterManager->value))->toBeTrue()
         ->and(User::query()->where('email', 'staff@nbts.test')->sole()->hasRole(RoleName::CenterStaff->value))->toBeTrue()
         ->and(User::query()->where('email', 'donor@nbts.test')->sole()->hasRole(RoleName::Donor->value))->toBeTrue();

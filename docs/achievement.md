@@ -1192,6 +1192,80 @@ Next dependent task:
 
 - Supply an Android test target and fresh Firebase credentials, then run the remaining Phase 3 authentication/device/push gates before starting Phase 4 implementation.
 
+## 2026-08-11 — Staff navigation refinement gate
+
+Status: completed
+
+Scope: Laravel staff command-center navigation before further phase implementation
+
+Delivered:
+
+- Reordered the permitted staff destinations into Overview, Donation workflow, Coordination, System control, and Account groups without changing permission boundaries.
+- Added an animated desktop collapse control that reduces the 244-pixel navigation to a persistent 60-pixel icon rail while keeping all permitted destinations available.
+- Added translated navigation labels, icon tooltips, a compact active state, restrained separators, reduced-motion handling, and a clean edge-to-edge relationship with the page content.
+- Kept the existing mobile sidebar behavior and did not begin new Phase 4 implementation as part of this refinement.
+
+Verification:
+
+- `php artisan test --compact tests/Feature/OperationsAccountTest.php`: 5 tests passed with 21 assertions.
+- `npm run build`: passed; the updated production stylesheet was loaded in the browser.
+- Headed Chromium at 1600×900 verified the 244-pixel expanded state, 60-pixel collapsed state, 12 visible icon destinations, translated tooltip content, saved collapse state after reload, reliable re-expansion, and no current browser errors.
+
+## 2026-08-12 — Phase 5 operating model, assignment authorization, and role-aware dashboards
+
+Status: implementation foundation completed; external clinical and governance approvals pending
+
+Scope: Laravel documentation, organization/assignment backend, authorization, seeding, role-aware dashboards, tests, and visible browser QA
+
+Delivered:
+
+- Created the controlled `system-overview.md`, `center-operating-model.md`, and `roles-and-permissions.md` documents, including the 26-profile matrix, 13-dashboard mapping, multi-assignment policy, active-context rules, and separation-of-duty boundaries.
+- Recorded product-owner implementation approval while keeping Ministry/NBTS operations, laboratory, quality, hospital, privacy, center-capability, competency, and later clinical authority decisions explicitly open.
+- Added organization units, departments, work locations, staff assignments, staff competencies, and blood-center organization links through additive migrations and typed Eloquent models.
+- Added transactional, auditable assignment creation and status changes with actor-scope validation, effective dates, duplicate protection, clinical self-assignment protection, and historical accountability.
+- Added ownership-checked active assignment resolution. Assignment, account, organization, department, and location state now constrain scoped access; center visibility and operational models use the selected effective assignment before the compatibility fallback.
+- Removed blanket super-administrator authorization bypass. Technical administration now uses explicit permissions and does not grant unregistered or later clinical authority.
+- Expanded the role catalogue to 26 target profiles plus the two temporary compatibility-only codes and seeded explicit permission mappings for all 28 transition roles.
+- Added a dry-run-capable, non-destructive, idempotent `nbts:backfill-staff-assignments` command. The development backfill created two compatibility assignments on its first run and zero on its second run.
+- Seeded five local compatibility accounts: super administrator, NBTS administrator, center manager, center staff, and donor. Four staff accounts have scoped assignments; the center-staff account has two centers for context-switch isolation testing.
+- Built one compact premium Livewire dashboard shell with 13 role-aware staff configurations, active responsibility context, concise page heading and summary, real scoped metrics, priority queues, permission-aware quick actions, compact connected metric strips, and content-sized panels. Later clinical surfaces remain absent or explicitly unavailable.
+- Preserved the animated 60-pixel icon-only navigation rail, English/Kiswahili labels, dark/light themes, reduced motion, responsive layout, and donor staff-web boundary.
+
+Database/API impact:
+
+- Applied six additive Phase 5 migrations to the development database. The verified snapshot contains five organization units, thirty-eight departments, six staff assignments, and five compatibility demo accounts.
+- Kept deployed `center_staff` records and fallback behavior intact; no prior assignment or operational record was removed.
+- Added no donor API v1 route and changed no Flutter code. `docs/api.md` now records the future staff-context contract direction without claiming an endpoint exists.
+
+Automated verification:
+
+- `vendor/bin/pint --dirty --format agent`: passed.
+- `composer lint:check`: passed.
+- `composer types:check`: PHPStan passed with 0 errors.
+- `php artisan view:cache`: passed.
+- `npm run build`: passed; Vite produced the production bundle.
+- `php artisan test --compact`: 213 tests passed with 2,473 assertions in 626.916 seconds before the final browser-discovered inventory aggregation regression was added.
+- `php artisan test --compact tests/Feature/RoleAwareDashboardTest.php`: 6 tests passed with 51 assertions after adding and fixing the national inventory aggregation regression.
+- Assignment coverage includes multi-center permission isolation, foreign/expired/suspended assignment denial, center visibility, hospital scope, assignment creation/revocation separation, and backfill dry-run/idempotence.
+- Dashboard coverage proves exactly 13 configurations, all 26 target profile mappings, the five compatibility account boundaries, hospital controlled-foundation behavior, and assignment-switch session behavior.
+
+Browser/device verification:
+
+- Headed Chromium remained visible at 1600×900 in session `nbts-live`.
+- Verified super-administrator, NBTS administrator, center manager, center staff, center-staff assignment switching, and donor staff-web denial.
+- Verified the 60-pixel collapsed navigation, dark and light themes, no horizontal overflow, and no current page or JavaScript errors.
+- Found and resolved four issues: unsupported metric icons, clipped national assignment text, indistinguishable center-assignment labels, and duplicate national blood-group rows instead of aggregated stock. Evidence is stored in `docs/evidence/phase-5-dashboard-qa/`.
+
+Known limitations:
+
+- Final organization hierarchy, center types/capabilities, department owners/escalations, competency policy, clinical separation rules, and hospital/patient boundary require external approval.
+- Laboratory release, component approval, compatibility, blood issue, transfusion, recall, and other later safety-critical actions are not activated by this foundation.
+- Dashboard SLA/owner/escalation detail remains tied to later queue implementations; fake clinical statistics or placeholder actions were intentionally not added.
+
+Next dependent task:
+
+- Obtain and record the remaining operating/clinical approvals, then implement the next task-file phase without reopening this verified foundation except for regressions or approved refinements.
+
 ## Achievement template
 
 Copy this section for future verified work.

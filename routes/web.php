@@ -1,12 +1,15 @@
 <?php
 
+use App\Http\Controllers\CollectionLabelBarcodeController;
 use App\Http\Controllers\LocaleController;
+use App\Http\Controllers\OfflineDowntimeFormController;
 use App\Http\Controllers\Web\ArticleDirectoryController;
 use App\Http\Controllers\Web\BloodCenterDirectoryController;
 use App\Http\Controllers\Web\CampaignDirectoryController;
 use App\Http\Controllers\Web\HomeController;
 use App\Http\Controllers\Web\ImpactController;
 use App\Http\Controllers\Web\PublicPageController;
+use App\Livewire\Operations\DonorJourney;
 use App\Livewire\Operations\Overview;
 use App\Livewire\Operations\Workspace;
 use Illuminate\Support\Facades\Route;
@@ -53,6 +56,24 @@ Route::post('locale/{locale}', LocaleController::class)
 
 Route::middleware(['auth', 'active', 'staff'])->group(function () {
     Route::livewire('dashboard', Overview::class)->name('dashboard');
+
+    Route::get('operations/collection-labels/{collectionLabel}/barcode', CollectionLabelBarcodeController::class)
+        ->name('operations.collection-label.barcode');
+
+    Route::get('operations/offline-batches/{offlineIdentifierBatch}/downtime-form', OfflineDowntimeFormController::class)
+        ->name('operations.offline-batch.downtime-form');
+
+    Route::livewire('operations/donor-reception', DonorJourney::class)
+        ->defaults('workspace', 'donor-reception')
+        ->name('operations.donor-reception');
+
+    Route::livewire('operations/eligibility', DonorJourney::class)
+        ->defaults('workspace', 'eligibility')
+        ->name('operations.eligibility');
+
+    Route::livewire('operations/donations', DonorJourney::class)
+        ->defaults('workspace', 'donations')
+        ->name('operations.donations');
 
     Route::livewire('operations/{workspace}', Workspace::class)
         ->whereIn('workspace', array_keys(config('operations.workspaces', [])))

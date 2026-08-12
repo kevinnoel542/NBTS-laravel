@@ -44,6 +44,11 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
     'sms_reminders_enabled',
     'share_anonymized_data',
     'language',
+    'privacy_notice_version',
+    'consented_at',
+    'consent_recorded_by',
+    'consent_source',
+    'identity_review_required',
     'total_donations',
     'loyalty_points',
     'loyalty_tier',
@@ -60,9 +65,11 @@ class DonorProfile extends Model
             'blood_group_status' => BloodGroupStatus::class,
             'blood_group_verified' => 'boolean',
             'blood_group_verified_at' => 'datetime',
+            'consented_at' => 'immutable_datetime',
             'eligibility_status' => EligibilityStatus::class,
             'email_notifications_enabled' => 'boolean',
             'last_eligibility_checked_at' => 'datetime',
+            'identity_review_required' => 'boolean',
             'next_eligible_donation_date' => 'date',
             'push_notifications_enabled' => 'boolean',
             'share_anonymized_data' => 'boolean',
@@ -86,5 +93,11 @@ class DonorProfile extends Model
     public function bloodGroupVerifier(): BelongsTo
     {
         return $this->belongsTo(User::class, 'blood_group_verified_by');
+    }
+
+    /** @return BelongsTo<User, $this> */
+    public function consentRecorder(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'consent_recorded_by');
     }
 }

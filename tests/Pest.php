@@ -1,5 +1,6 @@
 <?php
 
+use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
 use Tests\TestCase;
 
@@ -14,8 +15,13 @@ use Tests\TestCase;
 |
 */
 
+$databaseIsolation = filter_var(
+    getenv('NBTS_REUSE_TEST_SCHEMA') ?: false,
+    FILTER_VALIDATE_BOOL,
+) ? DatabaseTransactions::class : LazilyRefreshDatabase::class;
+
 pest()->extend(TestCase::class)
-    ->use(LazilyRefreshDatabase::class)
+    ->use($databaseIsolation)
     ->in('Feature');
 
 /*

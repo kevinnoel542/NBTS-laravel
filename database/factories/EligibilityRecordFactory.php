@@ -30,4 +30,12 @@ class EligibilityRecordFactory extends Factory
             'notes' => null,
         ];
     }
+
+    public function eligible(): static
+    {
+        return $this->state(fn (): array => [
+            'status' => EligibilityStatus::Eligible,
+            'screened_at' => now(),
+        ]);
+    }
 }

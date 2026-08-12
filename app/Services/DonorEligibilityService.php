@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\EligibilityStatus;
 use App\Models\Deferral;
+use App\Models\DonorDuplicateCase;
 use App\Models\DonorProfile;
 use App\Models\EligibilityRecord;
 use App\Models\User;
@@ -35,6 +36,15 @@ class DonorEligibilityService
             ]);
         }
 
+        if ($profile->identity_review_required
+            || DonorDuplicateCase::query()->pending()->where(fn ($query) => $query
+                ->where('primary_donor_id', $donor->id)
+                ->orWhere('candidate_donor_id', $donor->id))->exists()) {
+            throw ValidationException::withMessages([
+                'identity' => ['A pending duplicate identity review blocks collection.'],
+            ]);
+        }
+
         if ($profile->eligibility_status !== EligibilityStatus::Eligible) {
             throw ValidationException::withMessages([
                 'eligibility' => ['The donor profile is not currently marked eligible.'],
@@ -61,7 +71,11 @@ class DonorEligibilityService
         $hasEligibleScreening = EligibilityRecord::query()
             ->where('user_id', $donor->id)
             ->where('status', EligibilityStatus::Eligible)
-            ->whereDate('created_at', $donationDate->toDateString())
+            ->where(fn ($query) => $query
+                ->whereDate('screened_at', $donationDate->toDateString())
+                ->orWhere(fn ($legacyQuery) => $legacyQuery
+                    ->whereNull('screened_at')
+                    ->whereDate('created_at', $donationDate->toDateString())))
             ->exists();
 
         if (! $hasEligibleScreening) {

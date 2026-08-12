@@ -7,7 +7,6 @@ use App\Contracts\SmsTransport;
 use App\Firebase\FirebaseTokenVerifier;
 use App\Firebase\KreaitFirebaseTokenVerifier;
 use App\Models\User;
-use App\RoleName;
 use App\Services\Notifications\FcmPushTransport;
 use App\Services\Notifications\LogPushTransport;
 use App\Services\Notifications\LogSmsTransport;
@@ -42,12 +41,12 @@ class AppServiceProvider extends ServiceProvider
     {
         $this->configureDefaults();
 
-        Gate::before(function (User $user, string $ability): ?bool {
+        Gate::before(function (User $user): ?bool {
             if (! $user->is_active) {
                 return false;
             }
 
-            return $user->hasRole(RoleName::SuperAdmin->value) ? true : null;
+            return null;
         });
     }
 

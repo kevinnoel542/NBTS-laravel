@@ -5,6 +5,7 @@ namespace App\Models;
 use App\BloodGroup;
 use App\DonationStatus;
 use App\DonationType;
+use App\Services\ActiveAssignmentContext;
 use Carbon\CarbonImmutable;
 use Database\Factories\DonationFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
@@ -69,6 +70,15 @@ class Donation extends Model
             return $query;
         }
 
+        $assignment = app(ActiveAssignmentContext::class)->selectedAssignment($user);
+        $selectedCenterId = $assignment?->organizationUnit->bloodCenter?->id;
+
+        if ($assignment instanceof StaffAssignment) {
+            return $selectedCenterId === null
+                ? $query->whereRaw('1 = 0')
+                : $query->where('blood_center_id', $selectedCenterId);
+        }
+
         return $query->whereIn(
             'blood_center_id',
             $user->centerStaffAssignments()->where('is_active', true)->select('blood_center_id'),
@@ -103,5 +113,11 @@ class Donation extends Model
     public function bloodUnit(): HasOne
     {
         return $this->hasOne(BloodUnit::class);
+    }
+
+    /** @return HasOne<CollectionEpisode, $this> */
+    public function collectionEpisode(): HasOne
+    {
+        return $this->hasOne(CollectionEpisode::class);
     }
 }

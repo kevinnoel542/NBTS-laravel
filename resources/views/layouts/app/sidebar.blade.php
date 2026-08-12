@@ -14,6 +14,8 @@
             $activeWorkspace = request()->route('workspace');
             $centerContext = app(\App\Services\ActiveCenterContext::class);
             $centerSelection = $centerContext->initialSelection(auth()->user());
+            $assignmentContext = app(\App\Services\ActiveAssignmentContext::class);
+            $assignmentSelection = $assignmentContext->initialSelection(auth()->user());
         @endphp
 
         <flux:sidebar sticky collapsible class="operations-sidebar border-e border-zinc-200 bg-white dark:border-zinc-800 dark:bg-[#111010]">
@@ -49,7 +51,7 @@
                         @foreach ($groupWorkspaces as $slug => $definition)
                             <flux:sidebar.item
                                 :href="route('operations.workspace', ['workspace' => $slug])"
-                                :current="request()->routeIs('operations.workspace') && $activeWorkspace === $slug"
+                                :current="request()->routeIs('operations.workspace', 'operations.donor-reception', 'operations.eligibility', 'operations.donations') && $activeWorkspace === $slug"
                                 :tooltip="__($definition['title'])"
                                 class="operations-sidebar-link"
                                 wire:navigate
@@ -67,9 +69,9 @@
             <flux:spacer />
 
             <div class="operations-sidebar-context in-data-flux-sidebar-collapsed-desktop:hidden">
-                <span>{{ __('console.context.label') }}</span>
-                <strong>{{ $centerContext->label(auth()->user(), $centerSelection) }}</strong>
-                <small>{{ __('console.context.scope_note') }}</small>
+                <span>{{ __('console.context.assignment') }}</span>
+                <strong>{{ $assignmentContext->label(auth()->user(), $assignmentSelection) }}</strong>
+                <small>{{ $centerContext->label(auth()->user(), $centerSelection) }}</small>
             </div>
 
             <flux:sidebar.nav>

@@ -1,6 +1,6 @@
 # NBTS documentation control center
 
-Last updated: 2026-08-11
+Last updated: 2026-08-12
 
 Owner: Documentation owner
 
@@ -26,7 +26,9 @@ Target workflow text is not proof that a feature exists or that a clinical rule 
 | How are documentation status, evidence, and approvals controlled? | [documentation-governance.md](documentation-governance.md) |
 | Which controlled documents exist or remain missing? | [documentation-register.md](documentation-register.md) |
 | Which standard document structures should be used? | [documentation-templates.md](documentation-templates.md) |
-| How do the backend and UI/documentation agents coordinate delivery? | [ui-documentation-workstream.md](ui-documentation-workstream.md) |
+| What are the current and target system boundaries? | [system-overview.md](system-overview.md) |
+| How are centers, departments, locations, and assignments organized? | [center-operating-model.md](center-operating-model.md) |
+| Which role profiles, permissions, scopes, dashboards, and duty separations apply? | [roles-and-permissions.md](roles-and-permissions.md) |
 
 ## Current execution road
 
@@ -46,11 +48,14 @@ Implementation does not begin with safety-critical schema assumptions. The minim
 
 ## Current documentation gate
 
-Documentation control is active. The next required artifacts are:
+Documentation control is active. The following Phase 5 operating-model artifacts are now in review and still require the approvals recorded in their headers:
 
 - `system-overview.md`
 - `center-operating-model.md`
 - `roles-and-permissions.md`
+
+The next safety/data artifacts remain:
+
 - `clinical-safety.md`
 - `risk-register.md`
 - `domain-model.md`

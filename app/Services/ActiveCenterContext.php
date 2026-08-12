@@ -8,6 +8,8 @@ use Illuminate\Database\Eloquent\Collection;
 
 final class ActiveCenterContext
 {
+    public function __construct(private readonly ActiveAssignmentContext $assignmentContext) {}
+
     /** @return Collection<int, BloodCenter> */
     public function availableCenters(User $user): Collection
     {
@@ -50,6 +52,13 @@ final class ActiveCenterContext
         if (ctype_digit($selection)
             && $availableCenters->contains('id', (int) $selection)) {
             session(['operations.center' => (int) $selection]);
+
+            $currentAssignmentCenterId = $this->assignmentContext
+                ->selectedAssignment($user)?->organizationUnit->bloodCenter?->id;
+
+            if ($currentAssignmentCenterId !== (int) $selection) {
+                $this->assignmentContext->setSelectionForCenter($user, (int) $selection);
+            }
 
             return $selection;
         }

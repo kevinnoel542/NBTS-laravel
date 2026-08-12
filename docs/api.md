@@ -1,6 +1,6 @@
 # NBTS API and Flutter contract
 
-Last verified: 2026-08-11
+Last verified: 2026-08-12
 
 ## Contract ownership
 
@@ -285,6 +285,142 @@ Current intentional projections:
 - Treat `action_url` and remote media URLs as untrusted input: allow only approved schemes/hosts and require user intent before opening an external destination.
 - Never cache donor-card QR payloads beyond `qr_expires_at`. Refresh the card when expired and never use the QR as a bearer credential.
 - Do not claim successful push delivery merely because FCM token registration succeeded; device receipt remains a separate acceptance test.
+
+## Phase 5 staff assignment API direction
+
+Phase 5 implements the Laravel staff-assignment and active-context foundation internally. It does **not** expose new staff-assignment endpoints in donor API v1, and no Flutter change is required for this work.
+
+Canonical server entities for a future separately approved staff API are:
+
+- `organization_unit`: stable code, type, parent, lifecycle state, and optional blood-center link.
+- `department` and `work_location`: organization-owned operational scope.
+- `staff_assignment`: user, role/profile, organization, optional department/location, shift, effective dates, status, approver/revoker, and reason.
+- `staff_competency`: user, competency code, organization/department scope, validity, status, and evidence metadata.
+- `active_assignment`: the authenticated user-owned assignment currently determining role, permissions, organization/center/hospital scope, navigation, dashboard, queues, and allowed actions.
+
+If a staff client is approved later, add it as a separately authenticated and versioned contract rather than extending donor `/api/v1` silently. The contract should:
+
+- Return only the caller's effective assignments and concise display labels; never return another staff member's assignments through the context selector.
+- Accept a stable assignment identifier when switching context, reject foreign/ineffective identifiers with a generic 403, and return the recalculated context and capabilities.
+- Return explicit stable capability codes instead of asking a client to infer authority from role names.
+- Apply organization, department, location, competency, record-context, and separation-of-duty checks again on every server action; a selected context is not a bearer permission.
+- Treat assignment suspension, expiry, revocation, account deactivation, and organization suspension as immediate authorization changes.
+- Preserve five compatibility account flows during transition without exposing local credentials or compatibility fallback details in API responses.
+- Keep later clinical actions absent until their versioned workflow, state machine, competency, reason, audit, and independent-approval controls are implemented and approved.
+
+Suggested response shape for a future authenticated context endpoint:
+
+```json
+{
+  "data": {
+    "active_assignment_id": 42,
+    "role": "reception_officer",
+    "organization": {
+      "id": 7,
+      "code": "BC-MUH",
+      "name": "Muhimbili Blood Center",
+      "short_name": "Muhimbili",
+      "type": "blood_center"
+    },
+    "department": {
+      "id": 18,
+      "code": "RECEPTION",
+      "name": "Reception"
+    },
+    "capabilities": [
+      "donors.view",
+      "appointments.view",
+      "appointments.manage"
+    ],
+    "dashboard": "reception"
+  }
+}
+```
+
+This is design guidance, not an implemented endpoint or a claim of clinical authority.
+
+## Phase 6 collection and offline API direction
+
+Phase 6 is implemented as a Fortify-authenticated Laravel staff/Livewire workflow. It adds **no donor `/api/v1` route, changes no existing donor response field, and requires no Flutter code change**. The donor app continues to use the existing donor card, eligibility, appointments, donations, notifications, and profile contracts. Laravel remains authoritative for every clinical or collection decision.
+
+The following entities and actions are internal server contracts today and guidance for a future separately approved staff or field-device API:
+
+| Capability | Authoritative server behavior |
+| --- | --- |
+| Donor lookup | Center/assignment scoped; supports donor ID, name, phone, email, and signed donor-card payload. National-identifier lookup stays absent until approved. |
+| Duplicate review | Returns privacy-limited candidates and stable match signals; merge requires permission/reason, retains immutable alias provenance, and never deletes the source record. |
+| Identity confirmation | Uses a stable method code, center, actor, reference suffix/fingerprint, result, source mode, confirmation time, and expiry. A failed check is evidence, not authorization. |
+| Screening | Accepts an identity link, effective protocol ID, complete required answers, observations, decision, reason/override where required, counselling/referral/re-entry evidence, and source mode. Laravel reruns rules and stores the exact snapshots. |
+| Collection preparation | Requires donor, center, optional checked-in appointment, current identity, same-day eligible screening, bag configuration/lot, planned volume, and optional device. Laravel rechecks all safety conditions and issues the identifier. |
+| Labels/specimens | Print, scan-apply, controlled replacement, collection start, specimen collection, and handoff are individual permission/audit actions. Clients never set status directly. |
+| Completion/reaction | Completion records measured volume, outcome, aftercare, acknowledgement, donor-reported blood group, and notes; reaction capture records severity, symptoms, treatment, referral, outcome, and follow-up. Successful stock remains quarantine-only. |
+| Offline receipt | Uses a registered device, assigned operator, active identifier batch, UUID idempotency key, controlled collection identifier, encrypted payload, payload fingerprint, and received time. Receipt creates no domain collection. |
+| Offline reconciliation | An authorized server action decrypts and validates the receipt, reruns the complete collection workflow, and ends in `reconciled`, `conflict`, or reasoned `rejected`. Reconciliation can never set release or available-inventory state. |
+
+### Stable Phase 6 codes
+
+- Duplicate case: `pending`, `merged`, `rejected`.
+- Identity method: `donor_id`, `signed_qr`, `assisted_questions`, `offline_assisted`, `national_identifier` (the last code remains disabled pending approval).
+- Identity result: `confirmed`, `failed`, `expired`.
+- Collection episode: `prepared`, `in_progress`, `quarantined`, `failed`, `interrupted`, `exception`.
+- Collection outcome: `completed`, `failed`, `interrupted`, `under_volume`, `over_volume`.
+- Label: `generated`, `printed`, `applied`, `voided`.
+- Specimen: `expected`, `collected`, `handed_off`, `missing`, `rejected`.
+- Offline device: `active`, `revoked`.
+- Offline submission: `received`, `conflict`, `reconciled`, `rejected`.
+
+Clients must preserve unknown future codes safely and display server-provided labels where available. They must not infer permission or release authority from a role name, status color, successful scan, HTTP 200 receipt, or synchronization result.
+
+### Suggested future field-device receipt
+
+This shape is guidance only; no HTTP endpoint is registered in the current donor API:
+
+```json
+{
+  "client_submission_id": "0a6a6ed8-dc47-4e69-a9c9-87e0d39ae946",
+  "device_id": 17,
+  "identifier_batch_id": 41,
+  "donation_identifier": "TZDSM120260000123Q",
+  "payload": {
+    "donor_id": 42,
+    "appointment_id": 311,
+    "identity_check_id": 903,
+    "eligibility_record_id": 812,
+    "bag_type": "triple",
+    "bag_lot": "LOT-2026-0041",
+    "planned_volume_ml": 450,
+    "actual_volume_ml": 448,
+    "blood_group": "O+",
+    "outcome": "completed",
+    "aftercare_confirmed": true,
+    "donor_acknowledged": true,
+    "specimen_volumes": {
+      "serology": 6,
+      "edta": 4
+    },
+    "notes": null
+  }
+}
+```
+
+Future transport requirements:
+
+- Authenticate the device and current assigned operator independently; a device credential is not a staff bearer token.
+- Encrypt the field database with platform-protected keys, redact logs, and wipe protected data after acknowledged reconciliation or server revocation according to approved policy.
+- Generate `client_submission_id` once and reuse it for retry. Reusing it with changed payload, actor, device, or identifier must fail.
+- Never invent identifiers outside a signed/assigned active batch. Expired or revoked batches must stop capture and require downtime escalation.
+- Treat receipt as `received`, not `completed`; keep the local record until authoritative reconciliation is acknowledged.
+- Present stable conflict codes and a human review queue. Do not automatically discard or overwrite either version.
+- Never expose decrypted offline payloads in ordinary logs, analytics, URLs, browser storage, crash reports, or documentation.
+- Never add laboratory result, release, component availability, allocation, or transfusion authority to an offline client.
+
+### Existing donor API behavior after Phase 6
+
+- `GET /eligibility` remains guidance/current summary, not permission to collect. Staff collection reruns authoritative identity, duplicate, deferral, interval, screening, and center checks.
+- `GET /donor-card` remains an expiring signed locator, not a bearer credential. A staff identity confirmation is still required.
+- `GET /donations` continues to expose only completed donation compatibility records owned by the donor; it does not expose internal duplicate evidence, screening answers, identity checks, label history, offline payloads, or unreleased laboratory details.
+- Generic donor follow-up/aftercare notifications may appear through the existing notification endpoints. Their body intentionally omits deferral reason, self-exclusion, blood group, collection identifier, outcome, and quarantine details.
+- A future mobile request for extra Phase 6 data must be proposed here first and implemented in Laravel with resource, policy, privacy, and contract tests before the Flutter owner consumes it.
 
 ## Verification commands
 

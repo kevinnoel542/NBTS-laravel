@@ -168,14 +168,14 @@ test('center managers are isolated to donor and operational records at assigned 
         ->and(Gate::forUser($manager)->denies('view', $otherCampaign))->toBeTrue();
 });
 
-test('national roles preserve the infrastructure boundary while super admins override record policies', function () {
+test('national roles preserve the infrastructure boundary without an unrestricted super admin bypass', function () {
     $superAdmin = User::factory()->superAdmin()->create();
     $nbtsAdmin = User::factory()->nbtsAdmin()->create();
     $donor = User::factory()->donor()->create();
     $draftArticle = Article::factory()->create();
     $auditLog = AuditLog::factory()->create();
 
-    expect(Gate::forUser($superAdmin)->allows('delete', $auditLog))->toBeTrue()
+    expect(Gate::forUser($superAdmin)->denies('delete', $auditLog))->toBeTrue()
         ->and(Gate::forUser($superAdmin)->allows('manageRoles', $nbtsAdmin))->toBeTrue()
         ->and(Gate::forUser($nbtsAdmin)->allows('view', $auditLog))->toBeTrue()
         ->and(Gate::forUser($nbtsAdmin)->denies('delete', $auditLog))->toBeTrue()

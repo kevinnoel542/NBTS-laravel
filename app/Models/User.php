@@ -6,6 +6,8 @@ use App\BloodGroup;
 use App\DonationStatus;
 use App\Gender;
 use App\RoleName;
+use App\Services\ActiveAssignmentContext;
+use App\Services\AssignmentAccess;
 use Database\Factories\UserFactory;
 use Illuminate\Contracts\Translation\HasLocalePreference;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
@@ -80,7 +82,7 @@ class User extends Authenticatable implements HasLocalePreference, PasskeyUser
     use HasFactory;
 
     use HasRoles {
-        hasPermissionTo as protected hasPermissionToIgnoringAccountStatus;
+        hasPermissionTo as protected hasPermissionToFromPackage;
     }
     use Notifiable;
     use PasskeyAuthenticatable;
@@ -116,7 +118,9 @@ class User extends Authenticatable implements HasLocalePreference, PasskeyUser
 
     public function canAccessStaffAccount(): bool
     {
-        return $this->is_active && $this->hasAnyRole(RoleName::staffValues());
+        return $this->is_active
+            && ($this->hasAnyRole(RoleName::staffValues())
+                || $this->staffAssignments()->effective()->exists());
     }
 
     /**
@@ -124,16 +128,28 @@ class User extends Authenticatable implements HasLocalePreference, PasskeyUser
      */
     public function hasPermissionTo(mixed $permission, ?string $guardName = null): bool
     {
+        return app(AssignmentAccess::class)->allows($this, $permission);
+    }
+
+    public function hasCompatibilityPermissionTo(mixed $permission, ?string $guardName = null): bool
+    {
         return $this->is_active
-            && $this->hasPermissionToIgnoringAccountStatus($permission, $guardName);
+            && $this->hasPermissionToFromPackage($permission, $guardName);
     }
 
     public function hasNationalScope(): bool
     {
-        return $this->is_active && $this->hasAnyRole([
-            RoleName::SuperAdmin->value,
-            RoleName::NbtsAdmin->value,
-        ]);
+        if (! $this->is_active) {
+            return false;
+        }
+
+        $assignment = app(ActiveAssignmentContext::class)->selectedAssignment($this);
+
+        if ($assignment instanceof StaffAssignment) {
+            return in_array($assignment->role->name, RoleName::nationalValues(), true);
+        }
+
+        return $this->hasAnyRole(RoleName::nationalValues());
     }
 
     public function hasCenterAccess(BloodCenter|int $bloodCenter): bool
@@ -142,8 +158,16 @@ class User extends Authenticatable implements HasLocalePreference, PasskeyUser
             return false;
         }
 
+        $bloodCenterId = $bloodCenter instanceof BloodCenter ? $bloodCenter->id : $bloodCenter;
+
         if ($this->hasNationalScope()) {
             return true;
+        }
+
+        $activeAssignment = app(ActiveAssignmentContext::class)->selectedAssignment($this);
+
+        if ($activeAssignment instanceof StaffAssignment) {
+            return $activeAssignment->organizationUnit->bloodCenter?->id === $bloodCenterId;
         }
 
         if (! $this->hasAnyRole([
@@ -152,8 +176,6 @@ class User extends Authenticatable implements HasLocalePreference, PasskeyUser
         ])) {
             return false;
         }
-
-        $bloodCenterId = $bloodCenter instanceof BloodCenter ? $bloodCenter->id : $bloodCenter;
 
         return $this->centerStaffAssignments()
             ->where('blood_center_id', $bloodCenterId)
@@ -173,16 +195,24 @@ class User extends Authenticatable implements HasLocalePreference, PasskeyUser
             return true;
         }
 
-        if (! $this->hasAnyRole([
-            RoleName::CenterManager->value,
-            RoleName::CenterStaff->value,
-        ])) {
+        $activeAssignment = app(ActiveAssignmentContext::class)->selectedAssignment($this);
+        $selectedCenterId = $activeAssignment?->organizationUnit->bloodCenter?->id;
+
+        if ($activeAssignment instanceof StaffAssignment && $selectedCenterId === null) {
             return false;
         }
 
-        $centerIds = $this->centerStaffAssignments()
-            ->where('is_active', true)
-            ->select('blood_center_id');
+        if (! $activeAssignment instanceof StaffAssignment
+            && ! $this->hasAnyRole([
+                RoleName::CenterManager->value,
+                RoleName::CenterStaff->value,
+            ])) {
+            return false;
+        }
+
+        $centerIds = $selectedCenterId === null
+            ? $this->centerStaffAssignments()->where('is_active', true)->select('blood_center_id')
+            : BloodCenter::query()->whereKey($selectedCenterId)->select('id');
 
         return User::query()
             ->whereKey($donorId)
@@ -199,6 +229,18 @@ class User extends Authenticatable implements HasLocalePreference, PasskeyUser
     public function centerStaffAssignments(): HasMany
     {
         return $this->hasMany(CenterStaff::class);
+    }
+
+    /** @return HasMany<StaffAssignment, $this> */
+    public function staffAssignments(): HasMany
+    {
+        return $this->hasMany(StaffAssignment::class);
+    }
+
+    /** @return HasMany<StaffCompetency, $this> */
+    public function staffCompetencies(): HasMany
+    {
+        return $this->hasMany(StaffCompetency::class);
     }
 
     /** @return BelongsToMany<BloodCenter, $this> */
@@ -295,6 +337,54 @@ class User extends Authenticatable implements HasLocalePreference, PasskeyUser
     public function deferrals(): HasMany
     {
         return $this->hasMany(Deferral::class);
+    }
+
+    /** @return HasMany<DonorDuplicateCase, $this> */
+    public function duplicateCasesAsPrimary(): HasMany
+    {
+        return $this->hasMany(DonorDuplicateCase::class, 'primary_donor_id');
+    }
+
+    /** @return HasMany<DonorDuplicateCase, $this> */
+    public function duplicateCasesAsCandidate(): HasMany
+    {
+        return $this->hasMany(DonorDuplicateCase::class, 'candidate_donor_id');
+    }
+
+    /** @return HasMany<DonorIdentityAlias, $this> */
+    public function mergedIdentityAliases(): HasMany
+    {
+        return $this->hasMany(DonorIdentityAlias::class, 'canonical_donor_id');
+    }
+
+    /** @return HasOne<DonorIdentityAlias, $this> */
+    public function sourceIdentityAlias(): HasOne
+    {
+        return $this->hasOne(DonorIdentityAlias::class, 'source_donor_id');
+    }
+
+    /** @return HasMany<DonorIdentityCheck, $this> */
+    public function identityChecks(): HasMany
+    {
+        return $this->hasMany(DonorIdentityCheck::class, 'donor_id');
+    }
+
+    /** @return HasMany<CollectionEpisode, $this> */
+    public function collectionEpisodes(): HasMany
+    {
+        return $this->hasMany(CollectionEpisode::class, 'donor_id');
+    }
+
+    /** @return HasMany<DonorReaction, $this> */
+    public function donorReactions(): HasMany
+    {
+        return $this->hasMany(DonorReaction::class, 'donor_id');
+    }
+
+    /** @return HasMany<OfflineCollectionDevice, $this> */
+    public function assignedOfflineCollectionDevices(): HasMany
+    {
+        return $this->hasMany(OfflineCollectionDevice::class, 'assigned_to');
     }
 
     /** @return HasMany<BloodUnit, $this> */

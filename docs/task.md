@@ -1,6 +1,6 @@
 # NBTS modernization task plan
 
-Last updated: 2026-08-11
+Last updated: 2026-08-12
 
 ## Purpose
 
@@ -239,6 +239,7 @@ Safety classification:
 - [x] Eligibility and deferral datasets pass.
 - [x] Notification channels are faked and asserted in automated tests.
 - [x] Fresh and existing database scenarios both pass.
+- [x] Staff navigation follows the operational workflow order, has a persistent animated desktop collapse state, keeps every permitted destination available as a labelled icon, and passes visible 1600×900 browser QA.
 
 ## Phase 3 — Mobile API, Firebase, and Flutter
 
@@ -336,25 +337,31 @@ Safety classification:
 
 ## Phase 5 — Operating model, center hierarchy, roles, and overview
 
+### Controlled operating-model documents
+
+- [~] `system-overview.md` defines the verified foundation, target boundaries, module map, role-aware dashboard contract, and implementation constraints; external domain approvals remain pending.
+- [~] `center-operating-model.md` defines the additive hierarchy, center capability, department/location, assignment lifecycle, active-context, migration, and separation-of-duty contract; external operations/clinical approval remains pending.
+- [~] `roles-and-permissions.md` defines the 26 target profiles, transition compatibility roles, permission matrices, dashboard mappings, and duty-separation contract; external security/clinical/quality/hospital approval remains pending.
+
 ### GOV-STRUCT — National and center hierarchy
 
 Priority: Must. Safety: High.
 
-- [ ] Approve the operating hierarchy: Ministry/NBTS national level → approved zonal/regional level where applicable → blood center → department → storage/work location.
-- [ ] Define the authoritative facility and organization registry, including stable codes and lifecycle states.
+- [~] Product implementation uses the approved additive hierarchy—NBTS national level → optional zone/region → blood center or hospital interface → department → storage/work location; final Ministry/NBTS structure approval remains pending.
+- [x] Define and implement the authoritative organization registry foundation with stable codes, parent relationships, unit types, lifecycle states, and blood-center links.
 - [ ] Approve the center-type catalog after current-state discovery. Candidate types for assessment are full collection/testing/processing center, collection-only site or mobile team, testing/processing hub, storage/distribution hub, and hospital blood-bank interface.
 - [ ] Define which functions each center type may perform; the system must not expose a laboratory, release, component, storage, or issue action to a center that is not approved for it.
 - [ ] Define center opening hours, service capacity, supported donation methods, tests, components, storage devices, transport routes, hospitals served, emergency contacts, and downtime capability.
-- [ ] Define active, suspended, temporarily closed, and retired center states with effective dates and reasons.
+- [~] Active, suspended, temporarily closed, and retired organization states are implemented; the formal state-change approval/effective-date procedure remains pending.
 
 ### GOV-DEPT — Departments and module ownership
 
 Priority: Must. Safety: High.
 
-- [ ] Establish department records or approved operational assignments for reception, screening/counselling, collection, laboratory, quality, component processing, inventory/storage, logistics/cold chain, haemovigilance, management, content/engagement, ICT/support, and audit.
+- [x] Establish department and work-location records plus scoped operational assignments for the documented operational areas.
 - [ ] Assign one accountable owner and escalation route to every module and queue.
-- [ ] Allow a small center to assign one person to multiple departments only where policy permits.
-- [ ] Prevent department consolidation from bypassing separation-of-duties rules.
+- [x] Support multiple effective-dated assignments for one identity across permitted organization, department, and location scopes.
+- [~] Assignment permissions cannot bypass active scope or self-approve a clinical assignment; later record-level clinical separation rules remain pending with their workflows.
 
 ### GOV-ROLE — Operational roles and assignments
 
@@ -362,14 +369,18 @@ Priority: Must. Safety: Critical for release/transfusion roles.
 
 Existing broad roles remain the compatibility boundary: `super_admin`, `nbts_admin`, `center_manager`, `center_staff`, and `donor`.
 
-Add approved operational profiles or permission bundles:
+Add the approved 26-profile operating catalogue and migrate from the broad compatibility roles without breaking current accounts:
 
-- [ ] National: national operations administrator, national quality/haemovigilance officer, national inventory/logistics coordinator, national donor engagement/content officer, national data-protection/governance officer, national auditor/inspector, and ICT/security operator.
-- [ ] Center: center manager, reception officer, screening/counselling officer, collection/phlebotomy officer, laboratory technician, laboratory approver/quality officer, component-processing officer, inventory officer, logistics/cold-chain officer, haemovigilance/quality officer, and center read-only auditor.
-- [ ] Hospital/integration: hospital clinician/requester, hospital blood-bank officer, compatibility/crossmatch officer, transfusion nurse/officer, hospital haemovigilance officer, and hospital read-only reviewer.
-- [ ] Record center, department, role/profile, shift, effective start/end date, assignment status, approver, and reason.
-- [ ] Support staff assigned to one or more centers while enforcing the active selected-center context.
-- [ ] Review access when a staff assignment, center, employment state, or competency changes.
+- [x] Platform: super administrator and ICT/security operator.
+- [x] National: national operations administrator, national quality/haemovigilance officer, national inventory/logistics coordinator, national donor engagement/content officer, data-protection/governance officer, and national auditor/inspector.
+- [x] Center: center manager, reception officer, screening/counselling officer, collection/phlebotomy officer, laboratory technician, laboratory approver/quality officer, component-processing officer, inventory officer, logistics/cold-chain officer, haemovigilance/quality officer, and center read-only auditor.
+- [x] Hospital/integration: hospital clinician/requester, hospital blood-bank officer, compatibility/crossmatch officer, transfusion nurse/officer, hospital haemovigilance officer, and hospital read-only reviewer.
+- [x] Donor: donor mobile role with access limited to the person’s own records and approved public data.
+- [x] Enforce one identity account per person while supporting multiple scoped role, organization/center/hospital, department, location, shift, and effective-date assignments.
+- [x] Record organization, center link, department, location, role/profile, shift, effective start/end date, assignment status, approver, revoker, and reason.
+- [x] Support staff assigned to one or more centers while enforcing an ownership-checked active assignment and selected-center context.
+- [~] Assignment, account, organization, department, and location state changes remove affected access; competency records exist, while action-specific competency enforcement remains pending with the later clinical workflows.
+- [x] Maintain five permission-tested representative construction accounts with local-only credentials: super administrator, NBTS administrator, center manager, center staff, and donor.
 
 ### GOV-SOD — Separation of duties and approvals
 
@@ -380,39 +391,44 @@ Priority: Must. Safety: Critical.
 - [ ] A release approver cannot bypass incomplete, reactive, discrepant, failed-QC, expired, recalled, or unresolved cold-chain conditions.
 - [ ] Blood-group correction after verification requires elevated permission, reason, confirmation, and independent review.
 - [ ] Emergency release, manual inventory adjustment, disposal, recall closure, and high-risk configuration changes require explicit authority and audit.
-- [ ] Super-admin technical access does not automatically grant clinical release authority.
+- [x] Super-admin technical access does not automatically grant clinical release authority.
 - [ ] Define configurable dual authorization by action, center type, component, emergency state, and risk class.
 
 ### GOV-VIS — Data visibility
 
 Priority: Must. Safety: High.
 
-- [ ] Donors see only their own records and approved public data.
-- [ ] Center staff see only assigned centers, permitted departments, and minimum necessary donor/patient information.
-- [ ] Center managers see assigned-center operations but not unrestricted infrastructure secrets.
-- [ ] National operational users see approved national data according to permission.
+- [x] Donors see only their own records and approved public data.
+- [x] Center staff see only assigned centers, permitted departments, and minimum necessary implemented donor information.
+- [x] Center managers see assigned-center operations without automatically receiving infrastructure or clinical authority.
+- [x] National operational users see implemented national data according to explicit permission.
 - [ ] Auditors use read-only access with export controls and purpose logging.
-- [ ] Hospital users see only their facility requests, allocated/issued components, and permitted patient-linked records.
+- [~] Hospital assignment isolation is implemented and tested; request, allocation, issue, and patient-linked workflows remain unavailable pending later approval and implementation.
 - [ ] Analytics use de-identified data unless identified access is specifically authorized.
 
 ### GOV-OVERVIEW — Dashboards and actionable queues
 
 Priority: Must. Safety: High.
 
-- [ ] National overview: stock by component/group/region, shortages, collections, usable yield, quarantine, release, expiry, request fill rate, transfer performance, cold-chain incidents, adverse events, recalls, center performance, and system health.
-- [ ] Center-manager overview: today’s donors, reception/screening/collection queues, samples and tests pending, quarantine/release queue, component stock, reservations, expiry risk, hospital requests, dispatch/receipt, alarms, incidents, staff coverage, and unresolved exceptions.
-- [ ] Department overview: only the work queue relevant to the user’s assigned duties.
-- [ ] Super-admin/ICT overview: availability, failed jobs, integration backlogs, audit-integrity checks, security alerts, backup age, restore-test status, certificate expiry, and support incidents.
-- [ ] Hospital overview: pending requests, compatibility work, allocated/issued components, receipt exceptions, pending transfusion outcomes, returns, and reactions.
+- [x] Build one shared role-aware dashboard shell instead of duplicating complete pages per profile.
+- [x] Implement the 13 staff configurations defined in `docs/workflow.md`: system control, national operations, national quality/governance, national inventory/logistics, engagement/content, center management, reception, screening/counselling, collection, laboratory/components, center inventory/logistics, center quality/haemovigilance, and hospital operations.
+- [x] Keep the donor home as a separate mobile/API dashboard contract without modifying the Flutter code in this Laravel workstream.
+- [x] Show active role and national/center/hospital context in the heading, with a concise responsibility summary and an assignment switcher only where multiple assignments exist.
+- [x] Recalculate navigation, dashboard data, queues, actions, and scope whenever the active assignment changes.
+- [~] Implemented priority queues place current actionable work first and hide unauthorized/unsupported sections; later safety-domain SLA and escalation queues remain pending with those modules.
+- [x] Use compact connected metric strips and content-sized queue panels without oversized cards or empty card gaps.
 - [ ] Every metric links to the records or queue that explains it; no decorative totals without action or definition.
 - [ ] Critical queues have age, SLA, owner, escalation state, and overdue indicators.
+- [x] Quick actions are role-appropriate and permission checked; later clinical actions remain hidden rather than bypassing competency, reason, audit, or independent approval.
+- [~] Shared dashboard components support 1600×900 responsive layouts, English/Kiswahili, keyboard focus, reduced motion, and implemented empty states; later deferred/error regions remain pending where their modules do not yet exist.
 
 ### Phase 5 completion gate
 
-- [ ] Ministry/NBTS owners approve hierarchy, center types, departments, role profiles, visibility, and separation of duties.
-- [ ] Permission-matrix tests prove center, department, national, hospital, audit, and technical isolation.
-- [ ] Each role sees the correct overview and cannot open forbidden queues.
-- [ ] Assignment removal immediately removes access without deleting historical accountability.
+- [~] Product-owner implementation approval is recorded; Ministry/NBTS operations, clinical, laboratory, quality, hospital, privacy, center-capability, and final separation-of-duty approval remains pending.
+- [x] Permission and assignment tests prove implemented center, department/context, national, hospital, audit, donor, and technical isolation.
+- [x] All 26 target profiles map to the correct overview among 13 shared configurations, and direct forbidden actions remain permission denied or unavailable.
+- [x] Assignment suspension, expiry, and revocation immediately remove current access without deleting historical accountability.
+- [x] Five compatibility accounts and visible 1600×900 dark/light browser QA pass; all four discovered dashboard issues are resolved with evidence.
 
 ## Phase 6 — Donor reception, screening, collection, and identification
 
@@ -420,65 +436,66 @@ Priority: Must. Safety: High.
 
 Priority: Must. Safety: Critical.
 
-- [-] Stable donor ID and profile foundation exist; reception entry points and duplicate management remain pending.
-- [ ] Search by signed donor-card QR, donor ID, approved national identifier, phone, email, or name with privacy-safe result previews.
-- [ ] Add duplicate detection, possible-match review, approved merge, rejected-match reason, and immutable merge provenance.
-- [ ] Prevent duplicate donor records from bypassing active deferrals or donation intervals.
-- [ ] Add confidential identity confirmation before staff opens sensitive health history.
-- [ ] Add consent/privacy-notice version, communication preferences, preferred language, and preferred center to the reception workflow.
+- [x] Stable donor IDs, profiles, compact reception worklists, registration, center scope, and controlled identity actions are implemented.
+- [x] Signed donor-card QR, donor ID, phone, email, and name search use scoped previews and require a separate expiring identity confirmation before clinical work.
+- [!] Approved national-identifier lookup remains disabled until the authoritative source, legal basis, matching rules, retention, and operator access are externally approved.
+- [x] Possible duplicates are scored from normalized identity signals; registration blocks likely matches unless an authorized reason is recorded.
+- [x] Review supports not-a-match or merge decisions; merge moves operational history, disables the source account, and preserves an immutable alias and audit provenance instead of deleting either identity.
+- [x] Pending duplicate review, merged/inactive accounts, effective deferrals, and donation intervals are rechecked when screening and collection begin.
+- [x] Reception captures the construction privacy-notice version, consent time/source, channel preferences, preferred language, and preferred center.
 
 ### SCR-ELIG — Screening and eligibility
 
 Priority: Must. Safety: Critical.
 
-- [ ] Record screening episode, questionnaire version, answers, age, weight, haemoglobin where required, observations, staff, center, time, and source mode.
-- [ ] Apply approved configurable age, weight, interval, health-answer, temporary-deferral, permanent-deferral, and confidential self-exclusion rules.
-- [ ] Keep the authorized screening officer as final decision maker; software supports but does not replace clinical judgment.
-- [ ] Store stable decision codes and the rule/questionnaire versions evaluated.
-- [ ] Provide private counselling, referral, re-entry date, and safe reminders for temporary deferrals.
-- [ ] Prevent ordinary SMS/push messages from revealing sensitive or reactive information.
-- [ ] Lifting or changing a deferral requires authority, reason, reevaluation, and audit.
+- [x] Screening stores donor/appointment/identity links, questionnaire and rule versions, answers, age, weight, haemoglobin, observations, actor, center, time, decision, source mode, counselling, referral, and re-entry evidence.
+- [x] A versioned rule engine enforces age, weight, interval, health answers, temporary/permanent deferrals, and confidential self-exclusion; only construction values are active today.
+- [!] Clinical/NBTS owners must approve the production questionnaire, thresholds, decision codes, referral rules, and effective date before the construction protocol can be promoted.
+- [x] The authorized screening officer remains the decision maker; an unsafe eligible override requires elevated authority and a documented reason.
+- [x] Stable decision codes and exact protocol/rule/questionnaire snapshots are retained with every screening record.
+- [x] Private counselling, referral, re-entry date, and a generic follow-up notification are supported; notification text never copies the deferral or self-exclusion reason into SMS, email, or push content.
+- [x] Lifting or changing a deferral remains authority-, reason-, reevaluation-, and audit-controlled.
 
 ### COL-ID — Unique donation identifier and barcode chain
 
 Priority: Must. Safety: Critical.
 
-- [ ] Approve ISBT 128 or an approved national equivalent before implementation.
-- [ ] Generate or receive one globally/nationally unique donation identification number for every collection episode.
-- [ ] Link donor, donation episode, collection container, all specimens, test orders, components, labels, storage, dispatch, hospital issue, and transfusion outcome.
-- [ ] Print and scan approved labels at chair-side; do not rely on manual transcription for critical identifiers.
-- [ ] Record label template/version, printer, print/reprint reason, operator, time, and voided labels.
-- [ ] Block unmatched, duplicate, unreadable, replaced, or unaccounted labels until resolved.
-- [ ] Run positive identification checks before collection and specimen handoff.
+- [!] ISBT 128 or the approved national equivalent, production label layouts, product codes, scanner/printer validation, and migration ADRs still require national approval.
+- [x] The construction identifier service reserves non-overlapping center/year ranges under database locks, adds a check character, accepts controlled offline ranges, and enforces unique collection identifiers.
+- [~] Donor → episode → original quarantined container → specimens → labels is implemented and tested. Test orders, components, storage, dispatch, hospital issue, and transfusion links are Phase 7–10 entities and must extend this identifier without replacing it.
+- [x] Code 128-B labels are generated, rendered no-store, printed and scan-applied at chair-side; collection cannot start until every current label is applied.
+- [x] Template/version, symbology, printer, print count, operator, time, replacement reason, voided label, and replacement provenance are retained.
+- [x] Mismatches, duplicate identifiers, unapplied labels, voided labels, and incomplete replacement chains block progress. Relabeling after collection starts is prohibited.
+- [x] Expiring positive identity is rechecked before preparation, label application is scan-matched, specimen collection is scan-matched, and specimen handoff is recorded.
 
 ### COL-OPS — Collection and donor-care workflow
 
 Priority: Must. Safety: Critical.
 
-- [ ] Staff receives the donor from a checked-in appointment or approved walk-in flow.
-- [ ] Revalidate active account, identity, screening decision, deferral state, donation interval, center authority, and collection capacity at the moment of collection.
-- [ ] Record donation type, collection method, bag/device/lot, volume, start/end time, collection outcome, staff, adverse donor reaction, and linked specimens.
-- [ ] Create one collection record and donation identifier; do not permanently assume one donation equals one final blood product.
-- [ ] Create the original collection container in quarantine, never directly in available inventory.
-- [ ] Record incomplete, failed, interrupted, or under/over-volume collection outcomes without creating false usable stock.
-- [ ] Complete aftercare, donor reaction monitoring, acknowledgement, next eligible date, and approved communication after commit.
+- [x] Checked-in appointments feed the controlled screening and ready-for-collection queues; the backend also supports an explicitly authorized walk-in episode.
+- [x] Active account, unresolved duplicate, current identity, same-day eligible screening, deferral, donation interval, center authority, center state, appointment reuse, and daily capacity are revalidated inside the collection transaction.
+- [x] Collection records include method, bag configuration/lot, optional device, planned/measured volume, start/end, outcome, staff, source mode, reactions, aftercare, acknowledgement, specimens, and handoffs.
+- [x] One episode and one donation identifier represent the collection; the legacy whole-blood compatibility unit is explicitly transitional and never treated as the permanent component model.
+- [x] The original collection container is created in quarantine and successful completion creates only a `collected` compatibility unit at a quarantine location; available inventory is never incremented.
+- [x] Failed, interrupted, under-volume, and over-volume outcomes remain explicit and do not create false usable stock.
+- [x] Aftercare, donor acknowledgement, reaction treatment/referral/follow-up, next eligibility, and a generic private after-visit notification are transactionally recorded/queued without exposing clinical details.
 
 ### COL-OFF — Mobile collection and offline controls
 
 Priority: Must where connectivity is unreliable. Safety: Critical.
 
-- [ ] Approve minimum offline dataset and device assignment by campaign/team.
-- [ ] Use encrypted local storage, controlled identifiers, offline barcode capture, synchronization state, conflict detection, and remote revocation/wipe.
-- [ ] Revalidate donor status, duplicates, deferrals, tests, quarantine, and release on the authoritative service after synchronization.
-- [ ] No offline-collected unit becomes releasable merely because synchronization succeeded.
-- [ ] Provide controlled downtime forms and reconciliation for power/network failure.
+- [!] Operations, privacy, security, and clinical owners must approve the minimum field dataset, campaign/team assignment, device baseline, retention window, and loss/wipe procedure before production use.
+- [~] Laravel provides assigned devices, one-time credentials, encrypted received payloads, non-overlapping expiring identifier batches, idempotent receipts, status/conflict queues, rejection with retained evidence, immediate server revocation, and batch revocation. Protected on-device storage, barcode capture, and physical remote wipe belong to the separately owned field client and remain blocked until approved.
+- [x] Reconciliation reruns authoritative active-account, duplicate, identity, screening, deferral, interval, center, capacity, identifier, label, specimen, and outcome checks rather than trusting the offline decision.
+- [x] A synchronized collection can create only quarantined compatibility stock; it cannot set laboratory release or available inventory state.
+- [x] Numbered no-store downtime forms, identifier custody, received/conflict/reconciled/rejected states, retry, and auditable resolution are implemented.
 
 ### Phase 6 completion gate
 
-- [ ] A traceability test links donor → collection → every bag/specimen label without mismatch.
-- [ ] Deferred, duplicate, ineligible, inactive, or unconfirmed donors cannot be collected.
-- [ ] Offline conflicts and duplicate identifiers are detected and resolved without data loss.
-- [ ] Clinical, donor-care, authorization, concurrency, barcode, device, and audit tests pass.
+- [x] Automated traceability links donor → collection → quarantined container → every current bag/specimen label and blocks mismatches or incomplete replacement chains.
+- [x] Deferred, unresolved-duplicate, ineligible, inactive, foreign-center, expired-identity, or unconfirmed donors cannot be collected.
+- [x] Offline idempotency, duplicate identifiers, authoritative conflicts, retry/rejection, revocation, and evidence retention are tested without deleting the encrypted receipt.
+- [x] Phase 6 clinical-control, donor-care, authorization, locked identifier reservation, barcode, label, specimen, device, offline, audit, workspace, and quarantine tests pass; visible 1600×900 browser evidence is recorded in `docs/evidence/phase-6-donor-journey-qa/`.
 
 ## Phase 7 — Laboratory, quarantine, quality control, and release
 

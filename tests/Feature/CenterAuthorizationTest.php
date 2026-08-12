@@ -23,7 +23,8 @@ test('the canonical role and permission matrix is seeded idempotently', function
             RoleName::cases(),
         ));
 
-    expect(Role::findByName(RoleName::SuperAdmin->value)->permissions)->toHaveCount(count(PermissionName::cases()))
+    expect(Role::findByName(RoleName::SuperAdmin->value)->hasPermissionTo(PermissionName::ManageBackups->value))->toBeTrue()
+        ->and(Role::findByName(RoleName::SuperAdmin->value)->hasPermissionTo(PermissionName::ApproveLaboratoryRelease->value))->toBeFalse()
         ->and(Role::findByName(RoleName::Donor->value)->permissions)->toBeEmpty();
 });
 
@@ -35,7 +36,8 @@ test('national and center roles receive distinct sensitive permissions', functio
     $donor = User::factory()->donor()->create();
 
     expect($superAdmin->can(PermissionName::ManageBackups->value))->toBeTrue()
-        ->and($superAdmin->can('unregistered.infrastructure.ability'))->toBeTrue()
+        ->and($superAdmin->can('unregistered.infrastructure.ability'))->toBeFalse()
+        ->and($superAdmin->can(PermissionName::ApproveLaboratoryRelease->value))->toBeFalse()
         ->and($nbtsAdmin->can(PermissionName::ManageCenters->value))->toBeTrue()
         ->and($nbtsAdmin->can(PermissionName::ManageBackups->value))->toBeFalse()
         ->and($centerManager->can(PermissionName::ManageCenterStaff->value))->toBeTrue()

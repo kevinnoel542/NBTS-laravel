@@ -1,6 +1,6 @@
 # NBTS Documentation Register and Creation Roadmap
 
-Last updated: 2026-08-11  
+Last updated: 2026-08-12
 Document ID: `DOC-REG-001`  
 Owner: Product owner / Documentation owner  
 Status: Active roadmap register
@@ -105,15 +105,15 @@ These are required before the safety-critical implementation phase.
 | `documentation-governance.md` | Must | Product/quality | Rules for evidence, status, approval, change control, and synchronization | `[x]` Active in `docs/` |
 | `documentation-register.md` | Must | Documentation owner | Master document inventory and creation roadmap | `[x]` Active in `docs/` |
 | `documentation-templates.md` | Must | Documentation owner | Standard templates for requirements, achievements, risks, ADRs, and approvals | `[x]` Active in `docs/` |
-| `ui-documentation-workstream.md` | Must | Technical lead / documentation owner | Two-agent ownership, UI direction, backend contract, handoff, QA, and completion gates | `[x]` Active in `docs/` |
+| `ui-documentation-workstream.md` | Must only when a two-agent workstream is active | Technical lead / documentation owner | Two-agent ownership, UI direction, backend contract, handoff, QA, and completion gates | `[!]` Not present; the current workstream is single-agent |
 
 ### 4.2 System and organization
 
 | File | Priority | Owner | Purpose | Status |
 |---|---|---|---|---|
-| `system-overview.md` | Must | Product owner | Explain boundaries, users, modules, current foundation, target national platform, and benefits | `[ ]` |
-| `roles-and-permissions.md` | Must | Security/product | National, center, hospital, technical, audit, and quality roles; permission matrix and separation of duties | `[ ]` |
-| `center-operating-model.md` | Must | NBTS operations | National → zone/region → center → department structure, center types, services, staffing, assignments, shifts, queues, dashboards, and escalation | `[ ]` |
+| `system-overview.md` | Must | Product owner | Explain boundaries, users, modules, current foundation, target national platform, and benefits | `[~]` Review draft created; external domain approvals pending |
+| `roles-and-permissions.md` | Must | Security/product | National, center, hospital, technical, audit, and quality roles; permission matrix and separation of duties | `[~]` Review draft created; external domain approvals pending |
+| `center-operating-model.md` | Must | NBTS operations | National → zone/region → center → department structure, center types, services, staffing, assignments, shifts, queues, dashboards, and escalation | `[~]` Review draft created; external domain approvals pending |
 | `architecture.md` | Must | Technical lead | Laravel, Flutter, databases, queues, event/outbox, storage, integrations, monitoring, trust boundaries, and deployment topology | `[ ]` |
 
 ### 4.3 Safety and data foundation
@@ -248,9 +248,9 @@ Create these Architecture Decision Records before implementing the affected data
 
 Do not begin the laboratory/component/hospital schema implementation until these are approved or explicitly accepted as controlled pilot drafts:
 
-- [ ] `system-overview.md`
-- [ ] `center-operating-model.md`
-- [ ] `roles-and-permissions.md`
+- [~] `system-overview.md` exists in Review; required approvals remain pending.
+- [~] `center-operating-model.md` exists in Review; required approvals remain pending.
+- [~] `roles-and-permissions.md` exists in Review; required approvals remain pending.
 - [ ] `clinical-safety.md`
 - [ ] `risk-register.md`
 - [ ] `domain-model.md`

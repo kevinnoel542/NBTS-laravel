@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\BloodGroup;
+use App\Services\ActiveAssignmentContext;
 use Database\Factories\BloodInventoryFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Builder;
@@ -48,6 +49,15 @@ class BloodInventory extends Model
     {
         if ($user->hasNationalScope()) {
             return $query;
+        }
+
+        $assignment = app(ActiveAssignmentContext::class)->selectedAssignment($user);
+        $selectedCenterId = $assignment?->organizationUnit->bloodCenter?->id;
+
+        if ($assignment instanceof StaffAssignment) {
+            return $selectedCenterId === null
+                ? $query->whereRaw('1 = 0')
+                : $query->where('blood_center_id', $selectedCenterId);
         }
 
         return $query->whereIn(

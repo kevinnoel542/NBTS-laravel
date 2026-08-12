@@ -2,11 +2,13 @@
 
 namespace App\Models;
 
+use App\Services\ActiveAssignmentContext;
 use Database\Factories\BloodCenterFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
@@ -22,12 +24,16 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property string|null $capacity_label
  * @property int|null $estimated_wait_minutes
  * @property string|null $center_type
+ * @property string|null $collection_identifier_prefix
+ * @property int|null $daily_collection_capacity
+ * @property bool $offline_collection_enabled
  * @property string|null $image_path
  * @property string|null $latitude
  * @property string|null $longitude
  * @property bool $is_active
  */
 #[Fillable([
+    'organization_unit_id',
     'name',
     'address',
     'city',
@@ -38,6 +44,9 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
     'capacity_label',
     'estimated_wait_minutes',
     'center_type',
+    'collection_identifier_prefix',
+    'daily_collection_capacity',
+    'offline_collection_enabled',
     'image_path',
     'latitude',
     'longitude',
@@ -55,8 +64,10 @@ class BloodCenter extends Model
     {
         return [
             'is_active' => 'boolean',
+            'daily_collection_capacity' => 'integer',
             'latitude' => 'decimal:8',
             'longitude' => 'decimal:8',
+            'offline_collection_enabled' => 'boolean',
             'services' => 'array',
         ];
     }
@@ -82,11 +93,33 @@ class BloodCenter extends Model
             return $query;
         }
 
+        $assignment = app(ActiveAssignmentContext::class)->selectedAssignment($user);
+
+        if ($assignment instanceof StaffAssignment) {
+            $bloodCenterId = $assignment->organizationUnit->bloodCenter?->id;
+
+            return $bloodCenterId === null
+                ? $query->whereRaw('1 = 0')
+                : $query->whereKey($bloodCenterId);
+        }
+
         return $query->whereHas('staffAssignments', function (Builder $assignmentQuery) use ($user): void {
             $assignmentQuery
                 ->where('user_id', $user->id)
                 ->where('is_active', true);
         });
+    }
+
+    /** @return BelongsTo<OrganizationUnit, $this> */
+    public function organizationUnit(): BelongsTo
+    {
+        return $this->belongsTo(OrganizationUnit::class);
+    }
+
+    /** @return HasMany<StaffAssignment, $this> */
+    public function operationalAssignments(): HasMany
+    {
+        return $this->hasMany(StaffAssignment::class, 'organization_unit_id', 'organization_unit_id');
     }
 
     /** @return HasMany<CenterStaff, $this> */
@@ -149,5 +182,17 @@ class BloodCenter extends Model
     public function auditLogs(): HasMany
     {
         return $this->hasMany(AuditLog::class);
+    }
+
+    /** @return HasMany<CollectionEpisode, $this> */
+    public function collectionEpisodes(): HasMany
+    {
+        return $this->hasMany(CollectionEpisode::class);
+    }
+
+    /** @return HasMany<OfflineCollectionDevice, $this> */
+    public function offlineCollectionDevices(): HasMany
+    {
+        return $this->hasMany(OfflineCollectionDevice::class);
     }
 }

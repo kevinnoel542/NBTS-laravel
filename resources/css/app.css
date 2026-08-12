@@ -840,9 +840,606 @@ a:hover .operations-row-action {
     font-size: 0.66rem;
 }
 
+/* Role-aware command dashboard */
+.role-dashboard {
+    --dashboard-accent: #971c3d;
+    --dashboard-accent-soft: #fff1f3;
+}
+
+.dark .role-dashboard {
+    --dashboard-accent: #fb7185;
+    --dashboard-accent-soft: rgba(190, 24, 93, 0.14);
+}
+
+.role-dashboard[data-dashboard-accent="blue"] { --dashboard-accent: #1d4ed8; --dashboard-accent-soft: #eff6ff; }
+.role-dashboard[data-dashboard-accent="indigo"] { --dashboard-accent: #4f46e5; --dashboard-accent-soft: #eef2ff; }
+.role-dashboard[data-dashboard-accent="violet"] { --dashboard-accent: #7c3aed; --dashboard-accent-soft: #f5f3ff; }
+.role-dashboard[data-dashboard-accent="rose"] { --dashboard-accent: #be123c; --dashboard-accent-soft: #fff1f2; }
+.role-dashboard[data-dashboard-accent="amber"] { --dashboard-accent: #b45309; --dashboard-accent-soft: #fffbeb; }
+.role-dashboard[data-dashboard-accent="teal"] { --dashboard-accent: #0f766e; --dashboard-accent-soft: #f0fdfa; }
+.role-dashboard[data-dashboard-accent="emerald"] { --dashboard-accent: #047857; --dashboard-accent-soft: #ecfdf5; }
+.role-dashboard[data-dashboard-accent="plum"] { --dashboard-accent: #643458; --dashboard-accent-soft: #f8f0f6; }
+
+.dark .role-dashboard[data-dashboard-accent="blue"] { --dashboard-accent: #60a5fa; --dashboard-accent-soft: rgba(37, 99, 235, 0.14); }
+.dark .role-dashboard[data-dashboard-accent="indigo"] { --dashboard-accent: #818cf8; --dashboard-accent-soft: rgba(79, 70, 229, 0.15); }
+.dark .role-dashboard[data-dashboard-accent="violet"] { --dashboard-accent: #a78bfa; --dashboard-accent-soft: rgba(124, 58, 237, 0.15); }
+.dark .role-dashboard[data-dashboard-accent="rose"] { --dashboard-accent: #fb7185; --dashboard-accent-soft: rgba(190, 24, 93, 0.14); }
+.dark .role-dashboard[data-dashboard-accent="amber"] { --dashboard-accent: #fbbf24; --dashboard-accent-soft: rgba(180, 83, 9, 0.16); }
+.dark .role-dashboard[data-dashboard-accent="teal"] { --dashboard-accent: #5eead4; --dashboard-accent-soft: rgba(15, 118, 110, 0.16); }
+.dark .role-dashboard[data-dashboard-accent="emerald"] { --dashboard-accent: #6ee7b7; --dashboard-accent-soft: rgba(4, 120, 87, 0.16); }
+.dark .role-dashboard[data-dashboard-accent="plum"] { --dashboard-accent: #d8a5cb; --dashboard-accent-soft: rgba(100, 52, 88, 0.22); }
+
+.role-dashboard__header {
+    align-items: center;
+    min-height: 104px;
+    border-top: 3px solid var(--dashboard-accent);
+}
+
+.role-dashboard__header h1 {
+    margin-top: 5px;
+    font-size: clamp(1.4rem, 2vw, 1.8rem);
+}
+
+.role-dashboard__eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    color: var(--dashboard-accent);
+    font-size: 0.66rem;
+    font-weight: 780;
+    letter-spacing: 0.095em;
+    text-transform: uppercase;
+}
+
+.role-dashboard__pulse {
+    width: 7px;
+    height: 7px;
+    border: 2px solid var(--dashboard-accent);
+    border-radius: 999px;
+    box-shadow: 0 0 0 4px var(--dashboard-accent-soft);
+}
+
+.role-dashboard__contexts {
+    width: min(100%, 570px);
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+}
+
+.role-dashboard__context {
+    min-width: 0;
+    width: min(280px, 100%);
+    padding: 8px 10px;
+    border-radius: 9px;
+    box-shadow: none;
+}
+
+.role-dashboard__context .operations-context-card__icon,
+.role-dashboard__metric-icon,
+.role-dashboard__link-icon {
+    color: var(--dashboard-accent);
+    background: var(--dashboard-accent-soft);
+}
+
+.role-dashboard__metrics {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 1px;
+    overflow: hidden;
+    border: 1px solid var(--ops-line);
+    border-radius: 11px;
+    background: var(--ops-line);
+}
+
+.role-dashboard__metric {
+    min-height: 104px;
+    display: grid;
+    grid-template-columns: 34px minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 12px;
+    padding: 14px 15px;
+    background: var(--ops-panel);
+}
+
+.role-dashboard__metric-icon {
+    width: 34px;
+    height: 34px;
+    display: grid;
+    place-items: center;
+    border-radius: 9px;
+}
+
+.role-dashboard__metric span,
+.role-dashboard__metric strong {
+    display: block;
+}
+
+.role-dashboard__metric span {
+    color: var(--ops-muted);
+    font-size: 0.72rem;
+    font-weight: 650;
+}
+
+.role-dashboard__metric strong {
+    margin-top: 4px;
+    color: var(--ops-text);
+    font-size: 1.65rem;
+    font-variant-numeric: tabular-nums;
+    font-weight: 740;
+    letter-spacing: -0.045em;
+    line-height: 1;
+}
+
+.role-dashboard__metric small {
+    align-self: start;
+    color: #15803d;
+    font-size: 0.6rem;
+    font-weight: 720;
+}
+
+.dark .role-dashboard__metric small {
+    color: #86efac;
+}
+
+.role-dashboard__grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1.15fr) minmax(330px, 0.85fr);
+    gap: 12px;
+    align-items: stretch;
+}
+
+.role-dashboard .operations-panel {
+    border-radius: 11px;
+    box-shadow: 0 8px 24px rgba(46, 24, 31, 0.025);
+}
+
+.role-dashboard .operations-panel__header {
+    padding: 14px 16px;
+}
+
+.role-dashboard .operations-panel__header h2 {
+    margin-top: 3px;
+}
+
+.role-dashboard .operations-panel__header p {
+    margin-top: 2px;
+    font-size: 0.74rem;
+}
+
+.role-dashboard__queue,
+.role-dashboard__quick-actions {
+    min-height: 240px;
+}
+
+.role-dashboard__link-list {
+    display: grid;
+}
+
+.role-dashboard__link {
+    min-height: 57px;
+    display: flex;
+    align-items: center;
+    gap: 11px;
+    padding: 9px 13px;
+    border-bottom: 1px solid var(--ops-line);
+    transition: background-color 150ms ease;
+}
+
+.role-dashboard__link:last-child {
+    border-bottom: 0;
+}
+
+.role-dashboard__link:hover {
+    background: var(--ops-panel-muted);
+}
+
+.role-dashboard__link-icon {
+    width: 33px;
+    height: 33px;
+    display: grid;
+    flex: 0 0 auto;
+    place-items: center;
+    border-radius: 9px;
+}
+
+.role-dashboard__link strong,
+.role-dashboard__link small {
+    display: block;
+}
+
+.role-dashboard__link strong {
+    color: var(--ops-text);
+    font-size: 0.78rem;
+    font-weight: 700;
+}
+
+.role-dashboard__link small {
+    margin-top: 2px;
+    overflow: hidden;
+    color: var(--ops-muted);
+    font-size: 0.67rem;
+    line-height: 1.3;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.role-dashboard__link > .ui-icon {
+    color: var(--ops-muted);
+}
+
+.role-dashboard__readiness {
+    min-height: 168px;
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 18px;
+    color: var(--ops-muted);
+}
+
+.role-dashboard__readiness > span {
+    width: 36px;
+    height: 36px;
+    display: grid;
+    flex: 0 0 auto;
+    place-items: center;
+    border-radius: 9px;
+    color: var(--dashboard-accent);
+    background: var(--dashboard-accent-soft);
+}
+
+.role-dashboard__readiness strong {
+    color: var(--ops-text);
+    font-size: 0.82rem;
+}
+
+.role-dashboard__readiness p {
+    max-width: 46ch;
+    margin-top: 4px;
+    font-size: 0.73rem;
+    line-height: 1.5;
+}
+
+.role-dashboard__empty {
+    min-height: 146px;
+    justify-content: center;
+}
+
+.role-dashboard__empty strong,
+.role-dashboard__empty span {
+    display: block;
+}
+
+.role-dashboard__empty strong {
+    color: var(--ops-text);
+    font-size: 0.79rem;
+}
+
+.role-dashboard__empty span {
+    margin-top: 3px;
+    font-size: 0.7rem;
+}
+
+.role-dashboard__inventory .operations-panel__header {
+    align-items: center;
+}
+
+.role-dashboard__inventory .operations-stock-cell {
+    min-height: 77px;
+}
+
+.role-dashboard__inventory .operations-stock-cell span {
+    font-size: 1.25rem;
+}
+
+.role-dashboard__text-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    color: var(--dashboard-accent);
+    font-size: 0.7rem;
+    font-weight: 720;
+}
+
+@media (max-width: 1100px) {
+    .role-dashboard__header {
+        align-items: flex-start;
+    }
+
+    .role-dashboard__contexts {
+        width: min(100%, 300px);
+        flex-direction: column;
+    }
+
+    .role-dashboard__context {
+        width: 100%;
+    }
+
+    .role-dashboard__metrics {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 760px) {
+    .role-dashboard__header {
+        min-height: 0;
+    }
+
+    .role-dashboard__contexts {
+        width: 100%;
+    }
+
+    .role-dashboard__grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 520px) {
+    .role-dashboard__metrics {
+        grid-template-columns: 1fr;
+    }
+
+    .role-dashboard__metric {
+        min-height: 82px;
+    }
+}
+
 .operations-stock-cell--critical { box-shadow: inset 0 3px 0 #dc2626; }
 .operations-stock-cell--low { box-shadow: inset 0 3px 0 #d97706; }
 .operations-stock-cell--healthy { box-shadow: inset 0 3px 0 #15803d; }
+
+/* Phase 6 donor journey: compact, gapless control-room surfaces. */
+.phase-six-page {
+    --phase-accent: #8f1236;
+    --phase-accent-soft: color-mix(in srgb, var(--phase-accent) 9%, transparent);
+}
+
+.phase-six-header {
+    min-height: 94px;
+    align-items: center;
+}
+
+.phase-six-header__actions {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 9px;
+}
+
+.phase-six-context {
+    width: min(330px, 42vw);
+}
+
+.phase-six-metrics {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    overflow: hidden;
+    border: 1px solid var(--ops-line);
+    border-radius: 14px;
+    background: var(--ops-line);
+    gap: 1px;
+}
+
+.phase-six-metric {
+    min-height: 68px;
+    display: flex;
+    align-items: center;
+    gap: 11px;
+    padding: 11px 14px;
+    background: var(--ops-panel);
+}
+
+.phase-six-metric__icon {
+    width: 34px;
+    height: 34px;
+    display: grid;
+    flex: 0 0 auto;
+    place-items: center;
+    border-radius: 9px;
+    color: var(--phase-accent);
+    background: var(--phase-accent-soft);
+}
+
+.phase-six-metric--success .phase-six-metric__icon {
+    color: #15803d;
+    background: color-mix(in srgb, #15803d 10%, transparent);
+}
+
+.phase-six-metric--warning .phase-six-metric__icon {
+    color: #b45309;
+    background: color-mix(in srgb, #b45309 11%, transparent);
+}
+
+.phase-six-metric--danger .phase-six-metric__icon {
+    color: #c0262d;
+    background: color-mix(in srgb, #c0262d 10%, transparent);
+}
+
+.phase-six-metric strong,
+.phase-six-metric small {
+    display: block;
+}
+
+.phase-six-metric strong {
+    color: var(--ops-text);
+    font-size: 1.15rem;
+    font-variant-numeric: tabular-nums;
+    font-weight: 760;
+    line-height: 1;
+}
+
+.phase-six-metric small {
+    margin-top: 5px;
+    color: var(--ops-muted);
+    font-size: 0.67rem;
+    font-weight: 650;
+}
+
+.phase-six-tab-count {
+    min-width: 19px;
+    height: 19px;
+    display: inline-grid;
+    place-items: center;
+    margin-left: 5px;
+    padding: 0 5px;
+    border-radius: 999px;
+    color: currentColor;
+    background: color-mix(in srgb, currentColor 10%, transparent);
+    font-size: 0.62rem;
+    font-weight: 750;
+}
+
+.operations-tabs button.is-active .phase-six-tab-count {
+    background: rgba(255, 255, 255, 0.18);
+}
+
+.phase-six-worklist {
+    overflow: hidden;
+}
+
+.phase-six-card-scan {
+    display: grid;
+    grid-template-columns: minmax(260px, .8fr) minmax(360px, 1.2fr);
+    align-items: center;
+    gap: 22px;
+    padding: 18px;
+    border: 1px solid var(--ops-line);
+    border-radius: 14px;
+    background: var(--ops-panel);
+}
+
+.phase-six-card-scan__copy {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+}
+
+.phase-six-card-scan__copy > span {
+    width: 38px;
+    height: 38px;
+    display: grid;
+    flex: 0 0 auto;
+    place-items: center;
+    border-radius: 10px;
+    color: var(--phase-accent);
+    background: var(--phase-accent-soft);
+}
+
+.phase-six-card-scan h2 {
+    color: var(--ops-text);
+    font-size: .9rem;
+    font-weight: 730;
+}
+
+.phase-six-card-scan p {
+    max-width: 48ch;
+    margin-top: 3px;
+    color: var(--ops-muted);
+    font-size: .72rem;
+}
+
+.phase-six-table td:first-child {
+    width: 170px;
+}
+
+.phase-six-table td:nth-child(4) {
+    width: 145px;
+}
+
+.phase-six-table td:last-child {
+    width: 190px;
+}
+
+.phase-six-row-actions {
+    display: inline-flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 4px;
+}
+
+.phase-six-row-actions .operations-text-action {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.phase-six-form-guard,
+.phase-six-danger-note {
+    display: grid;
+    gap: 10px;
+    padding: 13px 14px;
+    border: 1px solid var(--ops-line);
+    border-radius: 11px;
+    color: var(--ops-muted);
+    background: var(--ops-panel-muted);
+    font-size: 0.76rem;
+    line-height: 1.45;
+}
+
+.phase-six-credential {
+    display: grid;
+    gap: 7px;
+    padding: 14px;
+    border: 1px solid color-mix(in srgb, #15803d 28%, var(--ops-line));
+    border-radius: 11px;
+    background: color-mix(in srgb, #15803d 7%, var(--ops-panel));
+}
+
+.phase-six-credential strong,
+.phase-six-credential span {
+    color: var(--ops-muted);
+    font-size: 0.72rem;
+}
+
+.phase-six-credential code {
+    overflow-wrap: anywhere;
+    color: var(--ops-text);
+    font-size: 0.76rem;
+}
+
+.phase-six-danger-note {
+    grid-template-columns: auto 1fr;
+    color: #9f1239;
+    border-color: color-mix(in srgb, #be123c 25%, var(--ops-line));
+    background: color-mix(in srgb, #be123c 6%, var(--ops-panel));
+}
+
+.dark .phase-six-danger-note {
+    color: #fda4af;
+}
+
+@media (max-width: 1050px) {
+    .phase-six-header {
+        align-items: flex-start;
+    }
+
+    .phase-six-header__actions {
+        width: min(100%, 360px);
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+    .phase-six-context {
+        width: 100%;
+    }
+
+    .phase-six-metrics {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 620px) {
+    .phase-six-header__actions {
+        width: 100%;
+    }
+
+    .phase-six-metrics {
+        grid-template-columns: 1fr;
+    }
+
+    .phase-six-card-scan {
+        grid-template-columns: 1fr;
+    }
+}
 
 .operations-empty-inline {
     min-height: 150px;
