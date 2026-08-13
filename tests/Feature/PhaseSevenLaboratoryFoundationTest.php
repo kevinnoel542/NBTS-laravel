@@ -4,6 +4,8 @@ use App\Actions\Laboratory\ApproveLaboratoryTestCatalog;
 use App\Actions\Laboratory\ReceiveLaboratorySpecimen;
 use App\Actions\Laboratory\RecordLaboratoryQualityControl;
 use App\Actions\Laboratory\RecordLaboratoryTestResult;
+use App\LaboratoryEquipmentStatus;
+use App\LaboratoryInterfaceMode;
 use App\LaboratoryQualityControlStatus;
 use App\LaboratoryReagentStatus;
 use App\LaboratoryReagentValidationState;
@@ -88,6 +90,62 @@ test('approved catalog entries drive specimen reception and automatic release te
         ->and(LaboratoryTestOrder::query()->where('status', LaboratoryTestOrderStatus::Ordered)->count())->toBe(1);
 });
 
+test('catalog reagent and equipment master data stores approved versions lifecycle and interface state', function () {
+    $qualityOwner = User::factory()->staff()->create();
+    StaffAssignment::factory()
+        ->for($qualityOwner)
+        ->for($this->organizationUnit)
+        ->forRole(RoleName::LaboratoryApproverQualityOfficer)
+        ->create();
+    session(['operations.assignment' => (string) StaffAssignment::query()->where('user_id', $qualityOwner->id)->sole()->id]);
+
+    $catalog = app(ApproveLaboratoryTestCatalog::class)->handle(
+        actor: $qualityOwner,
+        code: 'HBSAG',
+        name: 'Hepatitis B surface antigen',
+        category: LaboratoryTestCategory::TtiScreening,
+        specimenType: 'serology',
+        method: 'Analyzer CLIA',
+        algorithmVersion: 'tti-v2.4',
+        isRequiredForRelease: true,
+        releaseBlockingInterpretations: ['reactive', 'invalid', 'discrepant'],
+    );
+    $validatedReagent = LaboratoryReagentLot::factory()->create([
+        'laboratory_test_catalog_id' => $catalog->id,
+        'status' => LaboratoryReagentStatus::Usable,
+        'validation_state' => LaboratoryReagentValidationState::Validated,
+        'expires_on' => today()->addMonth(),
+        'validated_at' => now(),
+    ]);
+    $recalledReagent = LaboratoryReagentLot::factory()->create([
+        'laboratory_test_catalog_id' => $catalog->id,
+        'status' => LaboratoryReagentStatus::Recalled,
+        'validation_state' => LaboratoryReagentValidationState::Validated,
+        'expires_on' => today()->addMonth(),
+        'recalled_at' => now(),
+    ]);
+    $activeAnalyzer = LaboratoryEquipment::factory()->create([
+        'blood_center_id' => $this->center->id,
+        'calibration_due_on' => today(),
+        'interface_mode' => LaboratoryInterfaceMode::Analyzer,
+        'last_validated_at' => now(),
+        'status' => LaboratoryEquipmentStatus::Active,
+    ]);
+    $downtimeAnalyzer = LaboratoryEquipment::factory()->create([
+        'blood_center_id' => $this->center->id,
+        'downtime_started_at' => now(),
+        'status' => LaboratoryEquipmentStatus::Downtime,
+    ]);
+
+    expect($catalog->algorithm_version)->toBe('tti-v2.4')
+        ->and($catalog->approved_by)->toBe($qualityOwner->id)
+        ->and($catalog->blocksInterpretation('reactive'))->toBeTrue()
+        ->and($validatedReagent->permitsTestingUse())->toBeTrue()
+        ->and($recalledReagent->permitsTestingUse())->toBeFalse()
+        ->and($activeAnalyzer->permitsTestingUse())->toBeTrue()
+        ->and($downtimeAnalyzer->permitsTestingUse())->toBeFalse();
+});
+
 test('laboratory result recording requires passed QC and marks unsafe interpretations as release blocking', function () {
     $catalog = LaboratoryTestCatalog::factory()->create([
         'specimen_type' => 'serology',
@@ -151,6 +209,51 @@ test('laboratory result recording requires passed QC and marks unsafe interpreta
 
     expect($result->is_release_blocking)->toBeTrue()
         ->and($result->order->fresh()->status)->toBe(LaboratoryTestOrderStatus::Resulted);
+});
+
+test('laboratory result recording rejects invalid equipment and reagent context', function () {
+    $catalog = LaboratoryTestCatalog::factory()->create(['specimen_type' => 'serology']);
+    $receipt = LaboratorySpecimenReceipt::factory()->create(['specimen_id' => $this->specimen->id]);
+    $order = LaboratoryTestOrder::factory()->create([
+        'laboratory_specimen_receipt_id' => $receipt->id,
+        'specimen_id' => $this->specimen->id,
+        'laboratory_test_catalog_id' => $catalog->id,
+        'ordered_by' => $this->actor->id,
+    ]);
+    $expiredEquipment = LaboratoryEquipment::factory()->create([
+        'blood_center_id' => $this->center->id,
+        'calibration_due_on' => today()->subDay(),
+        'status' => LaboratoryEquipmentStatus::Active,
+    ]);
+    $unvalidatedReagent = LaboratoryReagentLot::factory()->create([
+        'laboratory_test_catalog_id' => $catalog->id,
+        'status' => LaboratoryReagentStatus::Usable,
+        'validation_state' => LaboratoryReagentValidationState::Pending,
+    ]);
+    $passedQc = app(RecordLaboratoryQualityControl::class)->handle(
+        actor: $this->actor,
+        catalog: $catalog,
+        status: LaboratoryQualityControlStatus::Passed,
+        expectedResults: ['negative_control' => 'negative'],
+        observedResults: ['negative_control' => 'negative'],
+    );
+
+    expect(fn () => app(RecordLaboratoryTestResult::class)->handle(
+        actor: $this->actor,
+        order: $order,
+        qualityControlRun: $passedQc,
+        interpretation: LaboratoryTestInterpretation::NonReactive,
+        resultValue: 'non-reactive',
+        equipment: $expiredEquipment,
+    ))->toThrow(ValidationException::class)
+        ->and(fn () => app(RecordLaboratoryTestResult::class)->handle(
+            actor: $this->actor,
+            order: $order,
+            qualityControlRun: $passedQc,
+            interpretation: LaboratoryTestInterpretation::NonReactive,
+            resultValue: 'non-reactive',
+            reagentLot: $unvalidatedReagent,
+        ))->toThrow(ValidationException::class);
 });
 
 test('laboratory receipt rejects wrong barcode and duplicate receipt attempts', function () {

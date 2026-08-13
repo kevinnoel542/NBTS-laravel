@@ -2,6 +2,7 @@
 
 use App\Actions\Laboratory\AuthorizeBloodUnitRelease;
 use App\BloodGroup;
+use App\BloodUnitQuarantineReason;
 use App\BloodUnitStatus;
 use App\LaboratoryQualityControlStatus;
 use App\LaboratoryTestCategory;
@@ -26,6 +27,7 @@ use App\Models\Specimen;
 use App\Models\User;
 use App\ReleaseAuthorizationDecision;
 use App\RoleName;
+use App\Services\BloodUnitQuarantineService;
 use App\SpecimenStatus;
 use Database\Seeders\RolePermissionSeeder;
 use Illuminate\Validation\ValidationException;
@@ -165,12 +167,85 @@ test('routine release records criteria and moves only eligible units to availabl
         ->and($authorization->released_by)->toBe($approver->id)
         ->and($authorization->electronic_signature)->toBeTrue()
         ->and($authorization->evaluated_tests)->toHaveCount(5)
+        ->and($authorization->evaluated_tests[0])->toHaveKeys(['algorithm_version', 'method', 'quality_control_status', 'test_code', 'verified_by'])
         ->and($unit->fresh()->status)->toBe(BloodUnitStatus::Available)
         ->and($unit->fresh()->current_location)->toBe('Available stock')
         ->and($unit->fresh()->quarantine->hasCompletedReleaseCriteria())->toBeTrue()
         ->and($inventory->available_units)->toBe(1)
         ->and(AuditLog::query()->where('action', 'laboratory.release_decision_recorded')->count())->toBe(1)
         ->and(AuditLog::query()->where('action', 'blood_units.laboratory_released')->count())->toBe(1);
+});
+
+test('release blocks invalid repeated discrepant failed qc recalled and excursion affected units', function () {
+    $center = BloodCenter::factory()->create();
+    $approver = laboratoryReleaseApprover($center);
+    $unit = BloodUnit::factory()->create([
+        'blood_center_id' => $center,
+        'blood_group' => BloodGroup::BPositive,
+        'status' => BloodUnitStatus::Testing,
+    ]);
+
+    createRequiredReleaseResults($unit);
+
+    releaseResultFor('HCV')->forceFill([
+        'status' => LaboratoryTestResultStatus::Invalid,
+    ])->save();
+    releaseResultFor('SYPHILIS')->forceFill([
+        'status' => LaboratoryTestResultStatus::Repeated,
+    ])->save();
+    releaseResultFor('ABO-RH')->forceFill([
+        'interpretation' => LaboratoryTestInterpretation::Discrepant,
+        'is_release_blocking' => true,
+        'result_value' => 'ABO/Rh discrepant',
+    ])->save();
+    releaseResultFor('HBSAG')->qualityControlRun->forceFill([
+        'status' => LaboratoryQualityControlStatus::Failed,
+    ])->save();
+    app(BloodUnitQuarantineService::class)->hold($unit, [
+        BloodUnitQuarantineReason::Recalled,
+        BloodUnitQuarantineReason::ColdChainExcursion,
+    ], $approver);
+
+    $authorization = app(AuthorizeBloodUnitRelease::class)->execute(
+        bloodUnit: $unit,
+        approver: $approver,
+        reason: 'Safety block release review.',
+        electronicSignature: true,
+    );
+
+    expect($authorization->decision)->toBe(ReleaseAuthorizationDecision::Rejected)
+        ->and($authorization->released_by)->toBeNull()
+        ->and($authorization->exceptions)->toContain(
+            'unsafe_result:ABO-RH',
+            'quality_control_not_acceptable:HBSAG',
+            'invalid_result:HCV',
+            'repeated_result:SYPHILIS',
+            'unresolved_quarantine:recalled',
+            'unresolved_quarantine:cold_chain_excursion',
+        )
+        ->and($unit->fresh()->status)->toBe(BloodUnitStatus::Testing)
+        ->and(BloodInventory::query()->count())->toBe(0);
+});
+
+test('expired units cannot be converted into released stock even when tests are clean', function () {
+    $center = BloodCenter::factory()->create();
+    $unit = BloodUnit::factory()->create([
+        'blood_center_id' => $center,
+        'blood_group' => BloodGroup::OPositive,
+        'status' => BloodUnitStatus::Expired,
+    ]);
+    $approver = laboratoryReleaseApprover($center);
+
+    createRequiredReleaseResults($unit);
+
+    expect(fn () => app(AuthorizeBloodUnitRelease::class)->execute(
+        bloodUnit: $unit,
+        approver: $approver,
+        reason: 'Expired unit release attempt.',
+        electronicSignature: true,
+    ))->toThrow(ValidationException::class)
+        ->and($unit->fresh()->status)->toBe(BloodUnitStatus::Expired)
+        ->and(BloodInventory::query()->count())->toBe(0);
 });
 
 function laboratoryReleaseApprover(BloodCenter $center): User
@@ -273,4 +348,12 @@ function createRequiredReleaseResults(
             ...($overrides[$testCode] ?? []),
         ]);
     }
+}
+
+function releaseResultFor(string $testCode): LaboratoryTestResult
+{
+    return LaboratoryTestResult::query()
+        ->whereHas('testCatalog', fn ($query) => $query->where('code', $testCode))
+        ->latest('id')
+        ->firstOrFail();
 }

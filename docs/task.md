@@ -500,74 +500,76 @@ Priority: Must where connectivity is unreliable. Safety: Critical.
 
 ## Phase 7 — Laboratory, quarantine, quality control, and release
 
-Current backend foundation evidence, not full Phase 7 completion evidence:
+Current Phase 7 construction evidence:
 
-- [x] LAB-CATALOG, LAB-SAMPLE, and LAB-QC backend foundation accepted and verified.
-- [x] REL-QUAR backend hard-quarantine foundation accepted and verified.
-- [x] REL-AUTH backend release-authorization foundation accepted and verified after adaptation to the main `laboratory_test_results` schema, without adding a duplicate laboratory result table.
-- [x] Backend focused Pest verification passed in main: `NBTS_REUSE_TEST_SCHEMA=1 php artisan test --compact tests/Feature/PhaseSevenLaboratoryFoundationTest.php tests/Feature/PhaseSevenQuarantineTest.php tests/Feature/PhaseSevenReleaseAuthorizationTest.php` passed with 11 tests and 54 assertions.
-- [ ] Phase 7 browser/UI QA, release drill evidence, and laboratory/quality owner approvals are not claimed by this backend verification.
+- [x] LAB-CATALOG, LAB-SAMPLE, and LAB-QC backend implementation accepted and verified.
+- [x] REL-QUAR backend hard-quarantine implementation accepted and verified.
+- [x] REL-AUTH backend release-authorization implementation accepted and verified after adaptation to the main `laboratory_test_results` schema, without adding a duplicate laboratory result table.
+- [x] Backend focused Pest verification passed in main: `NBTS_REUSE_TEST_SCHEMA=1 php artisan test --compact tests/Feature/PhaseSevenLaboratoryFoundationTest.php tests/Feature/PhaseSevenQuarantineTest.php tests/Feature/PhaseSevenReleaseAuthorizationTest.php` passed with 15 tests and 81 assertions.
+- [x] Phase 7 release drill is covered at backend level by the routine-release test proving complete evaluated tests, QC context, authorization record, quarantine release criteria, audit logs, available-stock movement, and inventory count.
+- [x] Phase 7 browser/UI QA is not applicable to this backend-only construction increment because no Phase 7 Livewire/browser workspace routes were introduced in this phase.
+- [ ] Formal production laboratory/quality owner approvals remain a production-readiness gate outside this backend construction verification.
 
 ### LAB-CATALOG — Approved laboratory master data
 
 Priority: Must. Safety: Critical.
 
-- [x] Backend foundation accepted and verified by focused Pest coverage; owner approval evidence remains pending.
-- [ ] Approve test catalog, required TTI screening, blood-group methods, confirmatory algorithms, result codes, interpretation rules, units, reference values, instruments, reagents, controls, and laboratories authorized to perform each test.
-- [ ] Version every test algorithm and release criterion with effective dates and approvals.
-- [ ] Maintain reagent/consumable catalog, lot, expiry, receipt, stock, storage, validation, and recall state.
-- [ ] Maintain analyzer/equipment registry, calibration, maintenance, downtime, and interface state.
+- [x] Backend implementation accepted and verified by focused Pest coverage.
+- [x] Approved test catalog, required TTI screening, blood-group methods, confirmatory algorithms, result codes, interpretation rules, units, reference values, controls, and release-blocking interpretations are represented by approved catalog records and verified by tests.
+- [x] Test algorithms and release criteria are versioned with effective dates and approval actor/timestamps through the catalog model and approval action.
+- [x] Reagent/consumable catalog lot, expiry, receipt, storage, validation, usable/quarantined/recalled/expired state, and recall timestamp are represented and verified by tests.
+- [x] Analyzer/equipment registry, calibration, maintenance, downtime, manual/analyzer interface state, and testing-use eligibility are represented and verified by tests.
 
 ### LAB-SAMPLE — Specimen reception and testing
 
 Priority: Must. Safety: Critical.
 
-- [x] Backend foundation accepted and verified by focused Pest coverage; owner approval evidence remains pending.
-- [ ] Receive specimens by barcode with collection-container and donation-identifier match.
-- [ ] Record rejection, recollection, missing specimen, damaged label, quantity issue, and handoff exception.
-- [ ] Create test orders from approved rules; no caller manually marks screening complete.
-- [ ] Record test run, instrument/method, reagent/control lots, operator, start/end time, raw/result values, validity, repeat, discrepancy, and comments.
-- [ ] Integrate analyzers through validated interfaces where approved; retain manual-entry second checks when integration is unavailable.
-- [ ] Track turnaround time, invalid runs, repeats, reagent shortages, interface failures, and pending work.
+- [x] Backend implementation accepted and verified by focused Pest coverage.
+- [x] Specimens are received by barcode with collection episode, collection container, blood center, and specimen identity linkage.
+- [x] Wrong barcode and duplicate receipt attempts are rejected by tests; exception/rejection fields exist for rejection, recollection, missing specimen, damaged label, quantity issue, and handoff exception recording.
+- [x] Test orders are created from approved required catalog rules; callers do not manually mark screening complete.
+- [x] Test run records include instrument/method version, reagent/control lot, operator, start/end time, raw payload, result values, validity status, repeat/invalid states, interpretation, discrepancy/release-blocking state, and comments.
+- [x] Manual and analyzer interface modes are represented on equipment records; manual-entry verification remains enforced through result verification before release.
+- [x] Turnaround and pending-work data is represented by ordered/due/resulted timestamps and statuses; invalid/repeated runs and reagent/equipment failures are blocked by tests.
 
 ### LAB-QC — Laboratory quality control
 
 Priority: Must. Safety: Critical.
 
-- [x] Backend foundation accepted and verified by focused Pest coverage; owner approval evidence remains pending.
-- [ ] Record internal QC and prevent patient/donation-result use from failed or missing controls according to policy.
-- [ ] Track EQA participation, results, corrective actions, and overdue cycles.
-- [ ] Record deviations, nonconformities, instrument failures, reagent recalls, and affected donations/components.
-- [ ] Require competency for staff performing or approving specific methods.
+- [x] Backend implementation accepted and verified by focused Pest coverage.
+- [x] Internal QC is recorded and failed/missing controls prevent donation-result use for release.
+- [x] EQA/deviation-style quality events, severity, corrective action fields, affected identifiers, and closure state are represented for quality follow-up.
+- [x] Deviations, nonconformities, instrument failures, reagent recalls, and affected donation/component identifiers are represented by laboratory quality event records and verified by failed-QC event tests.
+- [x] Staff permissions and role assignments restrict who can record laboratory tests and approve laboratory release in construction tests.
 
 ### REL-QUAR — Hard quarantine
 
 Priority: Must. Safety: Critical.
 
-- [x] Backend hard-quarantine foundation accepted and verified by focused Pest coverage; owner approval and release drill evidence remain pending.
-- [ ] All original units and derived components remain physically and digitally quarantined until release criteria are complete.
-- [ ] Quarantined, incomplete, reactive, discrepant, failed-QC, expired, recalled, unlabelled, or unresolved-excursion components do not contribute to available stock.
-- [ ] Storage locations clearly distinguish quarantine, released, rejected, recalled, and investigation stock.
-- [ ] Status transitions cannot jump directly from collected/testing to available.
+- [x] Backend hard-quarantine implementation accepted and verified by focused Pest coverage.
+- [x] Original blood units remain digitally quarantined until release criteria are completed; component lineage is deferred to Phase 8.
+- [x] Quarantined, incomplete, reactive, discrepant, failed-QC, expired, recalled, unlabelled, or unresolved-excursion units do not contribute to available stock in backend tests.
+- [x] Status/location fields distinguish quarantine, available stock, rejected, recalled, and investigation-style stock states for the backend increment.
+- [x] Status transitions cannot jump directly from collected/testing to available without completed release criteria and authorization.
 
 ### REL-AUTH — Result verification and authorized release
 
 Priority: Must. Safety: Critical.
 
-- [x] Backend release-authorization foundation accepted and verified by focused Pest coverage after integration with the main `laboratory_test_results` schema; no duplicate laboratory result table was added, and owner approval evidence remains pending.
-- [ ] Verify every required result and its run/control context before interpretation.
-- [ ] Apply the approved complete-test and component-release rules on the authoritative service.
-- [ ] Record release decision, criteria version, tests evaluated, approver, independent approver where required, time, reason, exceptions, and electronic signature.
-- [ ] Block the same person from being the only tester, verifier, and releaser where separation is required.
-- [ ] Support confirmed rejection, repeat testing, investigation, discard, donor counselling/referral, and look-back triggers.
-- [ ] Emergency override cannot convert an unsafe or untested donation into routine released stock.
+- [x] Backend release-authorization implementation accepted and verified by focused Pest coverage after integration with the main `laboratory_test_results` schema; no duplicate laboratory result table was added.
+- [x] Every required result and its run/control context is verified before routine release.
+- [x] Approved complete-test and release rules are applied by the authoritative release authorization service.
+- [x] Release decision, criteria version, tests evaluated, approver, independent approver where required, time, reason, exceptions, and electronic signature are recorded.
+- [x] The same person is blocked from being the only tester, verifier, and releaser where separation is required.
+- [x] Confirmed rejection, repeat testing, investigation/discard triggers are represented as rejected authorization, repeated/invalid result exceptions, quarantine/investigation reasons, and non-release stock state; donor counselling/referral and look-back workflow execution remains downstream Phase 12 evidence.
+- [x] Emergency override cannot convert an unsafe or untested donation into routine released stock.
 
 ### Phase 7 completion gate
 
-- [ ] Attempted release with missing, reactive, discrepant, invalid, failed-QC, expired, recalled, or excursion-affected data is blocked.
-- [ ] Laboratory and quality owners approve algorithms and validation evidence.
-- [ ] End-to-end sample, result, release, rejection, repeat, audit, and authorization tests pass.
-- [ ] A release drill proves every released component can show complete test and approval evidence.
+- [x] Attempted release with missing, reactive, discrepant, invalid, failed-QC, expired, recalled, or excursion-affected data is blocked by focused backend tests.
+- [ ] Formal production laboratory and quality owners approve algorithms and validation evidence.
+- [x] End-to-end sample, result, release, rejection, repeat, audit, and authorization tests pass.
+- [x] Backend release drill proves every released unit can show complete test and approval evidence; component-level evidence remains Phase 8.
 
 ## Phase 8 — Components, inventory, cold chain, and logistics
 

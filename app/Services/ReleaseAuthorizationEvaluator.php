@@ -98,6 +98,14 @@ class ReleaseAuthorizationEvaluator
         $testCode = strtoupper($result->testCatalog->code);
         $exceptions = [];
 
+        if ($result->status === LaboratoryTestResultStatus::Invalid) {
+            $exceptions[] = "invalid_result:{$testCode}";
+        }
+
+        if ($result->status === LaboratoryTestResultStatus::Repeated) {
+            $exceptions[] = "repeated_result:{$testCode}";
+        }
+
         if ($result->status !== LaboratoryTestResultStatus::Verified || $result->verified_by === null || $result->verified_at === null) {
             $exceptions[] = "unverified_result:{$testCode}";
         }
