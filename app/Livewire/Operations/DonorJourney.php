@@ -265,7 +265,7 @@ final class DonorJourney extends Component
         $this->search = $profile->donor_id;
         $this->tab = 'search';
         $this->donorCardQrPayload = '';
-        $this->notice = 'Signed donor card verified. Confirm the donor’s identity before opening clinical details.';
+        $this->notice = __('console.phase_six.notices.card_verified');
         $this->resetPage();
     }
 
@@ -305,7 +305,9 @@ final class DonorJourney extends Component
         ]);
         $this->reset(['donorName', 'donorPhone', 'donorEmail', 'donorDateOfBirth', 'donorRegion', 'donorAddress', 'donorConsent', 'duplicateOverride', 'duplicateOverrideReason']);
         $this->modal('register-donor-phase-six')->close();
-        $this->notice = 'Donor '.$donor->donorProfile->donor_id.' registered. Identity confirmation is the next controlled step.';
+        $this->notice = __('console.phase_six.notices.donor_registered', [
+            'donor_id' => $donor->donorProfile->donor_id,
+        ]);
     }
 
     public function openIdentity(int $donorId): void
@@ -337,7 +339,9 @@ final class DonorJourney extends Component
             assistedReason: $validated['identityReason'] ?: null,
         );
         $this->modal('confirm-donor-identity')->close();
-        $this->notice = 'Identity confirmed until '.$check->expires_at?->format('d M Y, H:i').'.';
+        $this->notice = __('console.phase_six.notices.identity_confirmed', [
+            'expires_at' => $check->expires_at?->translatedFormat('d M Y, H:i'),
+        ]);
     }
 
     public function openDuplicateReview(int $caseId): void
@@ -360,7 +364,7 @@ final class DonorJourney extends Component
         $case = DonorDuplicateCase::query()->findOrFail((int) $validated['activeDuplicateCaseId']);
         $review->handle($this->user(), $case, DonorDuplicateCaseStatus::from($validated['reviewDecision']), $validated['reviewReason']);
         $this->modal('duplicate-review')->close();
-        $this->notice = 'Duplicate identity case reviewed with full provenance retained.';
+        $this->notice = __('console.phase_six.notices.duplicate_reviewed');
     }
 
     public function openScreening(int $appointmentId): void
@@ -429,7 +433,7 @@ final class DonorJourney extends Component
                 : null,
         ), $this->user());
         $this->modal('phase-six-screening')->close();
-        $this->notice = 'Screening decision saved with protocol and identity snapshots.';
+        $this->notice = __('console.phase_six.notices.screening_saved');
     }
 
     public function openCollection(int $appointmentId): void
@@ -465,21 +469,23 @@ final class DonorJourney extends Component
         ));
         $this->modal('prepare-collection')->close();
         $this->tab = 'labels';
-        $this->notice = 'Collection '.$episode->donation_identifier.' prepared in quarantine. Print and scan every label before starting.';
+        $this->notice = __('console.phase_six.notices.collection_prepared', [
+            'identifier' => $episode->donation_identifier,
+        ]);
     }
 
     public function printLabel(int $labelId, PrintCollectionLabel $print): void
     {
         $label = CollectionLabel::query()->findOrFail($labelId);
         $print->handle($this->user(), $label, 'Browser print station');
-        $this->notice = 'Label printed. Scan application is still required.';
+        $this->notice = __('console.phase_six.notices.label_printed');
     }
 
     public function applyLabel(int $labelId, ApplyCollectionLabel $apply): void
     {
         $label = CollectionLabel::query()->findOrFail($labelId);
         $apply->handle($this->user(), $label, $label->label_identifier);
-        $this->notice = 'Label application scan matched and was recorded.';
+        $this->notice = __('console.phase_six.notices.label_applied');
     }
 
     public function openLabelReplacement(int $labelId): void
@@ -500,7 +506,9 @@ final class DonorJourney extends Component
         $label = CollectionLabel::query()->with('collectionEpisode')->findOrFail((int) $validated['activeLabelId']);
         $replacement = $replace->handle($this->user(), $label, $validated['replacementReason']);
         $this->modal('replace-collection-label')->close();
-        $this->notice = 'Old label voided. Replacement '.$replacement->label_identifier.' must be printed and scan-applied before collection starts.';
+        $this->notice = __('console.phase_six.notices.label_replaced', [
+            'identifier' => $replacement->label_identifier,
+        ]);
     }
 
     public function startEpisode(int $episodeId, StartCollection $start): void
@@ -508,7 +516,7 @@ final class DonorJourney extends Component
         $episode = CollectionEpisode::query()->findOrFail($episodeId);
         $start->handle($this->user(), $episode);
         $this->tab = 'in_progress';
-        $this->notice = 'Collection started. Record every required specimen before completion.';
+        $this->notice = __('console.phase_six.notices.collection_started');
     }
 
     public function collectSpecimen(int $specimenId, CollectSpecimen $collect): void
@@ -529,14 +537,14 @@ final class DonorJourney extends Component
             ->latest('id')
             ->firstOrFail();
         $collect->handle($this->user(), $specimen, $appliedLabel->label_identifier, $volume);
-        $this->notice = 'Specimen scan and volume recorded.';
+        $this->notice = __('console.phase_six.notices.specimen_collected');
     }
 
     public function handOffSpecimen(int $specimenId, HandOffSpecimen $handOff): void
     {
         $specimen = Specimen::query()->findOrFail($specimenId);
         $handOff->handle($this->user(), $specimen, 'Laboratory specimen reception');
-        $this->notice = 'Specimen handoff recorded for laboratory reception.';
+        $this->notice = __('console.phase_six.notices.specimen_handed_off');
     }
 
     public function openCompletion(int $episodeId): void
@@ -576,7 +584,7 @@ final class DonorJourney extends Component
         ));
         $this->modal('complete-collection')->close();
         $this->tab = 'history';
-        $this->notice = 'Collection outcome completed. Any created unit remains quarantined pending downstream testing.';
+        $this->notice = __('console.phase_six.notices.collection_completed');
     }
 
     public function openReaction(int $episodeId): void
@@ -621,7 +629,7 @@ final class DonorJourney extends Component
         );
         $this->modal('record-donor-reaction')->close();
         $this->tab = 'reactions';
-        $this->notice = 'Donor reaction and follow-up requirement recorded.';
+        $this->notice = __('console.phase_six.notices.reaction_recorded');
     }
 
     public function registerOfflineDevice(RegisterOfflineCollectionDevice $register): void
@@ -630,14 +638,18 @@ final class DonorJourney extends Component
         $registration = $register->handle($this->user(), $this->requireSelectedCenter(), $this->user(), $validated['deviceName']);
         $this->issuedDeviceCredential = $registration['credential'];
         $this->deviceName = '';
-        $this->notice = 'Device registered. Copy the one-time credential now; it will not be shown again.';
+        $this->notice = __('console.phase_six.notices.device_registered');
     }
 
     public function issueOfflineBatch(int $deviceId, IssueOfflineIdentifierBatch $issue): void
     {
         $device = OfflineCollectionDevice::query()->findOrFail($deviceId);
         $batch = $issue->handle($this->user(), $device);
-        $this->notice = 'Offline identifier batch '.$batch->start_sequence.'–'.$batch->end_sequence.' issued until '.$batch->expires_at->format('d M Y H:i').'.';
+        $this->notice = __('console.phase_six.notices.batch_issued', [
+            'start' => $batch->start_sequence,
+            'end' => $batch->end_sequence,
+            'expires_at' => $batch->expires_at->translatedFormat('d M Y H:i'),
+        ]);
     }
 
     public function openDeviceRevocation(int $deviceId): void
@@ -658,7 +670,7 @@ final class DonorJourney extends Component
         $device = OfflineCollectionDevice::query()->findOrFail((int) $validated['activeDeviceId']);
         $devices->revoke($this->user(), $device, $validated['deviceRevocationReason']);
         $this->modal('revoke-offline-device')->close();
-        $this->notice = 'Device and all open identifier batches revoked. The field client must wipe its protected local dataset on its next connection.';
+        $this->notice = __('console.phase_six.notices.device_revoked');
     }
 
     public function reconcileOffline(int $submissionId, ReconcileOfflineCollection $reconcile): void
@@ -666,8 +678,10 @@ final class DonorJourney extends Component
         $submission = OfflineCollectionSubmission::query()->visibleTo($this->user())->findOrFail($submissionId);
         $result = $reconcile->handle($this->user(), $submission);
         $this->notice = $result->status === OfflineCollectionSubmissionStatus::Reconciled
-            ? 'Offline collection reconciled into quarantine.'
-            : 'Offline submission remains blocked for review: '.collect($result->conflict_codes)->implode(', ').'.';
+            ? __('console.phase_six.notices.offline_reconciled')
+            : __('console.phase_six.notices.offline_blocked', [
+                'codes' => collect($result->conflict_codes)->implode(', '),
+            ]);
     }
 
     public function openOfflineRejection(int $submissionId): void
@@ -688,7 +702,7 @@ final class DonorJourney extends Component
         $submission = OfflineCollectionSubmission::query()->visibleTo($this->user())->findOrFail((int) $validated['activeOfflineSubmissionId']);
         $reject->handle($this->user(), $submission, $validated['offlineRejectionReason']);
         $this->modal('reject-offline-submission')->close();
-        $this->notice = 'Offline submission rejected with its encrypted source payload and review provenance retained.';
+        $this->notice = __('console.phase_six.notices.offline_rejected');
     }
 
     /** @return array<string, string> */
@@ -699,32 +713,32 @@ final class DonorJourney extends Component
 
         if ($this->workspace === 'donor-reception') {
             return array_filter([
-                'search' => 'Donor search',
-                'scan' => $user->can(PermissionName::ConfirmDonorIdentity->value) ? 'Signed card' : null,
-                'duplicates' => $user->can(PermissionName::ReviewDonorDuplicates->value) ? 'Duplicate review' : null,
-                'identity' => 'Identity log',
-                'registration' => $user->can(PermissionName::RegisterDonors->value) ? 'Registration' : null,
+                'search' => __('console.phase_six.tabs.search'),
+                'scan' => $user->can(PermissionName::ConfirmDonorIdentity->value) ? __('console.phase_six.tabs.scan') : null,
+                'duplicates' => $user->can(PermissionName::ReviewDonorDuplicates->value) ? __('console.phase_six.tabs.duplicates') : null,
+                'identity' => __('console.phase_six.tabs.identity'),
+                'registration' => $user->can(PermissionName::RegisterDonors->value) ? __('console.phase_six.tabs.registration') : null,
             ]);
         }
 
         if ($this->workspace === 'eligibility') {
             return [
-                'queue' => 'Screening queue',
-                'history' => 'Decision history',
-                'deferrals' => 'Deferrals',
-                'protocols' => 'Protocols',
+                'queue' => __('console.phase_six.tabs.queue_eligibility'),
+                'history' => __('console.phase_six.tabs.history_eligibility'),
+                'deferrals' => __('console.phase_six.tabs.deferrals'),
+                'protocols' => __('console.phase_six.tabs.protocols'),
             ];
         }
 
         return array_filter([
-            'queue' => $user->can(PermissionName::PrepareCollections->value) ? 'Ready queue' : null,
-            'labels' => $user->can(PermissionName::ManageCollectionLabels->value) ? 'Labels' : null,
-            'in_progress' => $user->can(PermissionName::RecordDonations->value) ? 'In progress' : null,
-            'specimens' => $user->can(PermissionName::HandOffSpecimens->value) ? 'Specimens' : null,
-            'reactions' => $user->can(PermissionName::RecordDonorReactions->value) ? 'Reactions' : null,
-            'devices' => $user->can(PermissionName::ManageOfflineCollectionDevices->value) ? 'Offline devices' : null,
-            'offline' => $user->can(PermissionName::ReconcileOfflineCollections->value) ? 'Offline sync' : null,
-            'history' => 'History',
+            'queue' => $user->can(PermissionName::PrepareCollections->value) ? __('console.phase_six.tabs.queue_donations') : null,
+            'labels' => $user->can(PermissionName::ManageCollectionLabels->value) ? __('console.phase_six.tabs.labels') : null,
+            'in_progress' => $user->can(PermissionName::RecordDonations->value) ? __('console.phase_six.tabs.in_progress') : null,
+            'specimens' => $user->can(PermissionName::HandOffSpecimens->value) ? __('console.phase_six.tabs.specimens') : null,
+            'reactions' => $user->can(PermissionName::RecordDonorReactions->value) ? __('console.phase_six.tabs.reactions') : null,
+            'devices' => $user->can(PermissionName::ManageOfflineCollectionDevices->value) ? __('console.phase_six.tabs.devices') : null,
+            'offline' => $user->can(PermissionName::ReconcileOfflineCollections->value) ? __('console.phase_six.tabs.offline') : null,
+            'history' => __('console.phase_six.tabs.history_donations'),
         ]);
     }
 
@@ -736,22 +750,22 @@ final class DonorJourney extends Component
 
         return match ($this->workspace) {
             'donor-reception' => [
-                ['label' => 'Donors in scope', 'value' => $this->donorQuery()->count(), 'icon' => 'users', 'tone' => 'neutral'],
-                ['label' => 'Duplicate review', 'value' => $this->scopeCenter(DonorDuplicateCase::query(), $centerId)->pending()->count(), 'icon' => 'copy-check', 'tone' => 'warning'],
-                ['label' => 'Confirmed today', 'value' => $this->scopeCenter(DonorIdentityCheck::query(), $centerId)->whereDate('confirmed_at', today())->count(), 'icon' => 'badge-check', 'tone' => 'success'],
-                ['label' => 'Registered today', 'value' => $this->donorQuery()->whereDate('users.created_at', today())->count(), 'icon' => 'user-plus', 'tone' => 'accent'],
+                ['label' => __('console.phase_six.metrics.donors_in_scope'), 'value' => $this->donorQuery()->count(), 'icon' => 'users', 'tone' => 'neutral'],
+                ['label' => __('console.phase_six.metrics.duplicate_review'), 'value' => $this->scopeCenter(DonorDuplicateCase::query(), $centerId)->pending()->count(), 'icon' => 'clipboard-check', 'tone' => 'warning'],
+                ['label' => __('console.phase_six.metrics.confirmed_today'), 'value' => $this->scopeCenter(DonorIdentityCheck::query(), $centerId)->whereDate('confirmed_at', today())->count(), 'icon' => 'badge-check', 'tone' => 'success'],
+                ['label' => __('console.phase_six.metrics.registered_today'), 'value' => $this->donorQuery()->whereDate('users.created_at', today())->count(), 'icon' => 'user-plus', 'tone' => 'accent'],
             ],
             'eligibility' => [
-                ['label' => 'Waiting screening', 'value' => $this->appointmentQueue()->count(), 'icon' => 'clipboard-list', 'tone' => 'warning'],
-                ['label' => 'Screened today', 'value' => $this->scopeCenter(EligibilityRecord::query(), $centerId)->whereDate('screened_at', today())->count(), 'icon' => 'clipboard-check', 'tone' => 'success'],
-                ['label' => 'Active deferrals', 'value' => $this->deferralQuery()->effectiveOn()->count(), 'icon' => 'shield-alert', 'tone' => 'danger'],
-                ['label' => 'Active protocols', 'value' => ScreeningProtocol::query()->effective()->count(), 'icon' => 'file-check-2', 'tone' => 'accent'],
+                ['label' => __('console.phase_six.metrics.waiting_screening'), 'value' => $this->appointmentQueue()->count(), 'icon' => 'clock-3', 'tone' => 'warning'],
+                ['label' => __('console.phase_six.metrics.screened_today'), 'value' => $this->scopeCenter(EligibilityRecord::query(), $centerId)->whereDate('screened_at', today())->count(), 'icon' => 'clipboard-check', 'tone' => 'success'],
+                ['label' => __('console.phase_six.metrics.active_deferrals'), 'value' => $this->deferralQuery()->effectiveOn()->count(), 'icon' => 'shield', 'tone' => 'danger'],
+                ['label' => __('console.phase_six.metrics.active_protocols'), 'value' => ScreeningProtocol::query()->effective()->count(), 'icon' => 'file-text', 'tone' => 'accent'],
             ],
             default => [
-                ['label' => 'Ready', 'value' => $this->readyCollectionQueue()->count(), 'icon' => 'list-checks', 'tone' => 'accent'],
-                ['label' => 'Prepared', 'value' => $this->episodeQuery()->where('status', CollectionEpisodeStatus::Prepared)->count(), 'icon' => 'tag', 'tone' => 'warning'],
-                ['label' => 'In progress', 'value' => $this->episodeQuery()->where('status', CollectionEpisodeStatus::InProgress)->count(), 'icon' => 'activity', 'tone' => 'danger'],
-                ['label' => 'Quarantined today', 'value' => $this->episodeQuery()->where('status', CollectionEpisodeStatus::Quarantined)->whereDate('ended_at', today())->count(), 'icon' => 'shield-check', 'tone' => 'success'],
+                ['label' => __('console.phase_six.metrics.ready'), 'value' => $this->readyCollectionQueue()->count(), 'icon' => 'list-filter', 'tone' => 'accent'],
+                ['label' => __('console.phase_six.metrics.prepared'), 'value' => $this->episodeQuery()->where('status', CollectionEpisodeStatus::Prepared)->count(), 'icon' => 'package-check', 'tone' => 'warning'],
+                ['label' => __('console.phase_six.metrics.in_progress'), 'value' => $this->episodeQuery()->where('status', CollectionEpisodeStatus::InProgress)->count(), 'icon' => 'activity', 'tone' => 'danger'],
+                ['label' => __('console.phase_six.metrics.quarantined_today'), 'value' => $this->episodeQuery()->where('status', CollectionEpisodeStatus::Quarantined)->whereDate('ended_at', today())->count(), 'icon' => 'shield-check', 'tone' => 'success'],
             ],
         };
     }
@@ -776,6 +790,15 @@ final class DonorJourney extends Component
     public function centerLabel(): string
     {
         return app(ActiveCenterContext::class)->label($this->user(), $this->center);
+    }
+
+    /** @return array<string, string> */
+    protected function validationAttributes(): array
+    {
+        return collect(__('console.phase_six.validation'))
+            ->mapWithKeys(fn (string $label, string $attribute): array => [
+                (string) str($attribute)->camel() => $label,
+            ])->all();
     }
 
     public function render(): View
