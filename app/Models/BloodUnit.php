@@ -13,6 +13,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 /**
  * @property int $id
@@ -26,6 +27,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property BloodUnitStatus $status
  * @property int|null $handled_by
  * @property-read BloodCenter $bloodCenter
+ * @property-read BloodUnitQuarantine|null $quarantine
  */
 #[Fillable([
     'unit_number',
@@ -108,5 +110,17 @@ class BloodUnit extends Model
     public function inventoryAdjustments(): HasMany
     {
         return $this->hasMany(InventoryAdjustment::class);
+    }
+
+    /** @return HasMany<ReleaseAuthorization, $this> */
+    public function releaseAuthorizations(): HasMany
+    {
+        return $this->hasMany(ReleaseAuthorization::class);
+    }
+
+    /** @return HasOne<BloodUnitQuarantine, $this> */
+    public function quarantine(): HasOne
+    {
+        return $this->hasOne(BloodUnitQuarantine::class);
     }
 }

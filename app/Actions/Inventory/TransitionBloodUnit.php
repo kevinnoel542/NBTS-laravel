@@ -8,6 +8,7 @@ use App\Models\BloodInventory;
 use App\Models\BloodUnit;
 use App\Models\InventoryAdjustment;
 use App\Models\User;
+use App\Services\BloodUnitQuarantineService;
 use App\Services\InventoryStockAlertService;
 use App\Support\AuditLogger;
 use Illuminate\Support\Facades\DB;
@@ -18,6 +19,7 @@ final readonly class TransitionBloodUnit
 {
     public function __construct(
         private AuditLogger $auditLogger,
+        private BloodUnitQuarantineService $bloodUnitQuarantineService,
         private InventoryStockAlertService $inventoryStockAlertService,
     ) {}
 
@@ -29,6 +31,7 @@ final readonly class TransitionBloodUnit
     ): BloodUnit {
         return DB::transaction(function () use ($bloodUnit, $status, $actor, $notes): BloodUnit {
             $lockedUnit = BloodUnit::query()
+                ->with('quarantine')
                 ->lockForUpdate()
                 ->whereKey($bloodUnit->getKey())
                 ->firstOrFail();
@@ -39,6 +42,10 @@ final readonly class TransitionBloodUnit
 
             if (! $previousStatus->canTransitionTo($status)) {
                 throw InvalidBloodUnitTransition::from($previousStatus, $status);
+            }
+
+            if ($status === BloodUnitStatus::Available) {
+                $this->bloodUnitQuarantineService->assertCanMoveToAvailable($lockedUnit);
             }
 
             BloodInventory::query()->firstOrCreate(
@@ -59,8 +66,11 @@ final readonly class TransitionBloodUnit
                 ->where('blood_group', $lockedUnit->blood_group)
                 ->firstOrFail();
 
-            $availableDelta = (int) $status->contributesToAvailableInventory()
-                - (int) $previousStatus->contributesToAvailableInventory();
+            $requestedUnit = $lockedUnit->replicate()
+                ->forceFill(['status' => $status])
+                ->setRelation('quarantine', $lockedUnit->quarantine);
+            $availableDelta = (int) $this->bloodUnitQuarantineService->canContributeToAvailableStock($requestedUnit)
+                - (int) $this->bloodUnitQuarantineService->canContributeToAvailableStock($lockedUnit);
             $reservedDelta = (int) ($status === BloodUnitStatus::Reserved)
                 - (int) ($previousStatus === BloodUnitStatus::Reserved);
             $newAvailableUnits = $inventory->available_units + $availableDelta;

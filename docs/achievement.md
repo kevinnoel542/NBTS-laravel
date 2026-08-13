@@ -1325,6 +1325,33 @@ Next dependent task:
 
 - Record the required clinical, identifier, privacy, security, and operations approvals. Start Phase 7 only after its safety/data documents and approval gates are accepted; do not reopen Phase 6 except for a verified regression or approved change.
 
+## 2026-08-13 — Phase 7 backend laboratory, quarantine, and release foundation
+
+Status: backend foundation accepted and verified; full Phase 7 completion evidence remains pending
+
+Scope: Laravel backend laboratory catalog, specimen/testing, laboratory QC, hard quarantine, and release authorization foundation; no browser/UI QA claimed
+
+Verified backend state:
+
+- LAB-CATALOG, LAB-SAMPLE, and LAB-QC backend foundation has been accepted and verified.
+- REL-QUAR backend hard-quarantine foundation has been accepted and verified.
+- REL-AUTH backend release-authorization foundation has been accepted and verified after adaptation to the main `laboratory_test_results` schema.
+- Release authorization was integrated without adding a duplicate laboratory result table.
+
+Automated verification:
+
+- `NBTS_REUSE_TEST_SCHEMA=1 php artisan test --compact tests/Feature/PhaseSevenLaboratoryFoundationTest.php tests/Feature/PhaseSevenQuarantineTest.php tests/Feature/PhaseSevenReleaseAuthorizationTest.php`
+- Result in main: 11 tests passed with 54 assertions.
+
+Evidence boundary:
+
+- This entry records verified backend foundation only. It does not claim browser/UI QA, release drill completion, laboratory-owner approval, quality-owner approval, production release readiness, or production clinical authority.
+- Full Phase 7 completion can be promoted only after release drill evidence, remaining operational evidence, and required owner approvals are recorded.
+
+Next dependent task:
+
+- Record laboratory and quality owner approvals, perform the release drill, and add any required browser/UI or operational evidence before marking Phase 7 fully complete.
+
 ## Achievement template
 
 Copy this section for future verified work.

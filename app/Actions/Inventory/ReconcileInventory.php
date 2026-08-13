@@ -7,6 +7,7 @@ use App\Models\BloodInventory;
 use App\Models\BloodUnit;
 use App\Models\InventoryAdjustment;
 use App\Models\User;
+use App\Services\BloodUnitQuarantineService;
 use App\Services\InventoryStockAlertService;
 use App\Support\AuditLogger;
 use Illuminate\Support\Facades\DB;
@@ -17,6 +18,7 @@ final readonly class ReconcileInventory
 {
     public function __construct(
         private AuditLogger $auditLogger,
+        private BloodUnitQuarantineService $bloodUnitQuarantineService,
         private InventoryStockAlertService $inventoryStockAlertService,
     ) {}
 
@@ -50,10 +52,11 @@ final readonly class ReconcileInventory
 
         return DB::transaction(function () use ($inventory, $actor, $repair, $reason): array {
             $unitStatuses = BloodUnit::query()
+                ->with('quarantine')
                 ->where('blood_center_id', $inventory->blood_center_id)
                 ->where('blood_group', $inventory->blood_group)
                 ->lockForUpdate()
-                ->get(['status']);
+                ->get();
 
             $lockedInventory = BloodInventory::query()
                 ->with('bloodCenter')
@@ -65,7 +68,7 @@ final readonly class ReconcileInventory
             $currentAvailable = $lockedInventory->available_units;
             $currentReserved = $lockedInventory->reserved_units;
             $expectedAvailable = $unitStatuses
-                ->where('status', BloodUnitStatus::Available)
+                ->filter(fn (BloodUnit $bloodUnit): bool => $this->bloodUnitQuarantineService->canContributeToAvailableStock($bloodUnit))
                 ->count();
             $expectedReserved = $unitStatuses
                 ->where('status', BloodUnitStatus::Reserved)

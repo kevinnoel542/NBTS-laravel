@@ -58,4 +58,9 @@ class CollectionContainer extends Model
     {
         return $this->hasMany(CollectionLabel::class);
     }
+
+    public function isHardQuarantined(): bool
+    {
+        return $this->status->isHardQuarantined();
+    }
 }

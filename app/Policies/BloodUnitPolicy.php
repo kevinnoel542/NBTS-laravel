@@ -46,6 +46,12 @@ class BloodUnitPolicy
             && $user->hasCenterAccess($bloodUnit->blood_center_id);
     }
 
+    public function authorizeRelease(User $user, BloodUnit $bloodUnit): bool
+    {
+        return $user->can(PermissionName::ApproveLaboratoryRelease->value)
+            && $user->hasCenterAccess($bloodUnit->blood_center_id);
+    }
+
     public function update(User $user, BloodUnit $bloodUnit): bool
     {
         return $this->transition($user, $bloodUnit);

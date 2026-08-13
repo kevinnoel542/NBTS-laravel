@@ -500,10 +500,19 @@ Priority: Must where connectivity is unreliable. Safety: Critical.
 
 ## Phase 7 — Laboratory, quarantine, quality control, and release
 
+Current backend foundation evidence, not full Phase 7 completion evidence:
+
+- [x] LAB-CATALOG, LAB-SAMPLE, and LAB-QC backend foundation accepted and verified.
+- [x] REL-QUAR backend hard-quarantine foundation accepted and verified.
+- [x] REL-AUTH backend release-authorization foundation accepted and verified after adaptation to the main `laboratory_test_results` schema, without adding a duplicate laboratory result table.
+- [x] Backend focused Pest verification passed in main: `NBTS_REUSE_TEST_SCHEMA=1 php artisan test --compact tests/Feature/PhaseSevenLaboratoryFoundationTest.php tests/Feature/PhaseSevenQuarantineTest.php tests/Feature/PhaseSevenReleaseAuthorizationTest.php` passed with 11 tests and 54 assertions.
+- [ ] Phase 7 browser/UI QA, release drill evidence, and laboratory/quality owner approvals are not claimed by this backend verification.
+
 ### LAB-CATALOG — Approved laboratory master data
 
 Priority: Must. Safety: Critical.
 
+- [x] Backend foundation accepted and verified by focused Pest coverage; owner approval evidence remains pending.
 - [ ] Approve test catalog, required TTI screening, blood-group methods, confirmatory algorithms, result codes, interpretation rules, units, reference values, instruments, reagents, controls, and laboratories authorized to perform each test.
 - [ ] Version every test algorithm and release criterion with effective dates and approvals.
 - [ ] Maintain reagent/consumable catalog, lot, expiry, receipt, stock, storage, validation, and recall state.
@@ -513,6 +522,7 @@ Priority: Must. Safety: Critical.
 
 Priority: Must. Safety: Critical.
 
+- [x] Backend foundation accepted and verified by focused Pest coverage; owner approval evidence remains pending.
 - [ ] Receive specimens by barcode with collection-container and donation-identifier match.
 - [ ] Record rejection, recollection, missing specimen, damaged label, quantity issue, and handoff exception.
 - [ ] Create test orders from approved rules; no caller manually marks screening complete.
@@ -524,6 +534,7 @@ Priority: Must. Safety: Critical.
 
 Priority: Must. Safety: Critical.
 
+- [x] Backend foundation accepted and verified by focused Pest coverage; owner approval evidence remains pending.
 - [ ] Record internal QC and prevent patient/donation-result use from failed or missing controls according to policy.
 - [ ] Track EQA participation, results, corrective actions, and overdue cycles.
 - [ ] Record deviations, nonconformities, instrument failures, reagent recalls, and affected donations/components.
@@ -533,6 +544,7 @@ Priority: Must. Safety: Critical.
 
 Priority: Must. Safety: Critical.
 
+- [x] Backend hard-quarantine foundation accepted and verified by focused Pest coverage; owner approval and release drill evidence remain pending.
 - [ ] All original units and derived components remain physically and digitally quarantined until release criteria are complete.
 - [ ] Quarantined, incomplete, reactive, discrepant, failed-QC, expired, recalled, unlabelled, or unresolved-excursion components do not contribute to available stock.
 - [ ] Storage locations clearly distinguish quarantine, released, rejected, recalled, and investigation stock.
@@ -542,6 +554,7 @@ Priority: Must. Safety: Critical.
 
 Priority: Must. Safety: Critical.
 
+- [x] Backend release-authorization foundation accepted and verified by focused Pest coverage after integration with the main `laboratory_test_results` schema; no duplicate laboratory result table was added, and owner approval evidence remains pending.
 - [ ] Verify every required result and its run/control context before interpretation.
 - [ ] Apply the approved complete-test and component-release rules on the authoritative service.
 - [ ] Record release decision, criteria version, tests evaluated, approver, independent approver where required, time, reason, exceptions, and electronic signature.
