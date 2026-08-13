@@ -2,7 +2,9 @@
 
 namespace Database\Factories;
 
+use App\Models\BloodComponent;
 use App\Models\ComponentDisposal;
+use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -18,7 +20,16 @@ class ComponentDisposalFactory extends Factory
     public function definition(): array
     {
         return [
-            //
+            'blood_component_id' => BloodComponent::factory(),
+            'disposed_by' => User::factory()->staff(),
+            'witnessed_by' => User::factory()->staff(),
+            'approved_by' => null,
+            'method' => 'biohazard_incineration',
+            'reason' => 'expired',
+            'quantity' => 1,
+            'location' => 'Controlled disposal room',
+            'evidence_reference' => fake()->bothify('DSP-####'),
+            'disposed_at' => now(),
         ];
     }
 }

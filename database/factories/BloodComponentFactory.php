@@ -28,7 +28,9 @@ class BloodComponentFactory extends Factory
             'donation_id' => fn (array $attributes): int => BloodUnit::query()->findOrFail($attributes['blood_unit_id'])->donation_id,
             'parent_component_id' => null,
             'component_product_catalog_id' => ComponentProductCatalog::factory(),
-            'component_processing_event_id' => ComponentProcessingEvent::factory(),
+            'component_processing_event_id' => fn (array $attributes): int => ComponentProcessingEvent::factory()->create([
+                'blood_unit_id' => $attributes['blood_unit_id'],
+            ])->id,
             'blood_center_id' => fn (array $attributes): int => BloodUnit::query()->findOrFail($attributes['blood_unit_id'])->blood_center_id,
             'blood_group' => BloodGroup::OPositive,
             'status' => ComponentStatus::Available,

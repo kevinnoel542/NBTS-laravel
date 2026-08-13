@@ -2,6 +2,9 @@
 
 namespace Database\Factories;
 
+use App\LogisticsMovementStatus;
+use App\Models\BloodComponent;
+use App\Models\ComponentDispatch;
 use App\Models\ComponentDispatchItem;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
@@ -18,7 +21,11 @@ class ComponentDispatchItemFactory extends Factory
     public function definition(): array
     {
         return [
-            //
+            'component_dispatch_id' => ComponentDispatch::factory(),
+            'blood_component_id' => BloodComponent::factory(),
+            'status' => LogisticsMovementStatus::Packed,
+            'reconciled_disposition' => null,
+            'reconciled_at' => null,
         ];
     }
 }
