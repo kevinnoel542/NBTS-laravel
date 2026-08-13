@@ -10,7 +10,13 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Carbon;
 
+/**
+ * @property BloodGroup $blood_group
+ * @property ComponentStatus $status
+ * @property Carbon $expiry_date
+ */
 #[Fillable([
     'product_identifier',
     'blood_unit_id',
@@ -100,6 +106,18 @@ class BloodComponent extends Model
     public function processingEvent(): BelongsTo
     {
         return $this->belongsTo(ComponentProcessingEvent::class, 'component_processing_event_id');
+    }
+
+    /** @return HasMany<HospitalComponentAllocation, $this> */
+    public function hospitalAllocations(): HasMany
+    {
+        return $this->hasMany(HospitalComponentAllocation::class, 'blood_component_id');
+    }
+
+    /** @return HasMany<TransfusionRecord, $this> */
+    public function transfusionRecords(): HasMany
+    {
+        return $this->hasMany(TransfusionRecord::class, 'blood_component_id');
     }
 
     /** @return BelongsTo<BloodCenter, $this> */

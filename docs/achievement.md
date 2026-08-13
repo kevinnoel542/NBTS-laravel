@@ -1397,6 +1397,45 @@ Next dependent task:
 
 - Record formal production owner approvals before treating these component, inventory, cold-chain, and logistics workflows as production operational policy.
 
+## 2026-08-13 — Phase 9 backend hospital request, compatibility, issue, and transfusion foundation
+
+Status: backend construction scope accepted and verified; formal hospital clinical and blood-bank owner approvals remain pending
+
+Scope: Laravel backend hospital registry, hospital service registry, hospital-scoped request handling, patient specimen linkage, compatibility/crossmatch evidence, emergency release authorization, FEFO component allocation, issue check, receipt, bedside verification, transfusion outcome, and overdue outcome queue; no new Phase 9 browser/UI routes were introduced.
+
+Verified backend state:
+
+- HSP-REG stores approved hospitals, hospital blood-bank/service capability metadata, operating hours, request routes, integration identifiers, patient-identity minimums, privacy policy version, and service status.
+- Hospital users are constrained by active hospital organization assignments before request, compatibility, issue, receipt, or transfusion actions are accepted.
+- HSP-REQ records minimum patient reference, hospital/ward/service, clinician requester, diagnosis/indication, haemoglobin, observations, active bleeding state, urgency, requested component, quantity, required time, attachments, notes, guidance snapshot, override reason, source mode, and timestamps.
+- Requests outside the construction patient-blood-management threshold require an override reason without replacing clinical judgment.
+- Downtime/paper requests are captured as controlled records instead of disappearing from the workflow.
+- XMT-COMPAT links patient specimens to the same patient request, records ABO/Rh confirmation, antibody screen, compatibility result, method, instrument/reagent/control context, operator, reviewer, validity window, and exceptions.
+- Wrong-patient, wrong-component, incompatible, expired, unavailable, and unapproved component paths are blocked before routine allocation.
+- Emergency release requires emergency urgency, named clinical authorization, reason, risk acknowledgement, selected component, acknowledgement, and retrospective completion due date.
+- HSP-ALLOC allocates compatible components by FEFO and changes component state to prevent double allocation.
+- Final issue check requires request, patient, component, release, compatibility/emergency authorization, expiry, label, package, and staff confirmation.
+- Hospital receipt records receiving officer, time, condition, temperature evidence, discrepancy/hold state, and chain of custody.
+- TRF-BEDSIDE records bedside verification, start/completion, observations, volume, outcome, unused disposition, final component state, and donor-to-recipient traceability.
+- Missing outcomes appear in an overdue reconciliation queue.
+
+Automated verification:
+
+- `NBTS_REUSE_TEST_SCHEMA=1 php artisan test --compact tests/Feature/PhaseNineHospitalRequestTest.php tests/Feature/PhaseNineCompatibilityIssueTest.php tests/Feature/PhaseNineTransfusionTraceabilityTest.php`
+- Result in main: 6 tests passed with 32 assertions.
+- Phase 8+9 regression: `NBTS_REUSE_TEST_SCHEMA=1 php artisan test --compact tests/Feature/PhaseEightComponentLineageTest.php tests/Feature/PhaseEightComponentInventoryTest.php tests/Feature/PhaseEightColdChainLogisticsTest.php tests/Feature/PhaseNineHospitalRequestTest.php tests/Feature/PhaseNineCompatibilityIssueTest.php tests/Feature/PhaseNineTransfusionTraceabilityTest.php`
+- Result in main: 13 tests passed with 77 assertions.
+
+Evidence boundary:
+
+- This entry records verified backend construction scope only. It does not claim formal hospital clinical-owner approval, hospital blood-bank-owner approval, compatibility rule approval, transfusion policy approval, quality-owner approval, production release readiness, or production clinical authority.
+- Phase 9 browser/UI QA is not applicable to this backend-only construction increment because no Phase 9 Livewire/browser workspace routes were introduced.
+- Haemovigilance adverse-event investigation, recall, look-back, CAPA, SOP, competency, and audit workflows remain Phase 10.
+
+Next dependent task:
+
+- Record formal hospital clinical, blood-bank, compatibility, transfusion, and quality owner approvals before treating these workflows as production clinical policy.
+
 ## Achievement template
 
 Copy this section for future verified work.

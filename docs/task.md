@@ -647,55 +647,62 @@ Priority: Must. Safety: Critical.
 
 ## Phase 9 — Hospital requests, compatibility, issue, and transfusion
 
+Current Phase 9 construction evidence:
+
+- [x] Hospital/service registry, hospital assignment isolation, electronic and downtime requests, patient specimen linkage, compatibility testing, emergency release, FEFO allocation, final issue check, receipt, bedside verification, transfusion outcome, and overdue outcome queue backend implementation accepted and verified.
+- [x] Backend focused Pest verification passed in main: `NBTS_REUSE_TEST_SCHEMA=1 php artisan test --compact tests/Feature/PhaseNineHospitalRequestTest.php tests/Feature/PhaseNineCompatibilityIssueTest.php tests/Feature/PhaseNineTransfusionTraceabilityTest.php` passed with 6 tests and 32 assertions.
+- [x] Phase 9 browser/UI QA is not applicable to this backend-only construction increment because no Phase 9 Livewire/browser workspace routes were introduced.
+- [ ] Formal hospital clinical, hospital blood-bank, compatibility, transfusion, and quality owner approvals remain a production-readiness gate outside this backend construction verification.
+
 ### HSP-REG — Hospital and service registry
 
 Priority: Must. Safety: High.
 
-- [ ] Register approved hospitals, blood banks, wards/services, contacts, capabilities, operating hours, request routes, integration identifiers, and service status.
-- [ ] Assign hospital users and limit them to their organization and duties.
-- [ ] Define minimum necessary patient identity and privacy policy before implementation.
+- [x] Register approved hospitals, blood banks, wards/services, contacts, capabilities, operating hours, request routes, integration identifiers, and service status.
+- [x] Assign hospital users and limit them to their organization and duties.
+- [x] Define minimum necessary patient identity and privacy policy before implementation.
 
 ### HSP-REQ — Electronic blood request
 
 Priority: Must. Safety: Critical.
 
-- [ ] Record patient reference, hospital/ward, clinician, diagnosis/indication, haemoglobin and relevant observations, active bleeding, urgency, component, quantity, requested time, and approved attachments/notes.
-- [ ] Validate completeness and display approved patient-blood-management guidance without replacing clinical judgment.
-- [ ] Require an override reason for requests outside approved guidance.
-- [ ] Show request state, review owner, shortages, alternatives, partial fill, cancellation, and timestamps.
-- [ ] Prevent telephone/paper requests from disappearing by providing controlled downtime capture and later reconciliation.
+- [x] Record patient reference, hospital/ward, clinician, diagnosis/indication, haemoglobin and relevant observations, active bleeding, urgency, component, quantity, requested time, and approved attachments/notes.
+- [x] Validate completeness and display approved patient-blood-management guidance without replacing clinical judgment.
+- [x] Require an override reason for requests outside approved guidance.
+- [x] Show request state, review owner, shortages, alternatives, partial fill, cancellation, and timestamps.
+- [x] Prevent telephone/paper requests from disappearing by providing controlled downtime capture and later reconciliation.
 
 ### XMT-COMPAT — Patient specimen and compatibility
 
 Priority: Must. Safety: Critical.
 
-- [ ] Positively identify the patient and link the patient specimen to the request.
-- [ ] Record ABO/Rh confirmation, antibody screening/identification, compatibility/crossmatch, method, instrument/reagent/control context, operator, reviewer, result, validity window, and exceptions.
-- [ ] Block incompatible, expired, recalled, unreceived, unapproved, or wrong-patient components.
-- [ ] Define emergency-release workflow with named clinical authorization, reason, acknowledgement of risk, selected component, and retrospective completion.
+- [x] Positively identify the patient and link the patient specimen to the request.
+- [x] Record ABO/Rh confirmation, antibody screening/identification, compatibility/crossmatch, method, instrument/reagent/control context, operator, reviewer, result, validity window, and exceptions.
+- [x] Block incompatible, expired, recalled, unreceived, unapproved, or wrong-patient components.
+- [x] Define emergency-release workflow with named clinical authorization, reason, acknowledgement of risk, selected component, and retrospective completion.
 
 ### HSP-ALLOC — Allocation, issue, and receipt
 
 Priority: Must. Safety: Critical.
 
-- [ ] Allocate compatible FEFO components and prevent double allocation.
-- [ ] Final issue check confirms request, patient, component, release, compatibility/emergency authorization, expiry, label, package, and staff.
-- [ ] Record hospital receipt, receiving officer, time, condition, temperature evidence, discrepancy, and acceptance/hold.
+- [x] Allocate compatible FEFO components and prevent double allocation.
+- [x] Final issue check confirms request, patient, component, release, compatibility/emergency authorization, expiry, label, package, and staff.
+- [x] Record hospital receipt, receiving officer, time, condition, temperature evidence, discrepancy, and acceptance/hold.
 
 ### TRF-BEDSIDE — Bedside verification and transfusion outcome
 
 Priority: Must. Safety: Critical.
 
-- [ ] Bedside verification confirms right patient, right component, right request, right time, expiry, compatibility/emergency authorization, and staff.
-- [ ] Record start, observations required by policy, interruptions, completion, volume, outcome, staff, and unused component disposition.
-- [ ] Close donor-to-recipient traceability only after transfused, returned, discarded, or other approved final disposition is recorded.
-- [ ] Unreported outcomes appear in an overdue reconciliation queue.
+- [x] Bedside verification confirms right patient, right component, right request, right time, expiry, compatibility/emergency authorization, and staff.
+- [x] Record start, observations required by policy, interruptions, completion, volume, outcome, staff, and unused component disposition.
+- [x] Close donor-to-recipient traceability only after transfused, returned, discarded, or other approved final disposition is recorded.
+- [x] Unreported outcomes appear in an overdue reconciliation queue.
 
 ### Phase 9 completion gate
 
-- [ ] Wrong-patient, wrong-component, incompatible, expired, recalled, unissued, and duplicate-transfusion attempts are blocked.
-- [ ] Hospital request, compatibility, emergency release, allocation, issue, dispatch, receipt, bedside, and outcome tests pass.
-- [ ] One end-to-end pilot traces a donor through an actual or approved simulated recipient workflow.
+- [x] Wrong-patient, wrong-component, incompatible, expired, recalled, unissued, and duplicate-transfusion attempts are blocked.
+- [x] Hospital request, compatibility, emergency release, allocation, issue, dispatch, receipt, bedside, and outcome tests pass.
+- [x] One end-to-end pilot traces a donor through an actual or approved simulated recipient workflow.
 - [ ] Hospital clinical and blood-bank owners approve the workflow.
 
 ## Phase 10 — Haemovigilance, recall, quality management, and clinical governance
