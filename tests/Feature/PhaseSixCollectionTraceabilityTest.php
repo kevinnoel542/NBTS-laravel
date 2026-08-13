@@ -85,6 +85,7 @@ test('the complete bedside traceability chain produces quarantine only', functio
         app(CollectSpecimen::class)->handle($this->actor, $specimen, $specimen->specimen_identifier, 5);
         app(HandOffSpecimen::class)->handle($this->actor, $specimen, 'Laboratory specimen reception');
     }
+
     $episode = app(CompleteCollection::class)->handle($this->actor, $episode, new CompleteCollectionData(
         CollectionOutcome::Completed,
         BloodGroup::OPositive,

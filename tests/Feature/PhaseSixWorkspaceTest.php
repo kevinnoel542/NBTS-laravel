@@ -1,12 +1,18 @@
 <?php
 
+use App\CollectionEpisodeStatus;
 use App\Livewire\Operations\DonorJourney;
 use App\Models\BloodCenter;
 use App\Models\CenterStaff;
 use App\Models\CollectionContainer;
 use App\Models\CollectionEpisode;
 use App\Models\CollectionLabel;
+use App\Models\OrganizationUnit;
+use App\Models\Specimen;
+use App\Models\StaffAssignment;
 use App\Models\User;
+use App\RoleName;
+use App\SpecimenStatus;
 use Database\Seeders\RolePermissionSeeder;
 use Livewire\Livewire;
 
@@ -70,4 +76,32 @@ test('authorized staff can render a no-store code 128 label barcode', function (
         ->assertSee($label->label_identifier);
 
     expect($response->headers->get('cache-control'))->toContain('private', 'no-store', 'max-age=0');
+});
+
+test('the in progress worklist counts collected and handed off specimens', function () {
+    $organizationUnit = OrganizationUnit::factory()->create();
+    $this->center->forceFill(['organization_unit_id' => $organizationUnit->id])->save();
+    $assignment = StaffAssignment::factory()
+        ->for($this->actor)
+        ->for($organizationUnit)
+        ->forRole(RoleName::CenterManager)
+        ->create();
+    session(['operations.assignment' => $assignment->id]);
+
+    $episode = CollectionEpisode::factory()->create([
+        'blood_center_id' => $this->center,
+        'status' => CollectionEpisodeStatus::InProgress,
+    ]);
+    Specimen::factory()->create([
+        'collection_episode_id' => $episode,
+        'status' => SpecimenStatus::Collected,
+    ]);
+    Specimen::factory()->create([
+        'collection_episode_id' => $episode,
+        'status' => SpecimenStatus::HandedOff,
+    ]);
+
+    Livewire::test(DonorJourney::class, ['workspace' => 'donations'])
+        ->set('tab', 'in_progress')
+        ->assertSee('2/2 specimens');
 });
