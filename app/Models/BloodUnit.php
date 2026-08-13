@@ -112,6 +112,12 @@ class BloodUnit extends Model
         return $this->hasMany(InventoryAdjustment::class);
     }
 
+    /** @return HasMany<BloodComponent, $this> */
+    public function components(): HasMany
+    {
+        return $this->hasMany(BloodComponent::class);
+    }
+
     /** @return HasMany<ReleaseAuthorization, $this> */
     public function releaseAuthorizations(): HasMany
     {

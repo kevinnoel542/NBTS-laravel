@@ -1361,6 +1361,42 @@ Next dependent task:
 
 - Record formal production laboratory and quality owner approvals before treating these construction algorithms as production clinical policy.
 
+## 2026-08-13 — Phase 8 backend component, inventory, cold-chain, and logistics foundation
+
+Status: backend construction scope accepted and verified; formal production owner approvals remain pending
+
+Scope: Laravel backend component catalog, component lineage, component-level inventory, FEFO reservation, expiry, return/disposal, cold-chain telemetry/excursion hold, center transfer, and hospital dispatch proof; no new Phase 8 browser/UI routes were introduced
+
+Verified backend state:
+
+- CMP-MODEL stores component/product catalog records with codes, methods, additive solutions, volume, storage range, shelf life, quality criteria, and approval metadata.
+- Legacy `blood_units` compatibility records remain intact while `blood_components` provides controlled derived component lineage.
+- One donation can produce zero or more uniquely identified components with parent-child lineage.
+- Processing events record method/device, operator, timing, yields, modifications, QC samples, deviations, and final label verification.
+- Orphan and cross-donation component lineage is blocked.
+- INV-COMP tracks component type, ABO/Rh, attributes, release state, center, location/device, expiry, reservation, dispatch, receipt, return, disposal, recall, and investigation hold state.
+- FEFO reservation chooses the earliest compatible available component and stale reservations are released.
+- Component reconciliation compares authoritative component states against physical counts.
+- INV-EXP expires eligible components without deleting traceability, assesses returns before restocking, and records disposal reason/method/witness/approval/evidence.
+- CC-EQUIP records cold-chain devices and temperature readings, opens alarms/excursions, and automatically holds affected stock.
+- LOG-TRANSFER moves stock only through transfer state transitions with temperature evidence and acceptance/hold result.
+- LOG-DISPATCH packs only issued/authorized components and records proof-of-delivery reconciliation.
+
+Automated verification:
+
+- `NBTS_REUSE_TEST_SCHEMA=1 php artisan test --compact tests/Feature/PhaseEightComponentLineageTest.php tests/Feature/PhaseEightComponentInventoryTest.php tests/Feature/PhaseEightColdChainLogisticsTest.php`
+- Result in main: 7 tests passed with 45 assertions.
+
+Evidence boundary:
+
+- This entry records verified backend construction scope only. It does not claim formal production component-owner, inventory-owner, logistics-owner, cold-chain-owner, or quality-owner approval.
+- Phase 8 browser/UI QA is not applicable to this backend-only construction increment because no Phase 8 Livewire/browser workspace routes were introduced.
+- Hospital clinical compatibility and transfusion workflows remain Phase 9.
+
+Next dependent task:
+
+- Record formal production owner approvals before treating these component, inventory, cold-chain, and logistics workflows as production operational policy.
+
 ## Achievement template
 
 Copy this section for future verified work.

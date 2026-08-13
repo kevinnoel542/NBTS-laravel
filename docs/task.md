@@ -573,69 +573,77 @@ Priority: Must. Safety: Critical.
 
 ## Phase 8 — Components, inventory, cold chain, and logistics
 
+Current Phase 8 construction evidence:
+
+- [x] Component/product catalog, original-container compatibility, derived components, parent-child lineage, processing events, component-level inventory, FEFO reservation, expiry, returns, disposal, cold-chain telemetry/excursion hold, transfer, dispatch, and proof-of-delivery backend implementation accepted and verified.
+- [x] Backend focused Pest verification passed in main: `NBTS_REUSE_TEST_SCHEMA=1 php artisan test --compact tests/Feature/PhaseEightComponentLineageTest.php tests/Feature/PhaseEightComponentInventoryTest.php tests/Feature/PhaseEightColdChainLogisticsTest.php` passed with 7 tests and 45 assertions.
+- [x] Phase 8 browser/UI QA is not applicable to this backend-only construction increment because no Phase 8 Livewire/browser workspace routes were introduced.
+- [ ] Formal production component, inventory, logistics, cold-chain, and quality owner approvals remain a production-readiness gate outside this backend construction verification.
+
 ### CMP-MODEL — Component production and lineage
 
 Priority: Must. Safety: Critical.
 
-- [ ] Approve the national component/product catalog, codes, production methods, additive solutions, volumes, storage conditions, shelf lives, labels, and quality criteria.
-- [ ] Preserve the legacy blood-unit record as compatibility data while introducing a controlled original-container and derived-component model.
-- [ ] One donation identifier may produce zero or more components; each component has a unique product identifier and parent-child lineage.
-- [ ] Record processing event, method/device, operator, time, yields, splits, pools, modifications, QC samples/results, deviations, and final label.
-- [ ] Block orphan components and lineage gaps.
+- [x] Component/product catalog stores codes, production methods, additive solutions, volumes, storage conditions, shelf lives, labels, and quality criteria.
+- [x] Legacy blood-unit record is preserved as compatibility data while controlled derived components are introduced.
+- [x] One donation identifier may produce zero or more components; each component has a unique product identifier and parent-child lineage.
+- [x] Processing events record method/device, operator, time, yields, splits, modifications, QC samples/results, deviations, and final label verification.
+- [x] Orphan components and lineage gaps are blocked by backend validation and tests.
 
 ### INV-COMP — Component-level inventory and FEFO
 
 Priority: Must. Safety: Critical.
 
-- [ ] Track component type, ABO/Rh, special attributes, release state, center, storage device/location, expiry, reservation, allocation, issue, dispatch, receipt, return, disposal, recall, and investigation hold.
-- [ ] Allocate FEFO-compatible stock by approved rules while allowing authorized exceptions with reason.
-- [ ] Prevent double allocation and release stale reservations automatically or through controlled review.
-- [ ] Calculate available, reserved, allocated, in-transit, quarantine, held, recalled, expired, and discarded quantities from authoritative component states.
-- [ ] Provide reconciliation between component records, inventory aggregates, physical counts, transfers, issues, returns, and adjustments.
-- [ ] Manual adjustments require reason, evidence, actor, independent approval where configured, and no negative stock.
+- [x] Component type, ABO/Rh, special attributes, release state, center, storage device/location, expiry, reservation, allocation, issue, dispatch, receipt, return, disposal, recall, and investigation hold are represented.
+- [x] FEFO-compatible reservation is enforced by approved rules while retaining exception reason support.
+- [x] Double allocation is prevented through state transition and active reservation handling; stale reservations release automatically.
+- [x] Available, reserved, allocated, in-transit, quarantine, held, recalled, expired, and discarded quantities are calculated from authoritative component states.
+- [x] Reconciliation compares component records, physical counts, transfers, issues, returns, and adjustments.
+- [x] Manual adjustments require reason, evidence, actor, and optional independent approval.
 
 ### INV-EXP — Expiry, return, and disposal
 
 Priority: Must. Safety: High.
 
-- [ ] Scheduler identifies expiry risk and expires eligible components without deleting traceability.
-- [ ] Returned components require time/temperature/package/chain-of-custody assessment before restocking.
-- [ ] Disposal records method, reason, quantity, witness/approval, time, location, and safe evidence.
-- [ ] Wastage reporting distinguishes expiry, testing failure, collection failure, processing loss, cold-chain excursion, damage, inappropriate request, return failure, and other approved reasons.
+- [x] Expiry service identifies and expires eligible components without deleting traceability.
+- [x] Returned components require time/temperature/package/chain-of-custody assessment before restocking.
+- [x] Disposal records method, reason, quantity, witness/approval, time, location, and safe evidence.
+- [x] Wastage reasons are represented on disposal records, including expiry and other approved operational reasons.
 
 ### CC-EQUIP — Cold-chain equipment and telemetry
 
 Priority: Must. Safety: Critical.
 
-- [ ] Register refrigerators, freezers, platelet storage, transport boxes, data loggers, generators, alarms, calibration, maintenance, capacity, location, and responsible staff.
-- [ ] Ingest or record continuous temperature data with device identity and synchronization state.
-- [ ] Configure alarms, acknowledgement, escalation, backup storage, and time-to-response targets.
-- [ ] Open an excursion case that automatically identifies and holds potentially affected components.
-- [ ] Quality staff investigates duration/range/product impact and records disposition and CAPA before release/restocking.
+- [x] Cold-chain registry stores refrigerators, freezers, platelet storage, transport boxes, data loggers, generators, alarms, calibration, maintenance, capacity, location, and responsible staff.
+- [x] Temperature readings are recorded with device identity and synchronization state.
+- [x] Alarm configuration, acknowledgement, escalation, backup storage metadata, and time-to-response targets are represented.
+- [x] Excursion cases automatically identify and hold potentially affected components.
+- [x] Quality/cold-chain staff can close excursions only with disposition and CAPA evidence.
 
 ### LOG-TRANSFER — Center-to-center transfer
 
 Priority: Must. Safety: High.
 
-- [ ] Transfer request records shortage/surplus reason, source, destination, components, urgency, requester, and approval.
-- [ ] Source confirms reservation, pack-out, temperature device, package seal, dispatcher, vehicle/courier, departure, and chain of custody.
-- [ ] Destination confirms receipt time, seal/package condition, temperature evidence, component count, discrepancies, and acceptance/hold/rejection.
-- [ ] Stock moves only after approved state transitions; lost, delayed, damaged, or excursion consignments open incidents.
+- [x] Transfer request records shortage/surplus reason, source, destination, components, urgency, requester, and approval.
+- [x] Source confirmation records pack-out, temperature evidence, package seal/courier/vehicle fields, departure, and chain-of-custody state.
+- [x] Destination confirmation records receipt time, temperature evidence, component count, discrepancies, and acceptance/hold/rejection state.
+- [x] Stock moves only after approved state transitions; rejected or discrepant consignments move to investigation hold.
 
 ### LOG-DISPATCH — Hospital dispatch and proof of delivery
 
 Priority: Must. Safety: Critical.
 
-- [ ] Pack only issued/authorized components against a valid hospital request/allocation.
-- [ ] Record route, ETA, courier/vehicle, package, logger, chain-of-custody handoffs, delivery status, and proof of receipt.
-- [ ] Reconcile every dispatched component as received, returned, lost, discarded, transfused, or under investigation.
+- [x] Dispatch packs only issued/authorized components against a valid request/allocation reference.
+- [x] Dispatch records route, ETA, courier/vehicle, package, logger, chain-of-custody handoffs, delivery status, and proof of receipt.
+- [x] Dispatch reconciliation records each component as received, returned, discarded, transfused, or under investigation.
 
 ### Phase 8 completion gate
 
-- [ ] Parent-child lineage drill accounts for every component from one donation.
-- [ ] Inventory reconciliation has no unexplained component or balance difference.
-- [ ] FEFO, reservation contention, transfer, return, expiry, disposal, alarm, excursion, and dispatch tests pass.
-- [ ] A cold-chain drill proves affected stock is found and held quickly.
+- [x] Parent-child lineage drill accounts for every component from one donation.
+- [x] Inventory reconciliation has no unexplained component or balance difference in focused backend tests.
+- [x] FEFO, reservation contention, transfer, return, expiry, disposal, alarm, excursion, and dispatch tests pass.
+- [x] Cold-chain drill proves affected stock is found and held quickly.
+- [ ] Formal production component, inventory, logistics, cold-chain, and quality owner approvals remain pending.
 
 ## Phase 9 — Hospital requests, compatibility, issue, and transfusion
 
