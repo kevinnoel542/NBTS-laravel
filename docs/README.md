@@ -79,4 +79,4 @@ Laboratory, component, cold-chain, and hospital specifications follow after the 
 
 ## Security and privacy
 
-Do not place passwords, private keys, access tokens, Firebase service-account content, production personal data, patient identifiers, or unnecessary donor health data in controlled documentation.
+Do not place production passwords, private keys, access tokens, Firebase service-account content, production personal data, patient identifiers, or unnecessary donor health data in controlled documentation. The construction-only shared password for the five local compatibility accounts may be recorded only in `local-demo credentials.md`; it must never be reused outside local or test environments.

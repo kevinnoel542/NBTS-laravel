@@ -56,6 +56,7 @@ use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Validation\Rule;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Url;
@@ -203,6 +204,11 @@ final class DonorJourney extends Component
     public function mount(string $workspace, ActiveCenterContext $centerContext): void
     {
         abort_unless(in_array($workspace, ['donor-reception', 'eligibility', 'donations'], true), 404);
+        Gate::forUser($this->user())->authorize(match ($workspace) {
+            'donor-reception' => PermissionName::ViewDonors->value,
+            'eligibility' => PermissionName::CheckEligibility->value,
+            'donations' => PermissionName::ViewDonations->value,
+        });
         $this->workspace = $workspace;
         $this->center = $centerContext->initialSelection($this->user());
         $aliases = ['screening_queue' => 'queue', 'record' => 'queue'];

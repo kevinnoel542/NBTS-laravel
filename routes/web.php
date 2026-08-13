@@ -12,6 +12,7 @@ use App\Http\Controllers\Web\PublicPageController;
 use App\Livewire\Operations\DonorJourney;
 use App\Livewire\Operations\Overview;
 use App\Livewire\Operations\Workspace;
+use App\PermissionName;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', HomeController::class)->name('home');
@@ -65,14 +66,17 @@ Route::middleware(['auth', 'active', 'staff'])->group(function () {
 
     Route::livewire('operations/donor-reception', DonorJourney::class)
         ->defaults('workspace', 'donor-reception')
+        ->middleware('can:'.PermissionName::ViewDonors->value)
         ->name('operations.donor-reception');
 
     Route::livewire('operations/eligibility', DonorJourney::class)
         ->defaults('workspace', 'eligibility')
+        ->middleware('can:'.PermissionName::CheckEligibility->value)
         ->name('operations.eligibility');
 
     Route::livewire('operations/donations', DonorJourney::class)
         ->defaults('workspace', 'donations')
+        ->middleware('can:'.PermissionName::ViewDonations->value)
         ->name('operations.donations');
 
     Route::livewire('operations/{workspace}', Workspace::class)

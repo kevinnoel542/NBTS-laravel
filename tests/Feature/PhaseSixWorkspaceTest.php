@@ -131,6 +131,26 @@ test('donor accounts cannot access staff collection workspaces', function () {
         ->assertForbidden();
 });
 
+test('staff without phase six permissions cannot access routes or mount workspaces directly', function () {
+    $restrictedStaff = User::factory()->staff()->create();
+    $restrictedStaff->syncRoles([RoleName::IctSecurityOperator->value]);
+    $workspaces = [
+        'donor-reception' => 'operations.donor-reception',
+        'eligibility' => 'operations.eligibility',
+        'donations' => 'operations.donations',
+    ];
+
+    foreach ($workspaces as $workspace => $routeName) {
+        $this->actingAs($restrictedStaff)
+            ->get(route($routeName))
+            ->assertForbidden();
+
+        Livewire::actingAs($restrictedStaff)
+            ->test(DonorJourney::class, ['workspace' => $workspace])
+            ->assertStatus(403);
+    }
+});
+
 test('authorized staff can render a no-store code 128 label barcode', function () {
     $episode = CollectionEpisode::factory()->create(['blood_center_id' => $this->center]);
     $container = CollectionContainer::factory()->create(['collection_episode_id' => $episode]);
