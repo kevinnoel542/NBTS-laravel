@@ -1,6 +1,6 @@
 # NBTS API and Flutter contract
 
-Last verified: 2026-08-12
+Last verified: 2026-08-13
 
 ## Contract ownership
 

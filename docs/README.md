@@ -1,6 +1,6 @@
 # NBTS documentation control center
 
-Last updated: 2026-08-12
+Last updated: 2026-08-13
 
 Owner: Documentation owner
 
@@ -53,6 +53,8 @@ Documentation control is active. The following Phase 5 operating-model artifacts
 - `system-overview.md`
 - `center-operating-model.md`
 - `roles-and-permissions.md`
+
+The Phase 6 Laravel construction foundation for donor reception, eligibility, collection, quarantine-only traceability, and controlled offline reconciliation is implemented and verified. The visible browser record is available in the [Phase 6 donor journey QA report](evidence/phase-6-donor-journey-qa/report.md). Production clinical rules, the national identifier/barcode standard, and field-device controls retain the external approval boundaries recorded in `task.md`.
 
 The next safety/data artifacts remain:
 

@@ -1,6 +1,6 @@
 # NBTS modernization task plan
 
-Last updated: 2026-08-12
+Last updated: 2026-08-13
 
 ## Purpose
 
@@ -462,7 +462,7 @@ Priority: Must. Safety: Critical.
 
 - [!] ISBT 128 or the approved national equivalent, production label layouts, product codes, scanner/printer validation, and migration ADRs still require national approval.
 - [x] The construction identifier service reserves non-overlapping center/year ranges under database locks, adds a check character, accepts controlled offline ranges, and enforces unique collection identifiers.
-- [~] Donor → episode → original quarantined container → specimens → labels is implemented and tested. Test orders, components, storage, dispatch, hospital issue, and transfusion links are Phase 7–10 entities and must extend this identifier without replacing it.
+- [x] Donor → episode → original quarantined container → specimens → labels is implemented and tested. Test orders, components, storage, dispatch, hospital issue, and transfusion links are Phase 7–10 entities and must extend this identifier without replacing it.
 - [x] Code 128-B labels are generated, rendered no-store, printed and scan-applied at chair-side; collection cannot start until every current label is applied.
 - [x] Template/version, symbology, printer, print count, operator, time, replacement reason, voided label, and replacement provenance are retained.
 - [x] Mismatches, duplicate identifiers, unapplied labels, voided labels, and incomplete replacement chains block progress. Relabeling after collection starts is prohibited.
@@ -485,7 +485,8 @@ Priority: Must. Safety: Critical.
 Priority: Must where connectivity is unreliable. Safety: Critical.
 
 - [!] Operations, privacy, security, and clinical owners must approve the minimum field dataset, campaign/team assignment, device baseline, retention window, and loss/wipe procedure before production use.
-- [~] Laravel provides assigned devices, one-time credentials, encrypted received payloads, non-overlapping expiring identifier batches, idempotent receipts, status/conflict queues, rejection with retained evidence, immediate server revocation, and batch revocation. Protected on-device storage, barcode capture, and physical remote wipe belong to the separately owned field client and remain blocked until approved.
+- [x] Laravel provides assigned devices, one-time credentials, encrypted received payloads, non-overlapping expiring identifier batches, idempotent receipts, status/conflict queues, rejection with retained evidence, immediate server revocation, and batch revocation.
+- [!] Protected on-device storage, barcode capture, and physical remote wipe belong to the separately owned field client and remain blocked until the field dataset, device controls, and implementation are approved.
 - [x] Reconciliation reruns authoritative active-account, duplicate, identity, screening, deferral, interval, center, capacity, identifier, label, specimen, and outcome checks rather than trusting the offline decision.
 - [x] A synchronized collection can create only quarantined compatibility stock; it cannot set laboratory release or available inventory state.
 - [x] Numbered no-store downtime forms, identifier custody, received/conflict/reconciled/rejected states, retry, and auditable resolution are implemented.
@@ -495,7 +496,7 @@ Priority: Must where connectivity is unreliable. Safety: Critical.
 - [x] Automated traceability links donor → collection → quarantined container → every current bag/specimen label and blocks mismatches or incomplete replacement chains.
 - [x] Deferred, unresolved-duplicate, ineligible, inactive, foreign-center, expired-identity, or unconfirmed donors cannot be collected.
 - [x] Offline idempotency, duplicate identifiers, authoritative conflicts, retry/rejection, revocation, and evidence retention are tested without deleting the encrypted receipt.
-- [x] Phase 6 clinical-control, donor-care, authorization, locked identifier reservation, barcode, label, specimen, device, offline, audit, workspace, and quarantine tests pass; visible 1600×900 browser evidence is recorded in `docs/evidence/phase-6-donor-journey-qa/`.
+- [x] Phase 6 clinical-control, donor-care, authorization, locked identifier reservation, barcode, label, specimen, device, offline, audit, workspace, and quarantine tests pass; visible 1600×900 browser evidence is recorded in [`docs/evidence/phase-6-donor-journey-qa/report.md`](evidence/phase-6-donor-journey-qa/report.md).
 
 ## Phase 7 — Laboratory, quarantine, quality control, and release
 

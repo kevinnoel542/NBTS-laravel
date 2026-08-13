@@ -1,6 +1,6 @@
 # NBTS achievement log
 
-Last updated: 2026-08-11
+Last updated: 2026-08-13
 
 ## Evidence rule
 
@@ -1265,6 +1265,65 @@ Known limitations:
 Next dependent task:
 
 - Obtain and record the remaining operating/clinical approvals, then implement the next task-file phase without reopening this verified foundation except for regressions or approved refinements.
+
+## 2026-08-13 — Phase 6 donor reception, screening, collection, identification, and offline control
+
+Status: Laravel construction phase completed; external production acceptance inputs remain explicitly blocked
+
+Scope: Laravel backend, Livewire staff web, database, authorization, audit, operations evidence, and API guidance; no Flutter code change
+
+Delivered:
+
+- Added scoped donor reception with consent and communication preferences, normalized duplicate detection, authorized duplicate review/merge, immutable alias provenance, and expiring positive identity confirmation.
+- Added versioned eligibility protocols, rule/questionnaire snapshots, confidential self-exclusion, safe deferral handling, counselling, referral, re-entry evidence, controlled overrides, and generic private notifications that omit sensitive clinical detail.
+- Added transactionally locked center/year collection identifiers with check characters, Code 128-B labels, print/scan/apply/replacement provenance, original quarantine containers, required specimens, handoff evidence, and mismatch/relabel safety blocks.
+- Added collection preparation, start, completion, explicit failed/interrupted/volume outcomes, aftercare acknowledgement, donor-reaction treatment/referral/follow-up, and quarantine-only compatibility stock creation.
+- Added assigned and revocable offline devices, one-time credentials, non-overlapping expiring identifier batches, encrypted and idempotent receipts, authoritative reconciliation, retained conflict/rejection evidence, and numbered no-store downtime forms.
+- Added explicit Phase 6 permissions and policies without granting implicit clinical authority to the super-administrator role.
+- Built compact premium donor-reception, eligibility, collection, history, and offline workspaces with concise headings and summaries, filters, clear controls, configurable page size, pagination, content-sized dialogs, traceability progress, responsive layouts, dark/light themes, and the animated icon-only navigation rail.
+- Seeded the construction screening protocol, center identifier/capacity settings, one complete demo donor journey, and the five verified local compatibility accounts.
+- Updated the workflow, task, API/Flutter guidance, demo credentials, documentation entry point, and visible browser evidence without modifying the Flutter repository.
+
+Main implementation:
+
+- `app/Livewire/Operations/DonorJourney.php`
+- `resources/views/livewire/operations/donor-journey.blade.php`
+- `app/Actions/Collections/`, `app/Actions/Donors/`, `app/Actions/Eligibility/`, and `app/Actions/Offline/`
+- `app/Services/CollectionIdentifierService.php`, `app/Services/Code128Barcode.php`, and `app/Services/DonorDuplicateDetector.php`
+- Phase 6 Eloquent models, policies, factories, enums, configuration, seeders, and sixteen additive migrations dated `2026_08_12_111025` through `2026_08_12_111040`
+- `tests/Feature/PhaseSixDonorIdentityTest.php`, `PhaseSixScreeningTest.php`, `PhaseSixCollectionTraceabilityTest.php`, `PhaseSixOfflineReconciliationTest.php`, and `PhaseSixWorkspaceTest.php`
+
+Database/API impact:
+
+- Added duplicate-case, identity-check, protocol, identifier-sequence, collection, container, specimen, label, donor-reaction, offline-device, identifier-batch, and encrypted-submission records plus additive donor, eligibility, and center fields.
+- Successful collection and offline reconciliation stop at quarantine; neither path can release components or increase available inventory.
+- Added explicit staff web routes for `/operations/donor-reception`, `/operations/eligibility`, and `/operations/donations`, plus protected barcode and downtime-form routes.
+- Added no donor `/api/v1` route, changed no existing donor response field, and changed no Flutter file. `docs/api.md` records the future field-device contract and server-authority rules.
+
+Automated verification:
+
+- Phase 6 focused coverage contains 23 tests across identity, screening, collection traceability, offline reconciliation, and workspace behavior.
+- The latest traceability/workspace rerun passed 12 tests with 60 assertions, including the handed-off specimen-count regression.
+- `vendor/bin/pint --dirty --format agent`, `composer lint:check`, `composer types:check`, `php artisan view:cache`, `npm run build`, and `git diff --check` passed.
+
+Browser verification:
+
+- Headed Chromium remained visible in session `nbts-live` at 1600×900 using the center-manager account and Muhimbili scope.
+- Completed donor reception → eligibility → collection preparation → label issue/application → collection start → specimen collection/handoff → completion → quarantine history, then verified offline device/batch and no-store downtime-form controls.
+- Verified dark and light themes, 244-to-60-pixel animated navigation collapse, no horizontal overflow, and no current page or JavaScript errors.
+- Resolved all three findings: unsupported icons, oversized short-action panels, and handed-off specimens omitted from the progress total.
+- Thirteen screenshots and the complete results are recorded in [`docs/evidence/phase-6-donor-journey-qa/report.md`](evidence/phase-6-donor-journey-qa/report.md).
+
+Known limitations:
+
+- Production national-identifier integration requires an approved source, legal basis, access, matching, and retention policy.
+- The construction screening protocol cannot be promoted until clinical/NBTS owners approve the questionnaire, thresholds, decision/referral rules, and effective date.
+- ISBT 128 or the approved national equivalent, production label layouts, product codes, and scanner/printer validation require national approval.
+- Field-client protected storage, barcode capture, device/key baseline, retention, and loss/wipe behavior remain separately owned and externally blocked. Laravel's contract and controls are complete.
+
+Next dependent task:
+
+- Record the required clinical, identifier, privacy, security, and operations approvals. Start Phase 7 only after its safety/data documents and approval gates are accepted; do not reopen Phase 6 except for a verified regression or approved change.
 
 ## Achievement template
 
