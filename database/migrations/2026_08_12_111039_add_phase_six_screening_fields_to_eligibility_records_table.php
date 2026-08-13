@@ -39,11 +39,11 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('eligibility_records', function (Blueprint $table) {
-            $table->dropIndex('eligibility_center_status_screened_index');
             $table->dropForeign(['blood_center_id']);
             $table->dropForeign(['appointment_id']);
             $table->dropForeign(['identity_check_id']);
             $table->dropForeign(['screening_protocol_id']);
+            $table->dropIndex('eligibility_center_status_screened_index');
             $table->dropColumn([
                 'blood_center_id',
                 'appointment_id',
