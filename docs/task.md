@@ -711,48 +711,48 @@ Priority: Must. Safety: Critical.
 
 Priority: Must. Safety: High.
 
-- [ ] Record immediate and delayed donor reactions, severity, treatment, referral, outcome, follow-up, and implications for future eligibility.
-- [ ] Escalate serious events and link them to collection staff, center, equipment, supplies, and procedures without blaming individuals prematurely.
+- [x] Record immediate and delayed donor reactions, severity, treatment, referral, outcome, follow-up, and implications for future eligibility.
+- [x] Escalate serious events and link them to collection staff, center, equipment, supplies, and procedures without blaming individuals prematurely.
 
 ### HV-RECIP — Recipient adverse events
 
 Priority: Must. Safety: Critical.
 
-- [ ] Record suspected transfusion reactions, event type, symptoms, time, component, patient/request, staff, immediate action, samples/tests, investigation, classification, imputability, outcome, and reporting state.
-- [ ] Notify the responsible hospital, NBTS quality/haemovigilance, laboratory, and national authority according to severity.
+- [x] Record suspected transfusion reactions, event type, symptoms, time, component, patient/request, staff, immediate action, samples/tests, investigation, classification, imputability, outcome, and reporting state.
+- [x] Notify the responsible hospital, NBTS quality/haemovigilance, laboratory, and national authority according to severity.
 
 ### HV-RECALL — Recall and look-back
 
 Priority: Must. Safety: Critical.
 
-- [ ] Open recall/look-back from later donor information, reactive/changed test result, equipment/reagent concern, production deviation, labelling error, cold-chain incident, or other approved trigger.
-- [ ] Identify all donations, specimens, components, locations, transfers, hospitals, recipients, returns, discarded units, and unaccounted items in both directions.
-- [ ] Record actions, notification attempts, component recovery/disposition, patient follow-up, regulator communication, decision authority, deadlines, and closure approval.
-- [ ] Measure trace completion time and unresolved recipients/components.
+- [x] Open recall/look-back from later donor information, reactive/changed test result, equipment/reagent concern, production deviation, labelling error, cold-chain incident, or other approved trigger.
+- [x] Identify all donations, specimens, components, locations, transfers, hospitals, recipients, returns, discarded units, and unaccounted items in both directions.
+- [x] Record actions, notification attempts, component recovery/disposition, patient follow-up, regulator communication, decision authority, deadlines, and closure approval.
+- [x] Measure trace completion time and unresolved recipients/components.
 
 ### QMS-CAPA — Deviations, investigation, and CAPA
 
 Priority: Must. Safety: Critical.
 
-- [ ] Record deviation/nonconformity, containment, affected records, root-cause analysis, correction, corrective action, preventive action, owner, due date, effectiveness check, and closure.
-- [ ] Connect repeated deviations and audit findings to trend analysis.
-- [ ] Prevent closing critical CAPA without evidence and quality approval.
+- [x] Record deviation/nonconformity, containment, affected records, root-cause analysis, correction, corrective action, preventive action, owner, due date, effectiveness check, and closure.
+- [x] Connect repeated deviations and audit findings to trend analysis.
+- [x] Prevent closing critical CAPA without evidence and quality approval.
 
 ### QMS-SOP — SOPs, documents, EQA, audits, and competency
 
 Priority: Must. Safety: High.
 
-- [ ] Version and approve SOPs, forms, checklists, work instructions, labels, clinical rules, and training materials with effective/retired dates.
-- [ ] Link workflow actions to the active SOP/rule version.
-- [ ] Track staff training, task competency, reassessment, expiry, and retraining after critical change.
-- [ ] Track internal audits, EQA, findings, actions, and accreditation readiness.
-- [ ] Support active hospital transfusion committees with utilization, emergency release, reaction, wastage, and education review.
+- [x] Version and approve SOPs, forms, checklists, work instructions, labels, clinical rules, and training materials with effective/retired dates.
+- [x] Link workflow actions to the active SOP/rule version.
+- [x] Track staff training, task competency, reassessment, expiry, and retraining after critical change.
+- [x] Track internal audits, EQA, findings, actions, and accreditation readiness.
+- [x] Support active hospital transfusion committees with utilization, emergency release, reaction, wastage, and education review.
 
 ### Phase 10 completion gate
 
-- [ ] Adverse-event, recall, look-back, deviation, CAPA, SOP, competency, audit, and EQA tests pass.
-- [ ] A simulated recall locates every affected component and recipient or records an explicit unresolved exception.
-- [ ] Quality/haemovigilance owners approve investigation and closure authority.
+- [x] Adverse-event, recall, look-back, deviation, CAPA, SOP, competency, audit, and EQA tests pass.
+- [x] A simulated recall locates every affected component and recipient or records an explicit unresolved exception.
+- [~] Quality/haemovigilance closure authority is enforced in backend roles and tests; formal production owner approval remains pending.
 
 ## Phase 11 — Data governance, interoperability, security, resilience, and service management
 

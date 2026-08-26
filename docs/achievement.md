@@ -1436,6 +1436,42 @@ Next dependent task:
 
 - Record formal hospital clinical, blood-bank, compatibility, transfusion, and quality owner approvals before treating these workflows as production clinical policy.
 
+## 2026-08-26 — Phase 10 backend haemovigilance, recall, QMS, and clinical governance foundation
+
+Status: backend construction scope accepted and verified; formal quality/haemovigilance owner approval remains pending
+
+Scope: Laravel backend haemovigilance event records, recall/look-back trace records, quality deviations/CAPA, SOP document control, competency training, audit/EQA records, quality trend snapshot, and hospital transfusion committee review; no new Phase 10 browser/UI routes were introduced.
+
+Verified backend state:
+
+- HV-DONOR records donor reactions with severity, symptoms, treatment, referral, follow-up due date, future-eligibility implication context, center, collection episode, equipment, bag/supply context, escalation, and notification targets.
+- HV-RECIP records recipient transfusion reactions against hospital, request, component, transfusion record, immediate action, outcome, samples/tests/staff investigation context, classification, imputability, reporting state, escalation, and notification targets.
+- HV-RECALL opens controlled recall/look-back cases from approved triggers, holds affected components, traces backward to donation/unit and forward to component issue/hospital/recipient, records deadlines, decision authority, closure approval, and unresolved exceptions.
+- QMS-CAPA records deviations/nonconformities with affected records, owner, due date, RCA, corrective/preventive action, effectiveness check, closure evidence, and quality approval.
+- Critical CAPA closure is blocked until RCA, corrective action, preventive action, effectiveness check, and evidence are present.
+- QMS trend analysis identifies repeated deviation types, open critical deviations, overdue open deviations, and audit-linked deviation IDs.
+- QMS-SOP records effective SOP/document versions and links workflow codes to the active document version.
+- Competency records track staff training, verifier, evidence, reassessment, validity, and retraining state.
+- Audit and EQA records capture findings/results and nonconforming EQA outcomes.
+- Hospital transfusion committee review records utilization, emergency release, reaction, wastage, and education actions.
+
+Automated verification:
+
+- `NBTS_REUSE_TEST_SCHEMA=true DB_DATABASE=nbts_new_test php artisan test --compact tests/Feature/PhaseTenHaemovigilanceTest.php tests/Feature/PhaseTenRecallLookbackTest.php tests/Feature/PhaseTenQualityGovernanceTest.php`
+- Result in main: 8 tests passed with 69 assertions.
+- `vendor/bin/pint --dirty --format agent`
+- Result in main: passed.
+
+Evidence boundary:
+
+- This entry records verified backend construction scope only. It does not claim formal production quality-owner approval, haemovigilance-owner approval, regulator approval, production release readiness, or production clinical authority.
+- Phase 10 browser/UI QA is not applicable to this backend-only construction increment because no Phase 10 Livewire/browser workspace routes were introduced.
+- Notification targets are recorded as structured escalation metadata; external delivery channels remain part of later notification/integration work.
+
+Next dependent task:
+
+- Record formal production quality and haemovigilance owner approvals before treating investigation, recall closure, CAPA closure, and committee review workflows as production clinical governance policy.
+
 ## Achievement template
 
 Copy this section for future verified work.
