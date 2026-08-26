@@ -67,6 +67,11 @@ enum PermissionName: string
     case ManageQuality = 'quality.manage';
     case ManageHaemovigilance = 'haemovigilance.manage';
     case ManageRecalls = 'recalls.manage';
+    case ManageDataProtection = 'data_protection.manage';
+    case ManageIntegrations = 'integrations.manage';
+    case ManageSecurityOperations = 'security_operations.manage';
+    case ManageChangeControls = 'change_controls.manage';
+    case ManageIncidents = 'incidents.manage';
 
     /**
      * @return list<string>

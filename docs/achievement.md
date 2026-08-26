@@ -1472,6 +1472,38 @@ Next dependent task:
 
 - Record formal production quality and haemovigilance owner approvals before treating investigation, recall closure, CAPA closure, and committee review workflows as production clinical governance policy.
 
+## 2026-08-26 — Phase 11 backend data governance, interoperability, security, resilience, and change-control foundation
+
+Status: backend construction scope accepted and verified; formal external architecture and production owner approvals remain pending
+
+Scope: Laravel backend privacy inventory, privacy notice/version control, retention policy/deletion guard, protected export approval, integration endpoint/message gateway records, high-risk MFA enforcement service, access review conflict reporting, backup/restore evidence, incident/SLA records, and change-control approval rules; no Flutter code was changed.
+
+Verified backend state:
+
+- SEC-PRIV records processing inventory, controller/processor responsibilities, lawful basis, data minimization, vendor controls, DPIA evidence, breach response, rights handling, privacy notice versions, communication preferences, retention policy, deletion restriction, and encrypted protected-export manifest.
+- INT-STD records approved integration endpoint profiles and encrypted endpoint config, enforces idempotency and sequence checks, stores acknowledgements, and dead-letters failed/late messages instead of losing them silently.
+- SEC-ACCESS enforces MFA for high-risk roles and creates access review records with high-risk roles and separation-conflict evidence.
+- DR-BCP records encrypted/off-site backup evidence with size/checksum/verification and recovery exercises with recovery point/time, required identification/quarantine/release/traceability validation checks, exceptions, reopening approval, and CAPA reference.
+- OPS-SLA records severity, owner, impact, workaround, communication, escalation targets, acknowledgement, restoration/resolution state, and recurrence link.
+- GOV-CHANGE records clinical/safety, privacy/data, operational, and infrastructure changes with required approvals, regression evidence, migration/rollback plan, release notes, training impact, effective date, emergency flag, and retrospective review due date.
+
+Automated verification:
+
+- `NBTS_REUSE_TEST_SCHEMA=true DB_DATABASE=nbts_new_test php artisan test --compact tests/Feature/PhaseElevenGovernanceTest.php`
+- Result in main: 4 tests passed with 43 assertions.
+- `vendor/bin/pint --dirty --format agent`
+- Result in main: passed after import-order fix.
+
+Evidence boundary:
+
+- This entry records verified backend construction scope only. It does not claim Ministry interoperability approval, ISBT/national coding decision approval, production HMIS/LIS/DHIS2 connector readiness, infrastructure TLS/certificate/key-management deployment, physical network segmentation, formal clinical safety officer appointment, or production readiness approval.
+- Integration endpoint records avoid direct database access by contract, but real external connector implementation remains later integration work.
+- Phase 11 browser/UI QA is not applicable to this backend-only construction increment because no Phase 11 Livewire/browser workspace routes were introduced.
+
+Next dependent task:
+
+- Obtain formal DPO, ICT/security, quality, clinical, operations, Ministry/interoperability, and governance owner approvals before treating these controls as production readiness evidence.
+
 ## Achievement template
 
 Copy this section for future verified work.

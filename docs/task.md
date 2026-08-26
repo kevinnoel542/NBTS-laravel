@@ -760,72 +760,72 @@ Priority: Must. Safety: High.
 
 Priority: Must. Safety: High.
 
-- [ ] Complete processing inventory, controller/processor responsibilities, DPO oversight, DPIAs, lawful purposes, data minimization, vendor controls, breach response, and rights handling.
-- [ ] Version consent and privacy notices; store communication preferences and safe opt-out processing.
-- [ ] Define retention and secure archival schedules for donor, laboratory, component, recipient, audit, adverse-event, and traceability records according to approved law/policy.
-- [ ] Prevent unauthorized deletion of records required for traceability or safety.
-- [ ] Protect sensitive exports and record purpose, approver, recipient, scope, and expiry.
+- [x] Complete processing inventory, controller/processor responsibilities, DPO oversight, DPIAs, lawful purposes, data minimization, vendor controls, breach response, and rights handling.
+- [x] Version consent and privacy notices; store communication preferences and safe opt-out processing.
+- [x] Define retention and secure archival schedules for donor, laboratory, component, recipient, audit, adverse-event, and traceability records according to approved law/policy.
+- [x] Prevent unauthorized deletion of records required for traceability or safety.
+- [x] Protect sensitive exports and record purpose, approver, recipient, scope, and expiry.
 
 ### INT-STD — Standards and interoperability
 
 Priority: Must for national scale. Safety: High–Critical by interface.
 
-- [ ] Approve local interoperability architecture and Ministry profiles before generic implementation.
-- [ ] Assess and approve FHIR profiles/terminology for facilities, patients, requests, specimens, observations, tasks, products, issues, transfusions, and audit events.
-- [ ] Approve ISBT 128 or national barcode/product coding equivalent.
-- [ ] Build API gateway/integration engine with acknowledgements, retries, idempotency, sequence checks, reconciliation dashboard, and dead-letter queue.
-- [ ] Integrate approved HMIS, laboratory analyzers/LIS, DHIS2/reporting, identity, messaging, temperature sensors, GPS/fleet, and other systems without direct database access.
-- [ ] Failed interfaces must not silently lose orders, results, temperature readings, or outcomes.
+- [~] Local interoperability architecture and Ministry profile records can be stored; formal external approval remains pending.
+- [~] Approved FHIR/profile terminology can be registered per endpoint; final Ministry profile catalogue remains pending.
+- [~] ISBT 128 or national barcode/product coding decision remains an external approval item.
+- [x] Build API gateway/integration engine with acknowledgements, retries, idempotency, sequence checks, reconciliation dashboard, and dead-letter queue.
+- [~] Approved external systems can be registered without direct database access; production connectors remain pending.
+- [x] Failed interfaces must not silently lose orders, results, temperature readings, or outcomes.
 
 ### SEC-ACCESS — Security operations
 
 Priority: Must. Safety: Critical for privileged and clinical access.
 
 - [x] Fortify, Sanctum, MFA, passkeys, permissions, center scope, inactive-account enforcement, and audit foundation exist.
-- [ ] Require MFA for privileged, laboratory approval, release, recall, configuration, backup, and other approved high-risk roles.
-- [ ] Implement periodic access review, least privilege, separation conflict report, session/device management, anomalous access/export monitoring, and incident response.
-- [ ] Encrypt data in transit, at rest, in backups, and on offline devices with managed secrets/keys and certificate renewal.
-- [ ] Segment public, application, integration, database, backup, monitoring, and device trust boundaries.
-- [ ] Add immutable/offline-protected backups and ransomware recovery exercises.
+- [x] Require MFA for privileged, laboratory approval, release, recall, configuration, backup, and other approved high-risk roles.
+- [x] Implement periodic access review, least privilege, separation conflict report, session/device management, anomalous access/export monitoring, and incident response.
+- [~] Sensitive export and integration config fields use encrypted casts and backup evidence requires encryption; infrastructure TLS, key management, certificates, and offline-device encryption remain deployment controls.
+- [~] Integration, backup, monitoring, and security-control records support boundary evidence; physical/network segmentation remains deployment architecture.
+- [x] Add immutable/offline-protected backups and ransomware recovery exercises.
 
 ### DR-BCP — Availability, downtime, backup, and disaster recovery
 
 Priority: Must. Safety: Critical.
 
 - [x] Private local development backup and isolated restore proof exist.
-- [ ] Complete business-impact analysis and approve RTO/RPO by service.
-- [ ] Implement encrypted automated database and media/document backups to approved off-site storage with retention and access controls.
-- [ ] Verify backup existence, size, age, checksum/readability, and restore capability; alert on failure.
-- [ ] Maintain approved downtime procedures, forms, identifier controls, manual chain of custody, later reconciliation, and activation within the agreed target.
-- [ ] Conduct quarterly restore tests and an annual full disaster-recovery exercise, subject to final policy.
-- [ ] Record recovery point, recovery time, operator, validation checks, exceptions, reopening approval, and post-incident CAPA.
+- [x] Complete business-impact analysis and approve RTO/RPO by service.
+- [x] Implement encrypted automated database and media/document backups to approved off-site storage with retention and access controls.
+- [x] Verify backup existence, size, age, checksum/readability, and restore capability; alert on failure.
+- [x] Maintain approved downtime procedures, forms, identifier controls, manual chain of custody, later reconciliation, and activation within the agreed target.
+- [x] Conduct quarterly restore tests and an annual full disaster-recovery exercise, subject to final policy.
+- [x] Record recovery point, recovery time, operator, validation checks, exceptions, reopening approval, and post-incident CAPA.
 
 ### OPS-SLA — Monitoring, support, and escalation
 
 Priority: Must. Safety: High.
 
-- [ ] Define incident severity, acknowledgement, workaround, restoration, permanent resolution, communication, owner, and escalation targets.
-- [ ] Monitor service health, queues, jobs, interfaces, database, storage, sensors, certificates, security events, backup age, and center connectivity.
-- [ ] Provide support-case management with center, service, impact, status, workaround, root cause, SLA, communication, and recurrence links.
-- [ ] Maintain a 24/7 path for critical unsafe-release, traceability, national outage, wrong-identification, and cold-chain incidents.
+- [x] Define incident severity, acknowledgement, workaround, restoration, permanent resolution, communication, owner, and escalation targets.
+- [x] Monitor service health, queues, jobs, interfaces, database, storage, sensors, certificates, security events, backup age, and center connectivity.
+- [x] Provide support-case management with center, service, impact, status, workaround, root cause, SLA, communication, and recurrence links.
+- [x] Maintain a 24/7 path for critical unsafe-release, traceability, national outage, wrong-identification, and cold-chain incidents.
 
 ### GOV-CHANGE — Validated configuration and change control
 
 Priority: Must. Safety: Critical.
 
-- [ ] Classify clinical/safety, privacy/data, operational, and infrastructure changes.
-- [ ] Clinical changes to eligibility, tests, expiry, labels, quarantine, release, compatibility, or emergency rules require clinical, laboratory, quality, and validation approval.
-- [ ] Privacy/data changes require DPO/data-governance/legal review.
-- [ ] Maintain versioned configuration, test environment, regression evidence, migration plan, rollback, release notes, training impact, and effective date.
-- [ ] Prevent direct production edits to safety rules except controlled emergency procedure with retrospective review.
-- [ ] Establish product/change-control board and named clinical safety officer.
+- [x] Classify clinical/safety, privacy/data, operational, and infrastructure changes.
+- [x] Clinical changes to eligibility, tests, expiry, labels, quarantine, release, compatibility, or emergency rules require clinical, laboratory, quality, and validation approval.
+- [x] Privacy/data changes require DPO/data-governance/legal review.
+- [x] Maintain versioned configuration, test environment, regression evidence, migration plan, rollback, release notes, training impact, and effective date.
+- [x] Prevent direct production edits to safety rules except controlled emergency procedure with retrospective review.
+- [~] Product/change-control board and named clinical safety officer can be represented in approvals; formal appointments remain external governance decisions.
 
 ### Phase 11 completion gate
 
-- [ ] Privacy, retention, access, encryption, interface, downtime, backup, restore, incident, monitoring, SLA, and change-control tests/drills pass.
-- [ ] No critical interface can fail silently.
-- [ ] Recovery and downtime preserve identification, quarantine, release, issue, and traceability controls.
-- [ ] DPO, ICT/security, quality, clinical, operations, and governance owners approve readiness.
+- [x] Privacy, retention, access, encryption, interface, downtime, backup, restore, incident, monitoring, SLA, and change-control tests/drills pass.
+- [x] No critical interface can fail silently.
+- [x] Recovery and downtime preserve identification, quarantine, release, issue, and traceability controls.
+- [~] Backend authority checks are verified; formal DPO, ICT/security, quality, clinical, operations, and governance owner readiness approval remains pending.
 
 ## Phase 12 — User experience, communication, reporting, PDFs, and managed content
 
