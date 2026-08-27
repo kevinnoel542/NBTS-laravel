@@ -1,6 +1,6 @@
 # NBTS API and Flutter contract
 
-Last verified: 2026-08-13
+Last verified: 2026-08-27
 
 ## Contract ownership
 
@@ -10,7 +10,7 @@ Laravel owns the `/api/v1` contract. The canonical mobile client is the standalo
 /home/kevin/Desktop/MAIN /PROJECTS/NBTS/nbts-mobile
 ```
 
-`docs/workflow.md` defines the business workflow and compatibility fields. This file is the operator/developer endpoint index. Any API change must update the relevant Form Request, Resource, Pest contract test, Flutter repository/model test, this file, `docs/workflow.md`, `docs/task.md`, and verified evidence in `docs/achievement.md` in the same change.
+`docs/planning/workflow.md` defines the business workflow and compatibility fields. This file is the operator/developer endpoint index. Any API change must update the relevant Form Request, Resource, Pest contract test, Flutter repository/model test, this file, `docs/planning/workflow.md`, `docs/planning/task.md`, and verified evidence in `docs/evidence/achievement.md` in the same change.
 
 The Laravel repository is the source of truth for endpoint behavior. Flutter implementation is owned separately: the mobile developer should implement against this file and report any requested contract change back to Laravel instead of silently working around it in the client.
 
@@ -265,7 +265,7 @@ Register a device token with:
 
 ## Compatibility and versioning
 
-The exact v1 compatibility aliases required by the current Flutter models are listed in `docs/workflow.md`. They may be deprecated only through a coordinated, versioned migration with mobile parser tests. Fields must never disappear silently from v1.
+The exact v1 compatibility aliases required by the current Flutter models are listed in `docs/planning/workflow.md`. They may be deprecated only through a coordinated, versioned migration with mobile parser tests. Fields must never disappear silently from v1.
 
 Current intentional projections:
 
@@ -285,6 +285,86 @@ Current intentional projections:
 - Treat `action_url` and remote media URLs as untrusted input: allow only approved schemes/hosts and require user intent before opening an external destination.
 - Never cache donor-card QR payloads beyond `qr_expires_at`. Refresh the card when expired and never use the QR as a bearer credential.
 - Do not claim successful push delivery merely because FCM token registration succeeded; device receipt remains a separate acceptance test.
+
+## Current Flutter work package for the mobile developer
+
+This is the current handoff for the Flutter owner. It is client work only. Do not add staff, laboratory, release, hospital, transfusion, offline collection, barcode authority, or field-device authority in Flutter until Laravel exposes an approved versioned API for those workflows.
+
+### Build now
+
+| Area | Flutter requirement | Laravel contract |
+| --- | --- | --- |
+| Environment setup | Use configurable API origins for local, staging, and production; append `/api/v1`; never hard-code one developer machine URL. | All mobile API routes are under `/api/v1`. |
+| Locale | Add an app language selector for English/Kiswahili and send `X-Locale: en` or `X-Locale: sw` on every request. | Server translates messages/labels but stable codes remain unchanged. |
+| Auth | Implement donor password register/login, Firebase login, token persistence, logout, and expired-session handling. | `/auth/register`, `/auth/login`, `/auth/firebase`, `/auth/logout`, `/me`, `/user`. |
+| Profile | Implement profile view/edit, photo upload, preferred center, language, notification preferences, and leaderboard opt-in. | `/profile`, `/profile/photo`; `share_anonymized_data` is separate from channel consent. |
+| Public discovery | Implement centers, center detail, available slots, campaigns, articles, publications, and schedules with search/filter/pagination. | Public endpoints listed in this file; hidden/draft/inactive records return empty lists or 404. |
+| Appointments | Implement available-slot lookup before booking, appointment list/detail/upcoming, booking, rescheduling, cancellation, loading states, validation errors, and empty states. | `/blood-centers/{center}/available-slots`, `/appointments`, `/appointments/upcoming`, `/appointments/{appointment}`. |
+| Donor home | Build a compact dashboard showing donor card, eligibility summary, next eligible date, upcoming appointment, donation summary, loyalty, unread notifications, and nearby/featured campaigns. | `/donor-card`, `/eligibility`, `/appointments/upcoming`, `/donations/summary`, `/loyalty`, `/notifications/unread-count`, `/campaigns`. |
+| Donation history | Render completed donation history and summary only; do not show quarantine, lab, release, component, or internal staff status. | `/donations`, `/donations/summary`. |
+| Loyalty | Render points, tier, rank, badges, rewards, and privacy-safe leaderboard. | `/loyalty`, `/leaderboard`; only opted-in donors appear in public rankings. |
+| Notifications | Implement inbox, unread filter, type filter, mark one read, mark all read, delete, unread badge, and safe action link handling. | `/notifications`, `/notifications/unread-count`, read/delete mutation routes. |
+| Push | Register FCM token after login and token refresh; unregister token before logout; handle construction mode where push transport may be log-only. | `/notifications/register-token`, `/notifications/device-token`. |
+| Errors | Normalize 401/403/404/422/429 and field validation messages; include retry-after behavior for 429. | Laravel returns standard JSON validation and auth errors. |
+| Accessibility | Support readable type scaling, proper labels, visible focus/tap states, contrast, and screen-reader names on form fields/actions. | Client responsibility; keep server codes stable. |
+
+### Screens to implement
+
+1. Splash/session restore.
+2. Login.
+3. Register.
+4. Firebase/social sign-in entry.
+5. Forgot-session/expired-session state.
+6. Donor home/dashboard.
+7. Donor card with QR expiry refresh.
+8. Eligibility summary.
+9. Center directory.
+10. Center detail and available slots.
+11. Campaign directory/detail.
+12. Appointment list.
+13. Book appointment.
+14. Reschedule/cancel appointment.
+15. Donation history and summary.
+16. Loyalty and leaderboard.
+17. Notification inbox and detail/action.
+18. Profile view/edit.
+19. Profile photo update.
+20. Preferences: language, push/email/SMS, leaderboard opt-in.
+21. Public articles/publications/schedules.
+22. Offline/network error screen.
+
+### Do not build yet
+
+- Do not build a staff login or staff dashboard in Flutter against donor `/api/v1`.
+- Do not expose donor duplicate-review, screening answers, deferral reasons, identity checks, label history, specimens, offline receipts, quarantine records, laboratory results, component records, hospital requests, compatibility tests, issue, transfusion outcomes, recalls, or CAPA.
+- Do not decode the donor-card QR as permission. It is only an expiring locator for staff-side identity confirmation.
+- Do not create local appointment times. Always request slots and submit an exact returned `scheduled_at`.
+- Do not infer eligibility or collection permission from the mobile eligibility screen. Laravel staff workflow reruns all checks.
+- Do not treat FCM registration success as proof of push delivery.
+- Do not store bearer tokens, Firebase tokens, FCM tokens, QR payloads, passwords, donor medical notes, or crash logs in insecure storage.
+
+### Flutter evidence required from the mobile developer
+
+The handoff is not complete until the Flutter owner returns:
+
+```bash
+dart format --output=none --set-exit-if-changed .
+flutter analyze
+flutter test
+```
+
+Required manual/device evidence:
+
+- Android donor registration, login, logout, and session restore.
+- Firebase login on Android using project `nbts-d567e` and package `com.nbts.mobile`.
+- EN/SW locale switch verified against server responses.
+- Appointment booking, rescheduling, cancellation, and validation errors.
+- Donor card expiry refresh behavior.
+- Notification inbox read/delete/mark-all behavior.
+- FCM token registration, token refresh, unregister-on-logout, and one real-device push-delivery proof when `PUSH_TRANSPORT=fcm` is approved.
+- Offline/network failure handling and retry behavior for safe GET requests only.
+- Accessibility smoke check with large text and screen reader labels.
+- Screenshots or screen recordings for the donor home, center slots, appointment flow, donor card, notifications, profile/preferences, and error states.
 
 ## Phase 5 staff assignment API direction
 

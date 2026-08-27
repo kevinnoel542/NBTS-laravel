@@ -43,6 +43,30 @@ return [
             'title' => 'Uendeshaji wa damu',
             'description' => 'Fuatilia vipimo, mifuko, akiba, uhamisho, muda wa kuisha, na utupaji uliothibitishwa.',
         ],
+        'laboratory' => [
+            'title' => 'Maabara',
+            'description' => 'Fuatilia upokeaji wa sampuli, foleni ya vipimo, marudio, karantini, mapitio, na utayari wa kutolewa.',
+        ],
+        'components' => [
+            'title' => 'Vipengele vya damu',
+            'description' => 'Kagua uchakataji, ufuatiliaji wa asili, lebo, vipimo vya ubora, na makosa ya uzalishaji.',
+        ],
+        'inventory' => [
+            'title' => 'Akiba',
+            'description' => 'Dhibiti FEFO, hifadhi, maeneo ya kuhifadhi, uhamisho, muda wa kuisha, marejesho, na utupaji.',
+        ],
+        'logistics' => [
+            'title' => 'Usafirishaji',
+            'description' => 'Ratibu ufungaji, ulinzi wa mzigo, njia, ushahidi wa joto, usafirishaji, na mapokezi yenye kasoro.',
+        ],
+        'hospital' => [
+            'title' => 'Hospitali',
+            'description' => 'Fuatilia maombi, ulinganifu, ugawaji, utoaji wa dharura, mapokezi, matokeo ya kuongezewa damu, na marejesho.',
+        ],
+        'quality' => [
+            'title' => 'Ubora',
+            'description' => 'Simamia haemovigilance, matukio, recalls, ufuatiliaji, CAPA, SOP, umahiri, EQA, na ushahidi wa ukaguzi.',
+        ],
         'response' => [
             'title' => 'Mwitikio',
             'description' => 'Tatua upungufu wa damu, ratibu kampeni, na wasiliana na wachangiaji wanaostahiki.',
@@ -106,6 +130,14 @@ return [
         'settings' => 'Mipangilio',
         'audit' => 'Ukaguzi',
         'recovery' => 'Urejeshaji',
+        'requests' => 'Maombi',
+        'compatibility' => 'Ulinganifu',
+        'issue' => 'Utoaji',
+        'transfusion' => 'Kuongezewa damu',
+        'reactions' => 'Athari',
+        'recalls' => 'Recalls',
+        'capa' => 'CAPA',
+        'audits' => 'Ukaguzi',
     ],
     'context' => [
         'label' => 'Kituo kinachotumika',

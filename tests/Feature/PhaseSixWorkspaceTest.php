@@ -93,6 +93,8 @@ test('phase six presentation is translated through matching english and swahili 
         ->assertSee('Search current worklist')
         ->assertSee('Register donor safely');
 
+    $this->actor->forceFill(['locale' => 'sw'])->save();
+
     $this->withSession(['locale' => 'sw'])
         ->get(route('operations.workspace', ['workspace' => 'eligibility']))
         ->assertOk()

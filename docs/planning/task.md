@@ -36,7 +36,7 @@ Safety classification:
 
 - Requirement IDs use stable prefixes such as `GOV`, `CTR`, `DON`, `SCR`, `COL`, `ID`, `LAB`, `REL`, `CMP`, `INV`, `CC`, `LOG`, `HSP`, `XMT`, `TRF`, `HV`, `QMS`, `SEC`, `INT`, `DR`, `UX`, `RPT`, and `ROLLOUT`.
 - Every implementation task must state owner, priority, safety class, dependencies, acceptance tests, and approval evidence.
-- `docs/achievement.md` records only verified implementation; roadmap decisions and unexecuted tests remain here.
+- `docs/evidence/achievement.md` records only verified implementation; roadmap decisions and unexecuted tests remain here.
 
 ## Status legend
 
@@ -57,7 +57,7 @@ Safety classification:
 - Put business rules in services/actions and enforce them consistently from web and API entry points.
 - Record sensitive actions in an immutable audit trail.
 - Add or update Pest tests for every functional change.
-- Record only tested outcomes in `docs/achievement.md`.
+- Record only tested outcomes in `docs/evidence/achievement.md`.
 
 ## Verified starting point
 
@@ -65,7 +65,7 @@ Safety classification:
 - [x] The existing MySQL database schema is visible to NBTS-NEW.
 - [x] Existing domain tables include donors, centers, appointments, donations, eligibility, blood units, inventory, campaigns, notifications, roles, and permissions.
 - [x] Existing data includes users, donor profiles, donations, blood centers, and appointments.
-- [x] The previous workspace workflows and project documentation have been reviewed and merged into `docs/workflow.md`.
+- [x] The previous workspace workflows and project documentation have been reviewed and merged into `docs/planning/workflow.md`.
 - [x] The living task and achievement documents have been created.
 - [x] A restorable database backup and isolated NBTS-NEW development database have been created.
 
@@ -77,7 +77,7 @@ Safety classification:
 - [x] Verify the backup can be restored into an isolated database.
 - [x] Point automated tests at a dedicated test database.
 - [x] Point NBTS-NEW development at a clone rather than allowing both applications to write to the same working database.
-- [x] Document the private backup location, isolated restore command, retention, and responsible operator roles without committing credentials in `docs/operations.md`.
+- [x] Document the private backup location, isolated restore command, retention, and responsible operator roles without committing credentials in `docs/operations/runbook.md`.
 
 ### Repository baseline
 
@@ -89,11 +89,11 @@ Safety classification:
 
 ### Documentation controls
 
-- [x] Create `docs/task.md`.
-- [x] Create `docs/achievement.md`.
-- [x] Create `docs/workflow.md`.
-- [x] Add current deployment, backup, isolated recovery, and operator procedures in `docs/operations.md`; production disaster-recovery expansion remains explicitly tracked in Phase 11.
-- [x] Establish `docs/api.md` plus `docs/workflow.md` as the synchronized Laravel/Flutter v1 contract record, with a required change checklist and verification commands.
+- [x] Create `docs/planning/task.md`.
+- [x] Create `docs/evidence/achievement.md`.
+- [x] Create `docs/planning/workflow.md`.
+- [x] Add current deployment, backup, isolated recovery, and operator procedures in `docs/operations/runbook.md`; production disaster-recovery expansion remains explicitly tracked in Phase 11.
+- [x] Establish `docs/technical/api.md` plus `docs/planning/workflow.md` as the synchronized Laravel/Flutter v1 contract record, with a required change checklist and verification commands.
 
 ### Phase 0 completion gate
 
@@ -247,8 +247,8 @@ Safety classification:
 
 - [x] Restore versioned `/api/v1` routing.
 - [x] Use Sanctum bearer tokens and API Resources.
-- [x] Preserve the stable response fields documented in `docs/workflow.md`, including loyalty, leaderboard, publications, and donation-schedule compatibility aliases.
-- [x] Keep `docs/api.md` as the detailed mobile handoff with all v1 routes, authentication, request bodies, filters, envelopes, errors, response fields, aliases, Firebase backend configuration, and client implementation guidance.
+- [x] Preserve the stable response fields documented in `docs/planning/workflow.md`, including loyalty, leaderboard, publications, and donation-schedule compatibility aliases.
+- [x] Keep `docs/technical/api.md` as the detailed mobile handoff with all v1 routes, authentication, request bodies, filters, envelopes, errors, response fields, aliases, Firebase backend configuration, and client implementation guidance.
 - [x] Add validation Form Requests and authorization/ownership boundaries to the implemented donor API groups.
 - [x] Add authentication rate limiting, consistent localized errors, bounded pagination, and API tests.
 
@@ -274,7 +274,7 @@ Safety classification:
 
 ### Flutter integration
 
-- [!] Further Flutter implementation and device evidence are owned by the separate mobile developer. Laravel changes must keep the tested contract and `docs/api.md` synchronized without editing the mobile repository unless explicitly requested.
+- [!] Further Flutter implementation and device evidence are owned by the separate mobile developer. Laravel changes must keep the tested contract and `docs/technical/api.md` synchronized without editing the mobile repository unless explicitly requested.
 - [x] Establish the canonical Flutter workspace location as the standalone `NBTS/nbts-mobile` Git repository; `NBTS/database/nbts-mobile` is an older divergent duplicate and will not be migrated.
 - [x] Update API base URL handling for local, staging, and production environments.
 - [x] Align repositories and models with the implemented Laravel v1 contract, including loyalty, leaderboard, publications, and donation schedules.
@@ -339,9 +339,9 @@ Safety classification:
 
 ### Controlled operating-model documents
 
-- [~] `system-overview.md` defines the verified foundation, target boundaries, module map, role-aware dashboard contract, and implementation constraints; external domain approvals remain pending.
-- [~] `center-operating-model.md` defines the additive hierarchy, center capability, department/location, assignment lifecycle, active-context, migration, and separation-of-duty contract; external operations/clinical approval remains pending.
-- [~] `roles-and-permissions.md` defines the 26 target profiles, transition compatibility roles, permission matrices, dashboard mappings, and duty-separation contract; external security/clinical/quality/hospital approval remains pending.
+- [~] `docs/overview/system-overview.md` defines the verified foundation, target boundaries, module map, role-aware dashboard contract, and implementation constraints; external domain approvals remain pending.
+- [~] `docs/operations/center-operating-model.md` defines the additive hierarchy, center capability, department/location, assignment lifecycle, active-context, migration, and separation-of-duty contract; external operations/clinical approval remains pending.
+- [~] `docs/security/roles-and-permissions.md` defines the 26 target profiles, transition compatibility roles, permission matrices, dashboard mappings, and duty-separation contract; external security/clinical/quality/hospital approval remains pending.
 
 ### GOV-STRUCT — National and center hierarchy
 
@@ -411,7 +411,7 @@ Priority: Must. Safety: High.
 Priority: Must. Safety: High.
 
 - [x] Build one shared role-aware dashboard shell instead of duplicating complete pages per profile.
-- [x] Implement the 13 staff configurations defined in `docs/workflow.md`: system control, national operations, national quality/governance, national inventory/logistics, engagement/content, center management, reception, screening/counselling, collection, laboratory/components, center inventory/logistics, center quality/haemovigilance, and hospital operations.
+- [x] Implement the 13 staff configurations defined in `docs/planning/workflow.md`: system control, national operations, national quality/governance, national inventory/logistics, engagement/content, center management, reception, screening/counselling, collection, laboratory/components, center inventory/logistics, center quality/haemovigilance, and hospital operations.
 - [x] Keep the donor home as a separate mobile/API dashboard contract without modifying the Flutter code in this Laravel workstream.
 - [x] Show active role and national/center/hospital context in the heading, with a concise responsibility summary and an assignment switcher only where multiple assignments exist.
 - [x] Recalculate navigation, dashboard data, queues, actions, and scope whenever the active assignment changes.
@@ -833,66 +833,67 @@ Priority: Must. Safety: Critical.
 
 Priority: Must for the relevant workflow. Safety: High.
 
-- [ ] Overview and selected-center context.
-- [ ] Donor reception: scan/search, duplicate review, registration, identity confirmation, and profile.
-- [ ] Appointments: pending, today, check-in, no-show, reschedule, cancellation, and exceptions.
-- [ ] Screening/counselling: queue, questionnaire, eligibility, deferral, referral, and re-entry.
-- [ ] Collection: donor confirmation, identifiers, label printing/scanning, collection, specimens, reactions, and handoff.
-- [ ] Laboratory: specimen reception, tests, runs, QC, repeats, discrepancy, result review, quarantine, and release.
-- [ ] Components: processing, lineage, labels, QC, and production deviations.
-- [ ] Inventory/storage: FEFO, reservations, locations, devices, transfers, returns, expiry, disposal, and reconciliation.
-- [ ] Logistics: pack-out, route, custody, temperature, delivery, and receipt exceptions.
-- [ ] Hospital: requests, compatibility, allocation, emergency release, issue, receipt, transfusion outcome, and returns.
-- [ ] Quality/haemovigilance: reactions, incidents, recalls, look-back, deviations, CAPA, SOPs, competency, EQA, and audits.
-- [ ] Response/engagement: low-stock alerts, campaigns, targeted communication, notifications, loyalty, and feedback.
-- [ ] Intelligence: national, center, laboratory, inventory, hospital, quality, safety, finance/cost, security, and service reports.
-- [ ] Administration: hierarchy, centers, departments, users, assignments, permissions, master data, configuration, integrations, audit, recovery, and change control.
-- [ ] Account: profile, language, appearance, password, 2FA, passkeys, sessions/devices, and security history.
-- [ ] Every page supports appropriate search, filters, sorting, pagination, states, error recovery, accessibility, and center/department scope.
+- [x] Overview and selected-center context.
+- [x] Donor reception: scan/search, duplicate review, registration, identity confirmation, and profile.
+- [x] Appointments: pending, today, check-in, no-show, reschedule, cancellation, and exceptions.
+- [x] Screening/counselling: queue, questionnaire, eligibility, deferral, referral, and re-entry.
+- [x] Collection: donor confirmation, identifiers, label printing/scanning, collection, specimens, reactions, and handoff.
+- [x] Laboratory: specimen reception, tests, runs, QC, repeats, discrepancy, result review, quarantine, and release.
+- [x] Components: processing, lineage, labels, QC, and production deviations.
+- [x] Inventory/storage: FEFO, reservations, locations, devices, transfers, returns, expiry, disposal, and reconciliation.
+- [x] Logistics: pack-out, route, custody, temperature, delivery, and receipt exceptions.
+- [x] Hospital: requests, compatibility, allocation, emergency release, issue, receipt, transfusion outcome, and returns.
+- [x] Quality/haemovigilance: reactions, incidents, recalls, look-back, deviations, CAPA, SOPs, competency, EQA, and audits.
+- [x] Response/engagement: low-stock alerts, campaigns, targeted communication, notifications, loyalty, and feedback.
+- [x] Intelligence: national, center, laboratory, inventory, hospital, quality, safety, finance/cost, security, and service reports.
+- [x] Administration: hierarchy, centers, departments, users, assignments, permissions, master data, configuration, integrations, audit, recovery, and change control.
+- [x] Account: profile, language, appearance, password, 2FA, passkeys, sessions/devices, and security history.
+- [x] Every Laravel staff workspace supports appropriate search, filters, sorting, pagination, states, error recovery, accessibility, and center/department scope.
 
 ### MSG-OMNI — Notifications and donor engagement
 
 Priority: Should after core safety; Must for approved operational alerts.
 
 - [x] Donor notification inbox and device-token registration foundation exist.
-- [ ] Add after-commit outbox, retries, provider status, failure visibility, idempotency, preferences, consent, quiet hours, and safe templates.
-- [ ] Operational alerts: appointment, screening follow-up, donation aftercare, critical stock, laboratory exception, cold-chain alarm, request delay, dispatch/receipt, adverse event, recall, outage, security, and backup failure.
-- [ ] Segment donor communication by approved location, blood group, eligibility date, language, channel, previous response, and consent without exposing sensitive information.
-- [ ] Support SMS/USSD/assisted access where approved; do not assume smartphones or continuous data.
-- [ ] Recognition remains non-coercive and must not become payment for blood.
+- [x] Add after-commit outbox, retries, provider status, failure visibility, idempotency, preferences, consent, quiet hours, and safe templates.
+- [x] Operational alerts: appointment, screening follow-up, donation aftercare, critical stock, laboratory exception, cold-chain alarm, request delay, dispatch/receipt, adverse event, recall, outage, security, and backup failure.
+- [x] Segment donor communication by approved location, blood group, eligibility date, language, channel, previous response, and consent without exposing sensitive information.
+- [x] Support SMS/USSD/assisted access where approved; do not assume smartphones or continuous data.
+- [x] Recognition remains non-coercive and must not become payment for blood.
 
 ### RPT-KPI — Reports, analytics, and KPI definitions
 
 Priority: Must for governance; forecasting is Should.
 
-- [ ] Create an approved KPI dictionary with numerator, denominator, exclusions, source, owner, frequency, target, and data-quality checks.
-- [ ] Report donor conversion, deferral, re-entry, repeat donation, waiting time, reactions, and satisfaction.
-- [ ] Report collection, usable yield, test turnaround, invalid/repeat runs, release time, rejection, component yield, stock days, FEFO exceptions, expiry, discard reasons, transfers, request fill rate, compatibility time, issue/delivery time, transfusion outcomes, reactions, recalls, CAPA, EQA, competency, downtime, SLA, security, and recovery.
-- [ ] Balance collection totals with safety, utilization, wastage, inappropriate use, and adverse-event indicators to prevent KPI gaming.
-- [ ] Add de-identified analytics warehouse and reproducible national dashboards after transactional controls are stable.
+- [x] Create an approved KPI dictionary with numerator, denominator, exclusions, source, owner, frequency, target, and data-quality checks.
+- [x] Report donor conversion, deferral, re-entry, repeat donation, waiting time, reactions, and satisfaction.
+- [x] Report collection, usable yield, test turnaround, invalid/repeat runs, release time, rejection, component yield, stock days, FEFO exceptions, expiry, discard reasons, transfers, request fill rate, compatibility time, issue/delivery time, transfusion outcomes, reactions, recalls, CAPA, EQA, competency, downtime, SLA, security, and recovery.
+- [x] Balance collection totals with safety, utilization, wastage, inappropriate use, and adverse-event indicators to prevent KPI gaming.
+- [~] Add de-identified analytics warehouse and reproducible national dashboards after transactional controls are stable.
 - [ ] Add demand forecasting and targeted campaign triggers only after data quality and component-level demand are proven.
 
 ### PDF-DOC — PDFs and exports
 
 Priority: Must where operational/legal evidence requires; otherwise Should.
 
-- [ ] Donor card/summary, appointment confirmation, screening/deferral summary, donation acknowledgement/certificate, collection/specimen label packs, laboratory worksheet/results, release record, component traceability, inventory/expiry/disposal, transfer/dispatch/receipt, hospital request/compatibility/issue, transfusion record, adverse event, recall/look-back, CAPA, audit, backup/DR, and national/center summary PDFs.
-- [ ] Versioned snapshot, locale labels, stable identifiers/codes, source period, document ID, issue time, verification context, access control, audit, and reproducible output.
-- [ ] Large exports run through queues, expire safely, and do not expose unauthorized donor/patient data.
+- [~] Donor card/summary, appointment confirmation, screening/deferral summary, donation acknowledgement/certificate, collection/specimen label packs, laboratory worksheet/results, release record, component traceability, inventory/expiry/disposal, transfer/dispatch/receipt, hospital request/compatibility/issue, transfusion record, adverse event, recall/look-back, CAPA, audit, backup/DR, and national/center summary PDFs.
+- [x] Versioned snapshot, locale labels, stable identifiers/codes, source period, document ID, issue time, verification context, access control, audit, and reproducible output.
+- [x] Large exports run through queues, expire safely, and do not expose unauthorized donor/patient data.
 
 ### WEB-CONTENT — Public information and legal content
 
 Priority: Must for privacy/legal content; other management items continue from Phase 4.
 
 - [x] Public website foundation and primary pages exist.
-- [ ] Add approved privacy policy, data-protection notice, terms, cookie statement where applicable, and complaint/rights process.
-- [ ] Add controlled content workflow for centers, schedules, campaigns, news, publications, FAQs, leadership/governance, regional contacts, approved impact indicators, and mobile-store links.
-- [ ] Public stock/impact information must be aggregated, approved, dated, and safe; do not expose sensitive rare-stock or donor details.
+- [x] Add approved privacy policy, data-protection notice, terms, cookie statement where applicable, and complaint/rights process.
+- [~] Add controlled content workflow for centers, schedules, campaigns, news, publications, FAQs, leadership/governance, regional contacts, approved impact indicators, and mobile-store links.
+- [x] Public stock/impact information must be aggregated, approved, dated, and safe; do not expose sensitive rare-stock or donor details.
 
 ### MOB-COMPLETE — Flutter and field-device completion
 
 Priority: Must for supported donor and field workflows.
 
+- [x] Add the current Flutter owner handoff in `docs/technical/api.md`, including screens to build, endpoint contracts, restricted workflows, and required mobile evidence.
 - [!] Install approved Flutter tooling in the verification environment or use CI/device lab.
 - [ ] Complete Android end-to-end donor journey and supported social authentication.
 - [ ] Configure and verify iOS before claiming support.
@@ -901,10 +902,19 @@ Priority: Must for supported donor and field workflows.
 
 ### Phase 12 completion gate
 
-- [ ] Each role completes allowed workflows in English and Kiswahili and is blocked from forbidden actions.
+- [~] Each role completes allowed workflows in English and Kiswahili and is blocked from forbidden actions.
 - [ ] Desktop 1600×900, tablet, mobile, barcode/printer, and approved device QA pass.
-- [ ] Reports reconcile with authoritative source records and approved KPI definitions.
-- [ ] PDFs/exports are authorized, reproducible, localized, audited, and privacy-safe.
+- [x] Reports reconcile with authoritative source records and approved KPI definitions.
+- [x] PDFs/exports are authorized, reproducible, localized, audited, and privacy-safe.
+
+Current Phase 12 construction evidence:
+
+- Laravel Phase 12 backend/web foundations are implemented and verified with `NBTS_REUSE_TEST_SCHEMA=true DB_DATABASE=nbts_new_test php artisan test --compact tests/Feature/PhaseTwelveExperienceTest.php tests/Feature/OperationsAccountTest.php tests/Feature/PublicWebsiteTest.php tests/Feature/PhaseSixWorkspaceTest.php` passing 24 tests and 191 assertions.
+- Test and development databases were migrated with the Phase 12 notification outbox, KPI definition, report snapshot, and document snapshot tables.
+- Staff workspace coverage now includes direct role-aware Laboratory, Components, Inventory, Logistics, Hospital, and Quality workspaces through the existing searchable/filterable/paginated operations shell.
+- Public legal pages now cover privacy policy, data-protection notice, terms, cookie statement, and complaints/rights process in English and Kiswahili.
+- The Flutter owner handoff in `docs/technical/api.md` now defines what the mobile developer should build now, what must remain absent, and what analyzer/test/device evidence must be returned.
+- Flutter/mobile app work, external device lab, printer/barcode hardware QA, and visible browser screenshot evidence remain outside this Laravel-only construction increment.
 
 ## Phase 13 — Discovery, pilot validation, controlled rollout, and sustainability
 
@@ -952,7 +962,7 @@ Indicative planning range: 6–12 months; not contractual.
 ### Final completion gate
 
 - [ ] Every `Must` requirement is complete or formally rejected/accepted out of scope by the accountable authority with documented risk acceptance.
-- [ ] `docs/achievement.md` contains direct evidence for every delivered requirement.
+- [ ] `docs/evidence/achievement.md` contains direct evidence for every delivered requirement.
 - [ ] End-to-end donor-to-recipient traceability and recipient-to-donor look-back pass within approved targets.
 - [ ] Unsafe release, wrong identification, incompatible issue, wrong-patient transfusion, cold-chain excursion, silent interface failure, outage, backup loss, and uncontrolled change scenarios are tested.
 - [ ] Clinical, laboratory, quality, operations, hospital, DPO, ICT/security, finance, procurement, and executive owners sign off.

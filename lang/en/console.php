@@ -43,6 +43,30 @@ return [
             'title' => 'Blood operations',
             'description' => 'Track testing, units, inventory, transfers, expiry, and confirmed disposal.',
         ],
+        'laboratory' => [
+            'title' => 'Laboratory',
+            'description' => 'Monitor specimen reception, test queues, repeat work, quarantine, review, and release readiness.',
+        ],
+        'components' => [
+            'title' => 'Components',
+            'description' => 'Review component processing, lineage, labels, quality checks, and production exceptions.',
+        ],
+        'inventory' => [
+            'title' => 'Inventory',
+            'description' => 'Control FEFO stock, reservations, storage locations, transfers, expiry, returns, and disposal.',
+        ],
+        'logistics' => [
+            'title' => 'Logistics',
+            'description' => 'Coordinate pack-out, transfer custody, route status, temperature evidence, delivery, and receipt exceptions.',
+        ],
+        'hospital' => [
+            'title' => 'Hospital',
+            'description' => 'Track requests, compatibility, allocation, emergency issue, receipt, transfusion outcomes, and returns.',
+        ],
+        'quality' => [
+            'title' => 'Quality',
+            'description' => 'Manage haemovigilance, incidents, recalls, look-back, CAPA, SOP, competency, EQA, and audit evidence.',
+        ],
         'response' => [
             'title' => 'Response',
             'description' => 'Resolve low stock, coordinate campaigns, and communicate with eligible donors.',
@@ -106,6 +130,14 @@ return [
         'settings' => 'Settings',
         'audit' => 'Audit',
         'recovery' => 'Recovery',
+        'requests' => 'Requests',
+        'compatibility' => 'Compatibility',
+        'issue' => 'Issue',
+        'transfusion' => 'Transfusion',
+        'reactions' => 'Reactions',
+        'recalls' => 'Recalls',
+        'capa' => 'CAPA',
+        'audits' => 'Audits',
     ],
     'context' => [
         'label' => 'Active center',

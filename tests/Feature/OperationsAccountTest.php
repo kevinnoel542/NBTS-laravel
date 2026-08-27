@@ -96,5 +96,5 @@ test('the command center and page summaries render in Kiswahili', function () {
         ->get(route('operations.workspace', ['workspace' => 'donor-reception']))
         ->assertOk()
         ->assertSee('Kituo cha amri')
-        ->assertSee('Tafuta wachangiaji, soma kadi salama, sajili wanaowasili, na kagua wasifu wao.');
+        ->assertSee('Tafuta mchangiaji sahihi, tatua uwezekano wa rekodi rudufu, hifadhi ridhaa na uthibitishe utambulisho kabla ya kazi za kitabibu kuanza.');
 });

@@ -1,6 +1,6 @@
 # NBTS achievement log
 
-Last updated: 2026-08-13
+Last updated: 2026-08-27
 
 ## Evidence rule
 
@@ -17,6 +17,40 @@ Each entry must record:
 - Browser/device verification when the feature has a user interface.
 - Known limitations and the next dependent task.
 
+## 2026-08-27 — Flutter owner handoff clarified
+
+Status: completed
+
+Scope: mobile/API documentation.
+
+Requirement IDs: MOB-COMPLETE, API-CONTRACT, MSG-OMNI.
+
+Delivered:
+
+- Added the current Flutter work package to `docs/technical/api.md`.
+- Defined the mobile screens to build now: auth, donor home, donor card, eligibility, centers, slots, appointments, donations, loyalty, notifications, profile, preferences, public content, and error/offline states.
+- Defined the Laravel endpoint contracts the Flutter owner should use.
+- Defined restricted workflows that must not be built in Flutter yet, including staff dashboards, screening, collection authority, barcode/device authority, laboratory release, hospital, transfusion, recall, and CAPA.
+- Defined the required Flutter evidence: formatting, analyzer, tests, Android journey, Firebase login, EN/SW behavior, appointment flow, donor-card expiry refresh, notification behavior, FCM registration/unregistration, offline handling, accessibility, and screenshots/recordings.
+
+Database/API impact: none. This documents the existing Laravel `/api/v1` contract and current mobile implementation boundaries.
+
+Automated verification:
+
+- `git diff --check` must pass before handoff.
+
+Browser/device verification: not performed in this documentation-only update. The Flutter owner must provide device evidence.
+
+Known limitations:
+
+- This does not implement Flutter code.
+- iOS remains unsupported until the Flutter owner provides approved configuration and device evidence.
+- Real push delivery remains unproven while Laravel is in construction-safe push mode or without approved FCM device testing.
+
+Next dependent task:
+
+- The Flutter owner should implement against `docs/technical/api.md` and return analyzer/test/device evidence before the mobile Phase 12 gate is marked complete.
+
 ## 2026-08-03 — National blood-management roadmap expansion
 
 Status: completed
@@ -28,8 +62,8 @@ Requirement IDs: DOC-ROADMAP-001, GOV-STRUCT-001, SAFE-CHAIN-001.
 Delivered:
 
 - Reclassified the current verified system as a donor-engagement and foundational blood-operations platform rather than a complete national blood-management system.
-- Expanded `docs/task.md` into the implementation roadmap for national, center, laboratory, component, logistics, hospital, transfusion, haemovigilance, quality, security, resilience, and rollout work.
-- Expanded `docs/workflow.md` into the target operating model from donor recruitment through recipient outcome, recall, and look-back.
+- Expanded `docs/planning/task.md` into the implementation roadmap for national, center, laboratory, component, logistics, hospital, transfusion, haemovigilance, quality, security, resilience, and rollout work.
+- Expanded `docs/planning/workflow.md` into the target operating model from donor recruitment through recipient outcome, recall, and look-back.
 - Defined national, blood-center, department, hospital, quality, audit, and technical operating roles while preserving permissions and center assignments as the real authorization boundary.
 - Added explicit center hierarchy, candidate center types, departments, role assignments, data visibility, work queues, dashboards, approval levels, escalation paths, and separation-of-duties rules.
 - Added the missing safety-critical capabilities: unique donation identification, bag–sample–component barcode linkage, laboratory orders/results/QC, hard quarantine, authorized release, component parent-child lineage, component-level FEFO inventory, cold chain, hospital requests, compatibility, dispatch/receipt, bedside verification, transfusion outcomes, adverse-event investigation, recall, look-back, deviations, CAPA, SOPs, competency, EQA, downtime, disaster recovery, interoperability, and formal change control.
@@ -71,9 +105,9 @@ Scope: project planning and architecture documentation.
 
 Delivered:
 
-- Created the living implementation checklist in `docs/task.md`.
+- Created the living implementation checklist in `docs/planning/task.md`.
 - Created this evidence-based achievement log.
-- Created `docs/workflow.md` by reconciling the previous NBTS project overview, database model, public website pages, admin pages, mobile/backend synchronization checklist, system requirements, and main workflows with the Laravel 13/Fortify/Livewire direction.
+- Created `docs/planning/workflow.md` by reconciling the previous NBTS project overview, database model, public website pages, admin pages, mobile/backend synchronization checklist, system requirements, and main workflows with the Laravel 13/Fortify/Livewire direction.
 - Added explicit workstreams for bilingual accounts, audit trails, disaster recovery, PDF outputs, public content, mobile integration, and 1600×900 browser QA.
 
 Verified evidence:
@@ -831,8 +865,8 @@ Scope: repository automation, backup safety, operations documentation, and devel
 Delivered:
 
 - Replaced the baseline CI setup with a MySQL 8.4 service that matches PHPUnit's `nbts_new_test` contract, locked PHP/npm installation, a clean production frontend build, and the repository's Pint/Larastan/Pest gate.
-- Added `docs/operations.md` with explicit environment boundaries, operator/approver roles, private backup handling, retention, isolated restore commands, verification evidence, deployment steps, and rollback controls without credentials.
-- Added `docs/api.md` as the current `/api/v1` and canonical Flutter endpoint/compatibility index, including the documentation/test update rule for every future contract change.
+- Added `docs/operations/runbook.md` with explicit environment boundaries, operator/approver roles, private backup handling, retention, isolated restore commands, verification evidence, deployment steps, and rollback controls without credentials.
+- Added `docs/technical/api.md` as the current `/api/v1` and canonical Flutter endpoint/compatibility index, including the documentation/test update rule for every future contract change.
 - Moved the verified source archive from the stale package destination `storage/app/private/Laravel/` to the monitored `storage/app/private/NBTS/` destination after the application name correction and restricted it to mode `0600`.
 - Kept the agent-browser Chromium window visible at 1600×900 and verified reusable development access for the super-admin, center-manager, and center-staff web accounts plus the donor mobile API account.
 
@@ -958,7 +992,7 @@ Delivered:
 Main implementation:
 
 - `lang/sw.json`, `lang/sw/*.php`, and the matching English operational/system/PDF catalogs.
-- `config/content.php` and the managed-content contract in `docs/workflow.md`.
+- `config/content.php` and the managed-content contract in `docs/planning/workflow.md`.
 - `app/Http/Resources/Api/V1/*Resource.php` stable-code and localized-label contracts.
 - `app/Policies/*.php`, `app/Concerns/ThrottlesSensitiveActions.php`, and `app/Http/Middleware/ThrottleSensitiveAuthenticationActions.php`.
 
@@ -1145,7 +1179,7 @@ Delivered:
 
 - Completed the donor loyalty summary and privacy-safe anonymized leaderboard API with Sanctum abilities, donor ownership/privacy policy checks, validation, bounded pagination, stable aliases, and tests.
 - Added the optional FCM HTTP v1 push transport behind the existing notification delivery contract, including recipient-scoped invalid-token retirement, provider identifiers, retry-compatible failures, and fingerprint-only audit metadata.
-- Completed the Laravel-to-Flutter handoff in `docs/api.md` with all 40 v1 routes, request bodies, filters, response envelopes, errors, field/alias contracts, Firebase backend configuration, and implementation guidance.
+- Completed the Laravel-to-Flutter handoff in `docs/technical/api.md` with all 40 v1 routes, request bodies, filters, response envelopes, errors, field/alias contracts, Firebase backend configuration, and implementation guidance.
 - Added authoritative completed-donation `total_volume_ml` plus readable `share_anonymized_data` to every mobile user response, keeping failed donation attempts out of the volume total and making privacy-consent state round-trip correctly.
 - Confirmed Android package `com.nbts.mobile` belongs to Firebase project `nbts-d567e`; kept the backend service-account boundary outside Git.
 - Extended the canonical `NBTS/nbts-mobile` client with loyalty, leaderboard, publication, and donation-schedule models/repositories, service registration, localized dashboard discovery, and repository/model contract tests.
@@ -1155,7 +1189,7 @@ Main implementation:
 
 - `app/Http/Controllers/Api/V1/LoyaltyController.php`, `app/Http/Controllers/Api/V1/LeaderboardController.php`, and their requests/resources.
 - `app/Services/Notifications/FcmPushTransport.php`, `config/services.php`, and `app/Providers/AppServiceProvider.php`.
-- `app/Actions/Profile/PrepareMobileUserResource.php`, `app/Http/Resources/Api/V1/UserResource.php`, and `docs/api.md`.
+- `app/Actions/Profile/PrepareMobileUserResource.php`, `app/Http/Resources/Api/V1/UserResource.php`, and `docs/technical/api.md`.
 - Canonical mobile `lib/core/data/models`, `lib/core/data/repositories`, `lib/core/api/service_locator.dart`, and `lib/features/dashboard/screens/dashboard_screen.dart`.
 
 Database/API impact:
@@ -1219,7 +1253,7 @@ Scope: Laravel documentation, organization/assignment backend, authorization, se
 
 Delivered:
 
-- Created the controlled `system-overview.md`, `center-operating-model.md`, and `roles-and-permissions.md` documents, including the 26-profile matrix, 13-dashboard mapping, multi-assignment policy, active-context rules, and separation-of-duty boundaries.
+- Created the controlled `docs/overview/system-overview.md`, `docs/operations/center-operating-model.md`, and `docs/security/roles-and-permissions.md` documents, including the 26-profile matrix, 13-dashboard mapping, multi-assignment policy, active-context rules, and separation-of-duty boundaries.
 - Recorded product-owner implementation approval while keeping Ministry/NBTS operations, laboratory, quality, hospital, privacy, center-capability, competency, and later clinical authority decisions explicitly open.
 - Added organization units, departments, work locations, staff assignments, staff competencies, and blood-center organization links through additive migrations and typed Eloquent models.
 - Added transactional, auditable assignment creation and status changes with actor-scope validation, effective dates, duplicate protection, clinical self-assignment protection, and historical accountability.
@@ -1235,7 +1269,7 @@ Database/API impact:
 
 - Applied six additive Phase 5 migrations to the development database. The verified snapshot contains five organization units, thirty-eight departments, six staff assignments, and five compatibility demo accounts.
 - Kept deployed `center_staff` records and fallback behavior intact; no prior assignment or operational record was removed.
-- Added no donor API v1 route and changed no Flutter code. `docs/api.md` now records the future staff-context contract direction without claiming an endpoint exists.
+- Added no donor API v1 route and changed no Flutter code. `docs/technical/api.md` now records the future staff-context contract direction without claiming an endpoint exists.
 
 Automated verification:
 
@@ -1298,7 +1332,7 @@ Database/API impact:
 - Added duplicate-case, identity-check, protocol, identifier-sequence, collection, container, specimen, label, donor-reaction, offline-device, identifier-batch, and encrypted-submission records plus additive donor, eligibility, and center fields.
 - Successful collection and offline reconciliation stop at quarantine; neither path can release components or increase available inventory.
 - Added explicit staff web routes for `/operations/donor-reception`, `/operations/eligibility`, and `/operations/donations`, plus protected barcode and downtime-form routes.
-- Added no donor `/api/v1` route, changed no existing donor response field, and changed no Flutter file. `docs/api.md` records the future field-device contract and server-authority rules.
+- Added no donor `/api/v1` route, changed no existing donor response field, and changed no Flutter file. `docs/technical/api.md` records the future field-device contract and server-authority rules.
 
 Automated verification:
 
@@ -1503,6 +1537,75 @@ Evidence boundary:
 Next dependent task:
 
 - Obtain formal DPO, ICT/security, quality, clinical, operations, Ministry/interoperability, and governance owner approvals before treating these controls as production readiness evidence.
+
+## 2026-08-27 — Phase 12 Laravel staff UX, communication, reporting, document snapshot, and public legal-content foundation
+
+Status: Laravel/backend/web construction scope implemented and verified; Flutter/device-lab and visible browser/device QA remain pending
+
+Scope: Laravel staff operations shell, public legal pages, notification outbox controls, donor communication segmentation, KPI dictionary, report snapshots, PDF/export document snapshots, localization, routing, and focused automated verification; no Flutter code was changed.
+
+Delivered:
+
+- Added direct role-aware staff workspaces for Laboratory, Components, Inventory, Logistics, Hospital, and Quality inside the existing Operations shell so the Phase 7–10 records are reachable through a consistent premium table interface with search, filters, clear controls, sorting, pagination, visible-column controls, empty states, and scope-aware navigation.
+- Added hospital and quality record queries and row summaries for hospital requests, compatibility tests, issue/allocation controls, transfusion records, haemovigilance events, recalls, CAPA/deviations, and audits.
+- Added approved public legal pages for privacy policy, data-protection notice, terms of use, cookie statement, and complaints/rights handling, with English and Kiswahili translations and footer links.
+- Added Phase 12 notification outbox governance covering after-commit intent, idempotency, provider status fields, attempts/retries, failure visibility, preferences, consent, quiet hours, safe template summaries, operational alert categories, SMS/USSD/assisted channel support, and non-coercive recognition blocking.
+- Added donor communication segmentation by approved non-sensitive criteria: location, blood group, eligibility date, language, channel, previous response, and consent. Sensitive health/patient criteria are rejected.
+- Added KPI definition approval and report snapshot controls with numerator, denominator, exclusions, source models, owner, frequency, target, data-quality checks, anti-gaming controls, de-identification, national-dashboard readiness, and authoritative reconciliation.
+- Added privacy-safe document/export snapshots with locale labels, stable identifiers, source periods, document reference, issue time, verification context, access scope, authorization/audit flags, encrypted payloads, checksum, queue flag, queue name, and safe expiry.
+
+Main implementation:
+
+- `app/Livewire/Operations/Workspace.php`
+- `app/Services/PhaseTwelveExperienceService.php`
+- `app/Http/Controllers/Web/PublicPageController.php`
+- `config/operations.php`
+- `routes/web.php`
+- `resources/views/web/legal.blade.php`
+- `resources/views/layouts/public.blade.php`
+- `lang/en/console.php`
+- `lang/sw/console.php`
+- `lang/en/public.php`
+- `lang/sw/public.php`
+- `tests/Feature/PhaseTwelveExperienceTest.php`
+- `tests/Feature/OperationsAccountTest.php`
+- `tests/Feature/PhaseSixWorkspaceTest.php`
+
+Database/API impact:
+
+- Added Phase 12 data tables: `notification_outboxes`, `kpi_definitions`, `report_snapshots`, and `document_snapshots`.
+- Added public web routes: `/privacy`, `/data-protection`, `/terms`, `/cookies`, and `/complaints-rights`.
+- No mobile/Flutter source files were changed.
+
+Automated verification:
+
+- `DB_DATABASE=nbts_new_test php artisan migrate --no-interaction`
+- Result: Phase 12 migrations applied to the test database.
+- `DB_DATABASE=nbts_new_dev php artisan migrate --no-interaction`
+- Result: Phase 12 migrations applied to the development database.
+- `NBTS_REUSE_TEST_SCHEMA=true DB_DATABASE=nbts_new_test php artisan test --compact tests/Feature/PhaseTwelveExperienceTest.php`
+- Result: 4 tests passed with 64 assertions.
+- `NBTS_REUSE_TEST_SCHEMA=true DB_DATABASE=nbts_new_test php artisan test --compact tests/Feature/OperationsAccountTest.php tests/Feature/PublicWebsiteTest.php tests/Feature/PhaseSixWorkspaceTest.php`
+- Result: 20 tests passed with 127 assertions.
+- `NBTS_REUSE_TEST_SCHEMA=true DB_DATABASE=nbts_new_test php artisan test --compact tests/Feature/PhaseTwelveExperienceTest.php tests/Feature/OperationsAccountTest.php tests/Feature/PublicWebsiteTest.php tests/Feature/PhaseSixWorkspaceTest.php`
+- Result: 24 tests passed with 191 assertions.
+- `vendor/bin/pint --dirty --format agent`
+- Result: passed after formatting/import-order fixes.
+
+Browser/device verification:
+
+- Not completed in this increment. Visible 1600×900, tablet, mobile, barcode/printer, Flutter, push-device, and external device-lab evidence remain open in `docs/planning/task.md`.
+
+Known limitations:
+
+- Rendered PDF templates for every listed operational document remain partial; this increment implements reproducible, localized, authorized, encrypted document/export snapshot foundations.
+- Demand forecasting and campaign-trigger automation remain pending until data quality and component-level demand are proven.
+- Controlled public content workflow is partial for leadership/governance, regional contacts, and final mobile-store links.
+- Formal production owner approvals and real external provider integrations are not claimed.
+
+Next dependent task:
+
+- Run visible browser/device QA and complete the remaining Flutter/device/printer/barcode evidence gates before marking Phase 12 fully production-ready.
 
 ## Achievement template
 

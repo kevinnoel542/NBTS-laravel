@@ -27,12 +27,12 @@ Different files answer different questions. A file must not take over the respon
 
 | Question | Authoritative document |
 |---|---|
-| What is planned, pending, blocked, or completed? | `docs/task.md` |
-| How should the target system operate? | `docs/workflow.md` |
-| What has actually been implemented and verified? | `docs/achievement.md` |
-| What API contract is currently supported? | `docs/api.md` |
-| How is the system deployed, backed up, restored, and supported? | `docs/operations.md` |
-| Which documents exist, are missing, or require review? | `docs/documentation-register.md` |
+| What is planned, pending, blocked, or completed? | `docs/planning/task.md` |
+| How should the target system operate? | `docs/planning/workflow.md` |
+| What has actually been implemented and verified? | `docs/evidence/achievement.md` |
+| What API contract is currently supported? | `docs/technical/api.md` |
+| How is the system deployed, backed up, restored, and supported? | `docs/operations/runbook.md` |
+| Which documents exist, are missing, or require review? | `docs/governance/documentation-register.md` |
 | Which safety hazards and controls apply? | `docs/clinical-safety.md` and `docs/risk-register.md` |
 | Which data fields, identifiers, codes, and ownership rules apply? | `docs/data-dictionary.md` |
 | Why was an important design decision made? | `docs/adr/ADR-*.md` |
@@ -45,11 +45,11 @@ Documentation does not override implemented code, migrations, database constrain
 When documentation and implementation disagree:
 
 1. Do not silently edit one side to make them appear consistent.
-2. Record the conflict in `docs/task.md`.
+2. Record the conflict in `docs/planning/task.md`.
 3. Identify whether the implementation or document is wrong.
 4. Obtain the required technical, clinical, laboratory, quality, privacy, or operational approval.
 5. Correct the affected files and implementation together.
-6. Record the verified result in `docs/achievement.md`.
+6. Record the verified result in `docs/evidence/achievement.md`.
 
 ### 2.2 Clinical-policy boundary
 
@@ -116,7 +116,7 @@ A model, migration, screen, endpoint, copied legacy module, or isolated unit tes
 
 ### 3.2 Achievement rule
 
-`docs/achievement.md` is evidence-only.
+`docs/evidence/achievement.md` is evidence-only.
 
 Do not add:
 
@@ -210,7 +210,7 @@ Priority and difficulty are different. A difficult `Must–Critical` item must b
 
 ## 6. Required task fields
 
-Every major item in `docs/task.md` must include:
+Every major item in `docs/planning/task.md` must include:
 
 ```md
 ### REQUIREMENT-ID — Requirement title
@@ -245,7 +245,7 @@ A requirement must not move to `[x]` until its completion gate is satisfied.
 
 ## 7. Required achievement fields
 
-Every major entry in `docs/achievement.md` must include:
+Every major entry in `docs/evidence/achievement.md` must include:
 
 ```md
 ## YYYY-MM-DD — Milestone title
@@ -296,7 +296,7 @@ Use `Not applicable` only when it is genuinely not applicable. Do not omit a req
 
 ## 8. Workflow-document rules
 
-`docs/workflow.md` defines the target operating model.
+`docs/planning/workflow.md` defines the target operating model.
 
 Every workflow must show:
 
@@ -336,15 +336,15 @@ A feature change may require several documents to change together.
 
 | Change type | Documents that must be reviewed |
 |---|---|
-| New feature or workflow | `task.md`, `workflow.md`, relevant module document |
-| Completed implementation | `task.md`, `achievement.md` |
-| API request/response change | `api.md`, `workflow.md`, Flutter contract tests, `task.md`, `achievement.md` |
+| New feature or workflow | `docs/planning/task.md`, `docs/planning/workflow.md`, relevant module document |
+| Completed implementation | `docs/planning/task.md`, `docs/evidence/achievement.md` |
+| API request/response change | `docs/technical/api.md`, `docs/planning/workflow.md`, Flutter contract tests, `docs/planning/task.md`, `docs/evidence/achievement.md` |
 | Database/entity/status change | `data-dictionary.md`, `domain-model.md`, migrations, API docs, tests |
 | Clinical/laboratory rule change | `clinical-safety.md`, relevant workflow, `risk-register.md`, change-control record, tests |
-| Role or permission change | `roles-and-permissions.md`, workflow, authorization tests |
-| Center structure change | `center-operating-model.md`, roles, dashboards, reports |
-| Deployment or infrastructure change | `architecture.md`, `operations.md`, `disaster-recovery.md`, security review |
-| New external integration | `interoperability.md`, `api.md`, security/privacy, reconciliation and monitoring |
+| Role or permission change | `docs/security/roles-and-permissions.md`, workflow, authorization tests |
+| Center structure change | `docs/operations/center-operating-model.md`, roles, dashboards, reports |
+| Deployment or infrastructure change | `architecture.md`, `docs/operations/runbook.md`, `disaster-recovery.md`, security review |
+| New external integration | `interoperability.md`, `docs/technical/api.md`, security/privacy, reconciliation and monitoring |
 | Incident or failure | `incident-response.md`, risk register, CAPA, task/achievement where changes are implemented |
 | KPI or report change | `kpi-dictionary.md`, report requirements, source/reconciliation tests |
 | Major design decision | New or updated ADR |
@@ -353,7 +353,7 @@ A feature change may require several documents to change together.
 
 Before implementation:
 
-1. Create or update the requirement in `task.md`.
+1. Create or update the requirement in `docs/planning/task.md`.
 2. Update the target workflow.
 3. Update the risk/safety record.
 4. Update the data/API/architecture document if affected.
@@ -373,7 +373,7 @@ After implementation:
 2. Update API/data/operations documents.
 3. Complete browser/device or operational validation.
 4. Mark the task complete only after the gate passes.
-5. Add the evidence entry to `achievement.md`.
+5. Add the evidence entry to `docs/evidence/achievement.md`.
 
 ---
 
@@ -568,7 +568,7 @@ Before accepting a document:
 - [ ] No secret or personal data is present.
 - [ ] Links resolve.
 - [ ] Terms and codes match the data dictionary.
-- [ ] Completion claims match `achievement.md`.
+- [ ] Completion claims match `docs/evidence/achievement.md`.
 - [ ] Date and version are updated.
 - [ ] Superseded content is not presented as active.
 
@@ -579,7 +579,7 @@ Before accepting a document:
 1. Never mark a feature complete without direct evidence.
 2. Never treat copied legacy code as verified implementation.
 3. Never treat a draft clinical rule as approved policy.
-4. Never allow `task.md`, `workflow.md`, and `achievement.md` to contradict each other silently.
+4. Never allow `docs/planning/task.md`, `docs/planning/workflow.md`, and `docs/evidence/achievement.md` to contradict each other silently.
 5. Never remove an API field without coordinated versioning.
 6. Never hide a limitation to improve the appearance of progress.
 7. Never store secrets or real personal health data in documentation.

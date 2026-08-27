@@ -10,7 +10,7 @@ This document is the target operating model for NBTS-NEW. It merges the useful b
 
 This document defines the target operating model. It intentionally distinguishes:
 
-- **Verified current foundation:** donor accounts, reception/search and duplicate review, expiring identity confirmation, versioned construction screening, checked-in donor queues, locked construction collection identifiers, Code 128 label/scan controls, quarantined collection containers, specimens/handoffs, collection outcomes, donor reactions, encrypted offline receipts/reconciliation, public/mobile discovery, appointments, donor card, donation history, blood-group verification, auditable blood-unit/inventory transitions, center/assignment scoping, role-aware dashboards, notification delivery, public website, and stable API contracts recorded in `docs/achievement.md`.
+- **Verified current foundation:** donor accounts, reception/search and duplicate review, expiring identity confirmation, versioned construction screening, checked-in donor queues, locked construction collection identifiers, Code 128 label/scan controls, quarantined collection containers, specimens/handoffs, collection outcomes, donor reactions, encrypted offline receipts/reconciliation, public/mobile discovery, appointments, donor card, donation history, blood-group verification, auditable blood-unit/inventory transitions, center/assignment scoping, role-aware dashboards, notification delivery, public website, and stable API contracts recorded in `docs/evidence/achievement.md`.
 - **Target national extension:** externally approved production donor rules and identifier/barcode standards, laboratory/QC, hard release authority, component production and lineage, component-level inventory, cold chain, hospital requests, compatibility, issue/dispatch/receipt, bedside transfusion, recipient haemovigilance, recall/look-back, quality management, interoperability, production device controls, disaster recovery, and controlled rollout.
 
 Target sections are requirements, not claims of implementation. Clinical, laboratory, quality, hospital, data-protection, legal, Ministry, and operational rules remain subject to formal approval and versioning.
@@ -120,7 +120,7 @@ The five authenticated compatibility roles (`super_admin`, `nbts_admin`, `center
 - Technical administrators cannot grant themselves clinical release authority through infrastructure access, and super-administrator access does not imply clinical competency.
 - Deactivating an account or assignment removes current access without deleting historical responsibility, audit evidence, or records signed by that person.
 
-During construction, the minimum representative local demo set is five accounts: super administrator, NBTS administrator, center manager, center staff, and donor. These accounts validate the current compatibility boundary; specialized Phase 5 demo identities are added only when their scoped permissions and workflows are implemented. Credentials remain documented only in `docs/local-demo credentials.md` and must never be production credentials.
+During construction, the minimum representative local demo set is five accounts: super administrator, NBTS administrator, center manager, center staff, and donor. These accounts validate the current compatibility boundary; specialized Phase 5 demo identities are added only when their scoped permissions and workflows are implemented. Credentials remain documented only in `docs/security/local-demo-credentials.md` and must never be production credentials.
 
 ## Center hierarchy, types, departments, and assignments
 
@@ -172,7 +172,7 @@ The dashboard is one role-aware Laravel shell, not 26 duplicated pages. It uses 
 
 The additive organization, department, work-location, competency, and effective-dated staff-assignment foundation is implemented. All 26 target profiles and two compatibility-only role codes seed with explicit permissions; 25 staff profiles map to exactly 13 shared Laravel dashboard configurations, while donor access remains mobile/API-only. Active assignment changes are ownership checked and recalculate scope, permissions, navigation, real metrics, queues, and quick actions. The compatibility backfill is dry-run capable, non-destructive, and idempotent.
 
-The five local compatibility accounts are seeded and recorded in `local-demo credentials.md`. The complete Laravel baseline suite passed 213 tests with 2,473 assertions; after visible QA found the final national inventory aggregation defect, the affected dashboard file passed 6 tests with 51 assertions and PHPStan passed with zero errors. Headed 1600×900 browser QA covers all five account boundaries, assignment switching, collapsed navigation, dark/light presentation, overflow, and browser errors. Later clinical panels remain omitted or explicitly unavailable until the affected workflow and external authority are approved.
+The five local compatibility accounts are seeded and recorded in `docs/security/local-demo-credentials.md`. The complete Laravel baseline suite passed 213 tests with 2,473 assertions; after visible QA found the final national inventory aggregation defect, the affected dashboard file passed 6 tests with 51 assertions and PHPStan passed with zero errors. Headed 1600×900 browser QA covers all five account boundaries, assignment switching, collapsed navigation, dark/light presentation, overflow, and browser errors. Later clinical panels remain omitted or explicitly unavailable until the affected workflow and external authority are approved.
 
 ### Verified Phase 2 operational workspaces
 
@@ -186,7 +186,7 @@ Notification orchestration records one delivery plan per recipient and channel. 
 - `Eligibility & counselling` provides checked-in queues, versioned protocol/rule snapshots, confidential self-exclusion, controlled deferrals, private counselling/referral/re-entry evidence, and generic follow-up notifications that omit sensitive reasons.
 - `Collection control` provides ready queues, locked identifiers, Code 128 labels, print/scan/replacement controls, original quarantined containers, required specimens, handoff, outcomes, donor reactions, and private aftercare communication.
 - Offline collection provides assigned/revocable devices, expiring server-reserved identifiers, encrypted and idempotent receipts, authoritative reconciliation, conflict/rejection queues, and controlled downtime forms.
-- The active thresholds, identifier format, label layout, and offline dataset are construction controls only. Production activation remains blocked until the external approvals recorded in `docs/task.md` are complete.
+- The active thresholds, identifier format, label layout, and offline dataset are construction controls only. Production activation remains blocked until the external approvals recorded in `docs/planning/task.md` are complete.
 
 ## Language workflow
 
@@ -735,7 +735,7 @@ Compatibility fields currently required by Flutter include:
 
 The canonical Flutter repository is `NBTS/nbts-mobile`. Its API client sends bearer tokens and the current locale, unregisters the device token before logout, and includes models/repositories for loyalty, leaderboard, publications, and donation schedules. Dashboard discovery and recognition surfaces consume those repositories. Flutter 3.44/Dart 3.12 analysis and the 8-test API/model/repository plus welcome/registration suite pass in an isolated SDK container. Authentication-provider checks and Android device execution remain acceptance gates; iOS is unsupported until its bundle and Firebase configuration are approved.
 
-Further Flutter implementation and device acceptance belong to the separate mobile owner. Laravel changes must publish exact requests, responses, aliases, security boundaries, and verification commands in `docs/api.md`; requested mobile workarounds must be reviewed as versioned API-contract decisions rather than silently changing server behavior.
+Further Flutter implementation and device acceptance belong to the separate mobile owner. Laravel changes must publish exact requests, responses, aliases, security boundaries, and verification commands in `docs/technical/api.md`; requested mobile workarounds must be reviewed as versioned API-contract decisions rather than silently changing server behavior.
 
 Aliases can remain during transition but should be normalized in a future versioned API, never silently removed from v1.
 
@@ -817,4 +817,4 @@ These are planning ranges, not contractual estimates. Each stage exits on safety
 
 ## Completion evidence
 
-Implementation status is tracked in `docs/task.md`. Proven completed work is recorded in `docs/achievement.md`. A workflow is complete only when its domain tests, authorization tests, UI/API tests, operational evidence, and relevant browser/device checks pass.
+Implementation status is tracked in `docs/planning/task.md`. Proven completed work is recorded in `docs/evidence/achievement.md`. A workflow is complete only when its domain tests, authorization tests, UI/API tests, operational evidence, and relevant browser/device checks pass.

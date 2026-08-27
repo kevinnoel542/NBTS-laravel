@@ -264,7 +264,7 @@ Automated verification must prove:
 - Read-only roles see no mutation controls and direct action requests are denied.
 - Existing compatibility accounts and cloned-database records continue to work during migration.
 
-Browser verification must cover the five persistent local compatibility accounts and representative factory-backed target profiles. Any persistent local account created for manual QA must be added to `local-demo credentials.md`.
+Browser verification must cover the five persistent local compatibility accounts and representative factory-backed target profiles. Any persistent local account created for manual QA must be added to `docs/security/local-demo-credentials.md`.
 
 ## 16. Implemented Phase 5 evidence
 

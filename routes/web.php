@@ -25,6 +25,11 @@ Route::controller(PublicPageController::class)->group(function (): void {
     Route::get('eligibility', 'eligibility')->name('eligibility');
     Route::get('faq', 'faq')->name('faq');
     Route::get('services', 'services')->name('services');
+    Route::get('privacy', 'privacy')->name('privacy');
+    Route::get('data-protection', 'dataProtection')->name('data-protection');
+    Route::get('terms', 'terms')->name('terms');
+    Route::get('cookies', 'cookies')->name('cookies');
+    Route::get('complaints-rights', 'complaints')->name('complaints-rights');
 });
 
 Route::get('impact', ImpactController::class)->name('impact');

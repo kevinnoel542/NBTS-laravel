@@ -157,6 +157,11 @@
                 <a href="{{ route('faq') }}">{{ __('public.nav.faq') }}</a>
                 <a href="{{ route('contact') }}">{{ __('public.nav.contact') }}</a>
                 <a href="{{ route('impact') }}">{{ __('public.nav.impact') }}</a>
+                <a href="{{ route('privacy') }}">{{ __('public.nav.privacy') }}</a>
+                <a href="{{ route('data-protection') }}">{{ __('public.nav.data_protection') }}</a>
+                <a href="{{ route('terms') }}">{{ __('public.nav.terms') }}</a>
+                <a href="{{ route('cookies') }}">{{ __('public.nav.cookies') }}</a>
+                <a href="{{ route('complaints-rights') }}">{{ __('public.nav.complaints_rights') }}</a>
                 <a href="{{ auth()->check() ? route('dashboard') : route('login') }}">{{ __('public.nav.account') }}</a>
             </div>
         </div>

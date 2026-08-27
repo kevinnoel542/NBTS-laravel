@@ -140,4 +140,4 @@ Production environment values, queue/mail/SMS/Firebase credentials, off-site bac
 - Reopen writes only after counts, invariants, queue state, storage, authentication, and critical browser/API journeys pass.
 - Record incident timing, recovery point, operator/approver, checks, exceptions, and follow-up actions.
 
-The complete target disaster-recovery workflow and pending production controls are tracked in `docs/workflow.md` and Phase 6 of `docs/task.md`.
+The complete target disaster-recovery workflow and pending production controls are tracked in `docs/planning/workflow.md` and Phase 6 of `docs/planning/task.md`.

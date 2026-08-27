@@ -6,7 +6,7 @@ Owner: Product owner / Technical lead
 Status: Review  
 Approval: Product direction approved for implementation on 2026-08-12; clinical, laboratory, quality, hospital, privacy, Ministry, and operational approval remains required for the affected safety-critical rules.  
 Related requirements: `GOV-STRUCT`, `GOV-DEPT`, `GOV-ROLE`, `GOV-SOD`, `GOV-VIS`, `GOV-OVERVIEW`  
-Related ADRs: Required ADRs listed in `documentation-register.md` remain pending.  
+Related ADRs: Required ADRs listed in `docs/governance/documentation-register.md` remain pending.
 Related policies/SOPs: Approved NBTS and Ministry policies must be linked before production acceptance.
 
 ## 1. Purpose
@@ -46,7 +46,7 @@ The current Laravel implementation includes:
 - Public website pages and versioned `/api/v1` donor contracts.
 - A Livewire/Flux staff command center with a collapsible navigation rail, center context, compact metrics, priority queues, filters, configurable tables, pagination, and audited actions.
 
-Verified implementation evidence belongs in `achievement.md`. This overview does not replace that evidence.
+Verified implementation evidence belongs in `docs/evidence/achievement.md`. This overview does not replace that evidence.
 
 ## 4. Target national extension
 
@@ -63,7 +63,7 @@ The target service adds controlled foundations and workflows for:
 - Haemovigilance, adverse events, recall, look-back, investigation, deviation, root cause, and CAPA.
 - Quality management, document control, competency, interoperability, offline/downtime operation, disaster recovery, security, support, and controlled rollout.
 
-These target modules remain governed by `task.md`, `workflow.md`, the documentation register, required ADRs, and formal domain approvals.
+These target modules remain governed by `docs/planning/task.md`, `docs/planning/workflow.md`, the documentation register, required ADRs, and formal domain approvals.
 
 ## 5. Users and channels
 
@@ -91,7 +91,7 @@ Laravel owns staff authentication, authorization, operational transactions, audi
 
 ### 6.2 Donor API and Flutter application
 
-Laravel owns the mobile API contract and server-side authorization. Flutter owns donor presentation and device behavior. Laravel changes must keep `api.md` synchronized and must not require uncoordinated mobile repository changes.
+Laravel owns the mobile API contract and server-side authorization. Flutter owns donor presentation and device behavior. Laravel changes must keep `docs/technical/api.md` synchronized and must not require uncoordinated mobile repository changes.
 
 ### 6.3 Data store
 
@@ -122,7 +122,7 @@ Authorization follows these principles:
 - Assignment deactivation, expiry, organization suspension, or account deactivation removes current access immediately while retaining history.
 - Super-administrator access does not automatically grant clinical release or transfusion authority.
 
-Detailed rules are defined in `center-operating-model.md` and `roles-and-permissions.md`.
+Detailed rules are defined in `docs/operations/center-operating-model.md` and `docs/security/roles-and-permissions.md`.
 
 ## 8. Role-aware command center
 
@@ -148,7 +148,7 @@ Dashboard rules:
 - Expensive secondary regions may load independently; the primary actionable queue loads first.
 - English/Kiswahili, light/dark appearance, keyboard navigation, focus states, loading, empty, error, and reduced-motion behavior are consistent.
 
-The target configurations are documented in `workflow.md` and `roles-and-permissions.md`.
+The target configurations are documented in `docs/planning/workflow.md` and `docs/security/roles-and-permissions.md`.
 
 ## 9. Module map
 
@@ -225,7 +225,7 @@ Phase 5 succeeds when:
 - Five compatibility demo accounts are available locally with documented local-only credentials.
 - Focused and regression tests pass.
 - Visible 1600×900 browser QA passes without JavaScript errors, horizontal overflow, inaccessible controls, oversized empty cards, or unsupported claims.
-- `task.md`, `workflow.md`, the controlled module documents, and `achievement.md` are synchronized with verified reality.
+- `docs/planning/task.md`, `docs/planning/workflow.md`, the controlled module documents, and `docs/evidence/achievement.md` are synchronized with verified reality.
 
 ## 14. Approval and unresolved decisions
 

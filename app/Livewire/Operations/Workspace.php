@@ -25,6 +25,7 @@ use App\BloodGroup;
 use App\BloodUnitStatus;
 use App\CampaignStatus;
 use App\CampaignType;
+use App\CompatibilityTestStatus;
 use App\Data\AdjustInventoryData;
 use App\Data\RecordDonationData;
 use App\Data\RecordEligibilityScreeningData;
@@ -37,6 +38,9 @@ use App\DonationStatus;
 use App\DonationType;
 use App\EligibilityStatus;
 use App\Gender;
+use App\HaemovigilanceEventStatus;
+use App\HospitalAllocationStatus;
+use App\HospitalRequestStatus;
 use App\LowStockAlertStatus;
 use App\Models\Appointment;
 use App\Models\Article;
@@ -46,20 +50,32 @@ use App\Models\BloodCenter;
 use App\Models\BloodInventory;
 use App\Models\BloodUnit;
 use App\Models\Campaign;
+use App\Models\CompatibilityTest;
 use App\Models\Deferral;
 use App\Models\Donation;
 use App\Models\DonorProfile;
 use App\Models\EligibilityRecord;
+use App\Models\HaemovigilanceEvent;
+use App\Models\HospitalBloodRequest;
+use App\Models\HospitalComponentAllocation;
 use App\Models\Leaderboard;
 use App\Models\LowStockAlert;
 use App\Models\NotificationDelivery;
+use App\Models\QualityAudit;
+use App\Models\QualityDeviation;
+use App\Models\RecallCase;
 use App\Models\Reward;
+use App\Models\TransfusionRecord;
 use App\Models\User;
 use App\Models\UserNotification;
 use App\PermissionName;
+use App\QualityAuditStatus;
+use App\QualityDeviationStatus;
+use App\RecallCaseStatus;
 use App\RoleName;
 use App\Services\ActiveCenterContext;
 use App\Support\AuditLogger;
+use App\TransfusionRecordStatus;
 use BackedEnum;
 use Carbon\CarbonImmutable;
 use Illuminate\Auth\Access\AuthorizationException;
@@ -1367,6 +1383,24 @@ class Workspace extends Component
             'blood-operations' => $this->tab === 'inventory'
                 ? ['healthy', 'low', 'critical']
                 : array_column(BloodUnitStatus::cases(), 'value'),
+            'laboratory',
+            'components' => array_column(BloodUnitStatus::cases(), 'value'),
+            'inventory' => $this->tab === 'inventory'
+                ? ['healthy', 'low', 'critical']
+                : array_column(BloodUnitStatus::cases(), 'value'),
+            'logistics' => array_column(BloodUnitStatus::cases(), 'value'),
+            'hospital' => match ($this->tab) {
+                'compatibility' => array_column(CompatibilityTestStatus::cases(), 'value'),
+                'issue' => array_column(HospitalAllocationStatus::cases(), 'value'),
+                'transfusion' => array_column(TransfusionRecordStatus::cases(), 'value'),
+                default => array_column(HospitalRequestStatus::cases(), 'value'),
+            },
+            'quality' => match ($this->tab) {
+                'recalls' => array_column(RecallCaseStatus::cases(), 'value'),
+                'capa' => array_column(QualityDeviationStatus::cases(), 'value'),
+                'audits' => array_column(QualityAuditStatus::cases(), 'value'),
+                default => array_column(HaemovigilanceEventStatus::cases(), 'value'),
+            },
             'response' => match ($this->tab) {
                 'campaigns' => array_column(CampaignStatus::cases(), 'value'),
                 'donor_communication' => ['unread', 'read'],
@@ -1560,6 +1594,9 @@ class Workspace extends Component
             'eligibility' => $this->eligibilityQuery(),
             'donations' => $this->donationQuery(),
             'blood-operations' => $this->bloodOperationsQuery(),
+            'laboratory', 'components', 'inventory', 'logistics' => $this->bloodOperationsQuery(),
+            'hospital' => $this->hospitalQuery(),
+            'quality' => $this->qualityQuery(),
             'response' => $this->responseQuery(),
             'engagement' => $this->engagementQuery(),
             'content' => $this->contentQuery(),
@@ -1672,6 +1709,70 @@ class Workspace extends Component
         };
 
         return $this->searchRelation($query, ['unit_number', 'blood_group', 'current_location'], ['donor' => ['name'], 'bloodCenter' => ['name']]);
+    }
+
+    /** @return Builder<CompatibilityTest>|Builder<HospitalBloodRequest>|Builder<HospitalComponentAllocation>|Builder<TransfusionRecord> */
+    private function hospitalQuery(): Builder
+    {
+        if ($this->tab === 'compatibility') {
+            return $this->searchRelation(
+                CompatibilityTest::query()->with(['bloodRequest.hospital', 'component']),
+                ['method', 'instrument_identifier', 'reagent_lot', 'exception_reason', 'notes'],
+                ['bloodRequest' => ['request_reference', 'patient_reference_hash'], 'component' => ['product_identifier']],
+            );
+        }
+
+        if ($this->tab === 'issue') {
+            return $this->searchRelation(
+                HospitalComponentAllocation::query()->with(['bloodRequest.hospital', 'component']),
+                ['issue_reference', 'notes'],
+                ['bloodRequest' => ['request_reference', 'patient_reference_hash'], 'component' => ['product_identifier']],
+            );
+        }
+
+        if ($this->tab === 'transfusion') {
+            return $this->searchRelation(
+                TransfusionRecord::query()->with(['bloodRequest.hospital', 'component']),
+                ['outcome', 'unused_component_disposition', 'notes'],
+                ['bloodRequest' => ['request_reference', 'patient_reference_hash'], 'component' => ['product_identifier']],
+            );
+        }
+
+        return $this->searchRelation(
+            HospitalBloodRequest::query()->with(['hospital', 'service', 'productCatalog']),
+            ['request_reference', 'patient_reference_hash', 'indication', 'notes'],
+            ['hospital' => ['name'], 'service' => ['name'], 'productCatalog' => ['name']],
+        );
+    }
+
+    /** @return Builder<HaemovigilanceEvent>|Builder<QualityAudit>|Builder<QualityDeviation>|Builder<RecallCase> */
+    private function qualityQuery(): Builder
+    {
+        if ($this->tab === 'recalls') {
+            return $this->searchColumns(
+                RecallCase::query(),
+                ['case_reference', 'trigger_type', 'description', 'closure_summary'],
+            );
+        }
+
+        if ($this->tab === 'capa') {
+            return $this->searchColumns(
+                QualityDeviation::query(),
+                ['deviation_reference', 'type', 'title', 'description', 'root_cause', 'corrective_action', 'preventive_action'],
+            );
+        }
+
+        if ($this->tab === 'audits') {
+            return $this->searchColumns(
+                QualityAudit::query(),
+                ['audit_reference', 'audit_type'],
+            );
+        }
+
+        return $this->searchColumns(
+            HaemovigilanceEvent::query(),
+            ['event_reference', 'reaction_type', 'immediate_action', 'treatment', 'outcome'],
+        );
     }
 
     /** @return Builder<Campaign>|Builder<UserNotification>|Builder<LowStockAlert> */
@@ -1916,6 +2017,14 @@ class Workspace extends Component
             $model instanceof BloodUnit => 'collection_date',
             $model instanceof Campaign => 'start_date',
             $model instanceof AuditLog => 'occurred_at',
+            $model instanceof CompatibilityTest => 'performed_at',
+            $model instanceof HaemovigilanceEvent => 'occurred_at',
+            $model instanceof HospitalBloodRequest => 'submitted_at',
+            $model instanceof HospitalComponentAllocation => 'allocated_at',
+            $model instanceof QualityAudit => 'scheduled_on',
+            $model instanceof QualityDeviation => 'opened_at',
+            $model instanceof RecallCase => 'opened_at',
+            $model instanceof TransfusionRecord => 'started_at',
             default => $model->usesTimestamps() ? 'created_at' : $model->getKeyName(),
         };
     }
@@ -2049,6 +2158,79 @@ class Workspace extends Component
                 'secondary' => collect([$model->category, $model->author_name])->filter()->implode(' | '),
                 'status' => $model->status->value,
                 'timestamp' => $model->published_at?->toIso8601String() ?? $model->updated_at?->toIso8601String(),
+            ],
+            $model instanceof HospitalBloodRequest => [
+                'reference' => $model->request_reference,
+                'primary' => $model->hospital->name.' request',
+                'secondary' => collect([
+                    $model->requested_blood_group?->value,
+                    $model->productCatalog->name,
+                    $model->quantity_requested.' requested',
+                    $model->urgency->value,
+                ])->filter()->implode(' | '),
+                'status' => $model->status->value,
+                'timestamp' => $model->submitted_at?->toIso8601String(),
+            ],
+            $model instanceof CompatibilityTest => [
+                'reference' => 'XMT-'.str_pad((string) $model->id, 6, '0', STR_PAD_LEFT),
+                'primary' => $model->bloodRequest->request_reference.' compatibility',
+                'secondary' => collect([
+                    $model->component?->product_identifier,
+                    $model->compatibility_result->value,
+                    $model->valid_until?->format('d M Y, H:i'),
+                ])->filter()->implode(' | '),
+                'status' => $model->status->value,
+                'timestamp' => $model->performed_at?->toIso8601String(),
+            ],
+            $model instanceof HospitalComponentAllocation => [
+                'reference' => $model->issue_reference ?? 'ISS-'.str_pad((string) $model->id, 6, '0', STR_PAD_LEFT),
+                'primary' => $model->bloodRequest->request_reference.' issue control',
+                'secondary' => collect([
+                    $model->component?->product_identifier,
+                    $model->expires_at?->format('d M Y, H:i'),
+                    $model->issued_at === null ? 'not issued' : 'issued',
+                ])->filter()->implode(' | '),
+                'status' => $model->status->value,
+                'timestamp' => $model->allocated_at?->toIso8601String(),
+            ],
+            $model instanceof TransfusionRecord => [
+                'reference' => 'TRF-'.str_pad((string) $model->id, 6, '0', STR_PAD_LEFT),
+                'primary' => $model->bloodRequest->request_reference.' transfusion',
+                'secondary' => collect([
+                    $model->component?->product_identifier,
+                    $model->volume_ml ? $model->volume_ml.' ml' : null,
+                    $model->outcome,
+                ])->filter()->implode(' | '),
+                'status' => $model->status->value,
+                'timestamp' => $model->started_at?->toIso8601String() ?? $model->verified_at?->toIso8601String(),
+            ],
+            $model instanceof HaemovigilanceEvent => [
+                'reference' => $model->event_reference,
+                'primary' => Str::headline($model->event_type->value).' event',
+                'secondary' => collect([$model->severity->value, $model->reaction_type, $model->classification])->filter()->implode(' | '),
+                'status' => $model->status->value,
+                'timestamp' => $model->occurred_at?->toIso8601String(),
+            ],
+            $model instanceof RecallCase => [
+                'reference' => $model->case_reference,
+                'primary' => Str::headline($model->trigger_type).' recall',
+                'secondary' => collect([$model->severity->value, $model->description])->filter()->implode(' | '),
+                'status' => $model->status->value,
+                'timestamp' => $model->opened_at?->toIso8601String(),
+            ],
+            $model instanceof QualityDeviation => [
+                'reference' => $model->deviation_reference,
+                'primary' => $model->title,
+                'secondary' => collect([$model->type, $model->severity->value, $model->due_at?->format('d M Y')])->filter()->implode(' | '),
+                'status' => $model->status->value,
+                'timestamp' => $model->opened_at?->toIso8601String(),
+            ],
+            $model instanceof QualityAudit => [
+                'reference' => $model->audit_reference,
+                'primary' => Str::headline($model->audit_type).' audit',
+                'secondary' => collect([$model->scheduled_on?->format('d M Y'), $model->accreditation_readiness])->filter()->implode(' | '),
+                'status' => $model->status->value,
+                'timestamp' => $model->scheduled_on?->toDateString(),
             ],
             $model instanceof BloodCenter => [
                 'reference' => 'CTR-'.str_pad((string) $model->id, 4, '0', STR_PAD_LEFT),
