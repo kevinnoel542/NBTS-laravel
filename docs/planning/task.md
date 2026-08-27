@@ -924,6 +924,8 @@ Priority: Must before safety-critical schema build.
 
 Indicative planning range: 6–10 weeks; not contractual.
 
+- [x] Implement Laravel rollout-readiness controls for site assessment capture, workflow-map completeness, inventory snapshot completeness, KPI baselines, risk/data/master-data inputs, pilot scope, backlog, legal/policy inputs, and approval status.
+- [x] Implement the Phase 13 policy-decision register for center taxonomy, identifier/label standard, component catalog, test algorithms, shelf lives, release authority, compatibility/emergency rules, patient data, retention, offline mode, RTO/RPO, integrations, and service levels.
 - [ ] Map actual collection, laboratory, component, storage, logistics, hospital, transfusion, adverse-event, recall, downtime, and governance workflows at representative sites.
 - [ ] Inventory current centers, staff, volumes, identifiers, forms, SOPs, analyzers, reagents, equipment, storage, sensors, routes, hospitals, connectivity, power, integrations, laws, contracts, and budgets.
 - [ ] Establish baseline KPIs, risk register, data dictionary, master-data ownership, safety case, approved target process, pilot scope, and prioritized backlog.
@@ -935,6 +937,7 @@ Priority: Must.
 
 Indicative planning range: 4–6 months after approved discovery; not contractual.
 
+- [x] Implement Laravel pilot-readiness review gates for complete donor-to-recipient chain coverage, migration evidence, training/competency evidence, SOP/hardware/test-environment prerequisites, downtime/restore evidence, traceability/recall simulation, critical-defect blocking, and clinical/quality/operations signoff tracking.
 - [ ] Pilot the complete chain at a controlled set of sites: donor → screening → collection/identifier → specimens → laboratory/QC → quarantine/release → components → inventory → one hospital request/compatibility/issue → dispatch/receipt → transfusion outcome.
 - [ ] Complete data migration/reconciliation, training, competency, SOP deployment, hardware, labels/barcodes, test environment, validation, downtime drill, restore test, support readiness, and traceability/recall simulation.
 - [ ] Exit only with no unresolved critical defects, approved validation evidence, acceptable data quality, user acceptance, and clinical/quality sign-off.
@@ -945,6 +948,7 @@ Priority: Should after pilot acceptance.
 
 Indicative planning range: 4–8 months; not contractual.
 
+- [x] Implement Laravel regional scale-readiness review gates for pilot-ready dependency, candidate sites, readiness criteria, KPI comparison, monitoring plan, support model, and critical-risk blocking.
 - [ ] Expand offline/mobile collection, hospital requests, transport, cold-chain telemetry, haemovigilance, interfaces, inventory balancing, support, and monitoring.
 - [ ] Onboard centers/hospitals by readiness criteria rather than calendar alone.
 - [ ] Compare safety, adoption, request fill, expiry, turnaround, incident, downtime, and support KPIs before each expansion wave.
@@ -955,6 +959,7 @@ Priority: Should/Could after stable scale.
 
 Indicative planning range: 6–12 months; not contractual.
 
+- [x] Implement Laravel national scale-readiness review gates for sustainable operating-budget coverage, vendor-exit coverage, KPI comparison, monitoring/support model, and unresolved critical-risk blocking.
 - [ ] National command dashboards, cross-region balancing, forecasting, advanced analytics, additional integrations, public aggregate indicators, donor segmentation, and continuous-improvement cycles.
 - [ ] Confirm sustainable annual operating budget for infrastructure, devices, sensors, connectivity, messaging, security, backups, support, training, calibration, maintenance, validation, and renewals.
 - [ ] Complete vendor-exit plan: source/data ownership, open exports, documentation, test suites, deployment automation, local administrators, handover drill, and independent recovery capability.
@@ -968,3 +973,12 @@ Indicative planning range: 6–12 months; not contractual.
 - [ ] Clinical, laboratory, quality, operations, hospital, DPO, ICT/security, finance, procurement, and executive owners sign off.
 - [ ] Recovery, rollback, support, training, competency, recurring financing, and vendor exit are proven.
 - [ ] No unresolved critical safety, security, privacy, traceability, data-integrity, resilience, or accessibility issue remains.
+
+Current Phase 13 construction evidence:
+
+- Laravel rollout-readiness foundation implemented with `rollout_site_assessments`, `rollout_policy_decisions`, `rollout_pilot_readiness_reviews`, and `rollout_scale_readiness_reviews`.
+- `App\Services\PhaseThirteenRolloutService` enforces complete discovery inputs, policy-decision approval evidence, pilot readiness gates, regional scale gates, national budget/vendor-exit gates, and critical-risk blocking.
+- Rollout permissions `rollout.view` and `rollout.manage` are seeded to appropriate national/control roles; donors cannot manage rollout controls.
+- Test and development databases were migrated with the Phase 13 rollout tables.
+- Automated evidence: `NBTS_REUSE_TEST_SCHEMA=true DB_DATABASE=nbts_new_test php artisan test --compact tests/Feature/PhaseThirteenRolloutTest.php tests/Feature/PhaseTwelveExperienceTest.php` passed 9 tests and 97 assertions.
+- Real-world representative-site discovery, external stakeholder approvals, pilot execution, regional onboarding, national optimization, and final sign-off remain open because they require operational evidence outside the Laravel repository.

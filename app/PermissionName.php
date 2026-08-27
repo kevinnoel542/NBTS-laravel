@@ -72,6 +72,8 @@ enum PermissionName: string
     case ManageSecurityOperations = 'security_operations.manage';
     case ManageChangeControls = 'change_controls.manage';
     case ManageIncidents = 'incidents.manage';
+    case ViewRollout = 'rollout.view';
+    case ManageRollout = 'rollout.manage';
 
     /**
      * @return list<string>

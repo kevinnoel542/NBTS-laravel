@@ -98,6 +98,8 @@ class RolePermissionSeeder extends Seeder
                 PermissionName::ManageSecurityOperations,
                 PermissionName::ManageChangeControls,
                 PermissionName::ManageIncidents,
+                PermissionName::ViewRollout,
+                PermissionName::ManageRollout,
             ]),
             RoleName::NbtsAdmin->value => $this->values([
                 PermissionName::ViewUsers,
@@ -135,6 +137,8 @@ class RolePermissionSeeder extends Seeder
                 PermissionName::ManageAssignments,
                 PermissionName::ManageOfflineCollectionDevices,
                 PermissionName::ReconcileOfflineCollections,
+                PermissionName::ViewRollout,
+                PermissionName::ManageRollout,
             ]),
             RoleName::CenterManager->value => $this->values([
                 PermissionName::ViewDonors,
@@ -170,6 +174,7 @@ class RolePermissionSeeder extends Seeder
                 PermissionName::ViewComponents,
                 PermissionName::ViewLogistics,
                 PermissionName::ViewQuality,
+                PermissionName::ViewRollout,
             ]),
             RoleName::CenterStaff->value => $this->values([
                 PermissionName::ViewDonors,
@@ -199,6 +204,8 @@ class RolePermissionSeeder extends Seeder
                 PermissionName::ManageSecurityOperations,
                 PermissionName::ManageIncidents,
                 PermissionName::ManageChangeControls,
+                PermissionName::ViewRollout,
+                PermissionName::ManageRollout,
             ]),
             RoleName::NationalOperationsAdministrator->value => $this->values([
                 PermissionName::ViewUsers,
@@ -240,6 +247,8 @@ class RolePermissionSeeder extends Seeder
                 PermissionName::ViewQuality,
                 PermissionName::ManageIncidents,
                 PermissionName::ManageChangeControls,
+                PermissionName::ViewRollout,
+                PermissionName::ManageRollout,
             ]),
             RoleName::NationalQualityHaemovigilanceOfficer->value => $this->values([
                 PermissionName::ViewUsers,
@@ -322,6 +331,7 @@ class RolePermissionSeeder extends Seeder
                 PermissionName::ManageDataProtection,
                 PermissionName::ManageChangeControls,
                 PermissionName::ManageIncidents,
+                PermissionName::ViewRollout,
             ]),
             RoleName::NationalAuditorInspector->value => $this->values([
                 PermissionName::ViewUsers,
@@ -342,6 +352,7 @@ class RolePermissionSeeder extends Seeder
                 PermissionName::ViewLogistics,
                 PermissionName::ViewHospitalRequests,
                 PermissionName::ViewQuality,
+                PermissionName::ViewRollout,
             ]),
             RoleName::ReceptionOfficer->value => $this->values([
                 PermissionName::ViewDonors,

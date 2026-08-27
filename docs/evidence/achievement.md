@@ -17,6 +17,69 @@ Each entry must record:
 - Browser/device verification when the feature has a user interface.
 - Known limitations and the next dependent task.
 
+## 2026-08-27 — Phase 13 Laravel rollout-readiness control foundation
+
+Status: completed for Laravel control foundation; external rollout execution remains pending.
+
+Scope: backend, database, authorization, rollout evidence controls, and automated tests.
+
+Requirement IDs: ROLLOUT-0, ROLLOUT-1, ROLLOUT-2, ROLLOUT-3, FINAL-GATE.
+
+Delivered:
+
+- Added rollout site-assessment records for representative-site workflow mapping, inventory snapshots, baseline KPIs, risks, data-dictionary scope, master-data ownership, safety-case/process references, pilot scope, backlog, legal/policy inputs, and operational readiness.
+- Added rollout policy-decision records for the required Phase 13 policy categories, including center taxonomy, identifier/barcode standard, component catalog, test algorithms, shelf lives, release authority, compatibility/emergency rules, patient data, retention, offline mode, RTO/RPO, integrations, and service levels.
+- Added pilot-readiness reviews that block pilot readiness until complete donor-to-recipient chain coverage, prerequisites, validation evidence, migration/training/downtime/traceability evidence, critical-defect closure, and clinical/quality/operations signoffs are present.
+- Added regional and national scale-readiness reviews that require pilot readiness, candidate sites, readiness criteria, KPI comparison, monitoring/support model, no unresolved critical risks, plus national operating-budget and vendor-exit coverage.
+- Added explicit rollout permissions `rollout.view` and `rollout.manage` and seeded them to appropriate national/control roles.
+- Added `PhaseThirteenRolloutService` to keep the readiness decisions server-authoritative and testable.
+
+Main files changed:
+
+- `app/PermissionName.php`
+- `database/seeders/RolePermissionSeeder.php`
+- `app/Models/RolloutSiteAssessment.php`
+- `app/Models/RolloutPolicyDecision.php`
+- `app/Models/RolloutPilotReadinessReview.php`
+- `app/Models/RolloutScaleReadinessReview.php`
+- `app/Services/PhaseThirteenRolloutService.php`
+- `database/migrations/2026_08_27_083905_create_rollout_site_assessments_table.php`
+- `database/migrations/2026_08_27_083906_create_rollout_policy_decisions_table.php`
+- `database/migrations/2026_08_27_083907_create_rollout_pilot_readiness_reviews_table.php`
+- `database/migrations/2026_08_27_083908_create_rollout_scale_readiness_reviews_table.php`
+- `database/factories/RolloutSiteAssessmentFactory.php`
+- `database/factories/RolloutPolicyDecisionFactory.php`
+- `database/factories/RolloutPilotReadinessReviewFactory.php`
+- `database/factories/RolloutScaleReadinessReviewFactory.php`
+- `tests/Feature/PhaseThirteenRolloutTest.php`
+
+Database/API impact:
+
+- Added four rollout-readiness tables.
+- Added two permissions.
+- No donor `/api/v1` route changed.
+- No Flutter code changed.
+
+Automated verification:
+
+- `DB_DATABASE=nbts_new_test php artisan migrate --no-interaction` passed.
+- `DB_DATABASE=nbts_new_dev php artisan migrate --no-interaction` passed.
+- `NBTS_REUSE_TEST_SCHEMA=true DB_DATABASE=nbts_new_test php artisan test --compact tests/Feature/PhaseThirteenRolloutTest.php` passed 5 tests and 33 assertions.
+- `NBTS_REUSE_TEST_SCHEMA=true DB_DATABASE=nbts_new_test php artisan test --compact tests/Feature/PhaseThirteenRolloutTest.php tests/Feature/PhaseTwelveExperienceTest.php` passed 9 tests and 97 assertions after formatting.
+- `vendor/bin/pint --dirty --format agent` passed after fixing dirty PHP files.
+
+Browser/device verification: not applicable to this backend control foundation.
+
+Known limitations:
+
+- This does not prove real representative-site discovery, real policy approval, pilot execution, regional scale, national optimization, or final sign-off.
+- External clinical, laboratory, quality, operations, hospital, DPO, ICT/security, finance, procurement, and executive approvals remain required before the Phase 13 final gate can close.
+- Device, barcode/printer, Flutter, and external pilot evidence remain outside this Laravel-only increment.
+
+Next dependent task:
+
+- Capture real site assessments and policy decisions through an approved UI/import/admin workflow, then attach external approval and pilot evidence before marking operational rollout tasks complete.
+
 ## 2026-08-27 — Flutter owner handoff clarified
 
 Status: completed
