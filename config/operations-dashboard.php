@@ -11,8 +11,12 @@ return [
             'accent' => 'plum',
             'metrics' => ['active_users', 'active_assignments', 'organization_units', 'audits_today'],
             'links' => [
-                ['workspace' => 'administration', 'tab' => 'users', 'icon' => 'shield-check', 'permission' => PermissionName::ViewUsers->value],
-                ['workspace' => 'intelligence', 'tab' => 'reports', 'icon' => 'chart-no-axes-combined', 'permission' => PermissionName::ViewReports->value],
+                ['workspace' => 'administration', 'tab' => 'users', 'icon' => 'shield-check', 'permission' => PermissionName::ViewUsers->value, 'title' => 'console.system_control.actions.users', 'description' => 'console.system_control.actions.users_description'],
+                ['workspace' => 'administration', 'tab' => 'roles_permissions', 'icon' => 'badge-check', 'permission' => PermissionName::ManageRoles->value, 'title' => 'console.system_control.actions.roles', 'description' => 'console.system_control.actions.roles_description'],
+                ['workspace' => 'administration', 'tab' => 'centers', 'icon' => 'map-pin', 'permission' => PermissionName::ViewCenters->value, 'title' => 'console.system_control.actions.centers', 'description' => 'console.system_control.actions.centers_description'],
+                ['workspace' => 'administration', 'tab' => 'audit', 'icon' => 'activity', 'permission' => PermissionName::ViewAudits->value, 'title' => 'console.system_control.actions.audit', 'description' => 'console.system_control.actions.audit_description'],
+                ['workspace' => 'administration', 'tab' => 'settings', 'icon' => 'settings', 'permission' => PermissionName::ManageSettings->value, 'title' => 'console.system_control.actions.settings', 'description' => 'console.system_control.actions.settings_description'],
+                ['workspace' => 'intelligence', 'tab' => 'reports', 'icon' => 'chart-no-axes-combined', 'permission' => PermissionName::ViewReports->value, 'title' => 'console.system_control.actions.reports', 'description' => 'console.system_control.actions.reports_description'],
             ],
         ],
         'national_operations' => [

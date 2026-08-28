@@ -73,11 +73,15 @@ test('the five compatibility accounts remain available and staff dashboards rend
 
         session(['operations.assignment' => $assignment->id]);
 
-        $this->actingAs($user)
+        $response = $this->actingAs($user)
             ->get(route('dashboard'))
             ->assertOk()
             ->assertSee($title)
             ->assertSee('Active responsibility');
+
+        if ($email === 'admin@nbts.test') {
+            $response->assertSee('Super Admin — command room');
+        }
     }
 
     $donor = User::query()->where('email', 'donor@nbts.test')->firstOrFail();
@@ -165,4 +169,48 @@ test('the national inventory snapshot aggregates each blood group across centers
             'status' => 'healthy',
         ],
     ]);
+});
+
+test('rollout command is visible and filterable for rollout-authorized dashboards', function () {
+    $this->seed(DatabaseSeeder::class);
+
+    $user = User::query()->where('email', 'nbts-admin@nbts.test')->firstOrFail();
+    $assignment = $user->staffAssignments()->effective()->firstOrFail();
+
+    session(['operations.assignment' => $assignment->id]);
+
+    Livewire::actingAs($user)
+        ->test(Overview::class)
+        ->assertSee('Rollout command')
+        ->assertSee('P13-POL-DATA')
+        ->set('rolloutSearch', 'OFFLINE')
+        ->assertSee('P13-POL-OFFLINE')
+        ->assertDontSee('P13-POL-DATA')
+        ->call('clearRolloutFilters')
+        ->set('rolloutRegister', 'pilot_reviews')
+        ->assertSee('P13-PILOT-EAST-001')
+        ->set('rolloutRegister', 'scale_reviews')
+        ->set('rolloutStatus', 'blocked')
+        ->assertSee('P13-SCALE-NAT-001')
+        ->assertDontSee('P13-SCALE-REG-001')
+        ->call('clearRolloutFilters')
+        ->assertSet('rolloutSearch', '')
+        ->assertSet('rolloutStatus', 'all')
+        ->assertSet('rolloutType', 'all')
+        ->assertSet('rolloutPerPage', 5);
+});
+
+test('rollout command is hidden from staff without rollout authority', function () {
+    $this->seed(DatabaseSeeder::class);
+
+    $user = User::query()->where('email', 'staff@nbts.test')->firstOrFail();
+    $assignment = $user->staffAssignments()->effective()->firstOrFail();
+
+    session(['operations.assignment' => $assignment->id]);
+
+    $this->actingAs($user)
+        ->get(route('dashboard'))
+        ->assertOk()
+        ->assertSee('Reception desk')
+        ->assertDontSee('Rollout command');
 });

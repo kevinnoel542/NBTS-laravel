@@ -14,6 +14,10 @@ use App\Models\CenterStaff;
 use App\Models\DonorIdentityCheck;
 use App\Models\EligibilityRecord;
 use App\Models\OrganizationUnit;
+use App\Models\RolloutPilotReadinessReview;
+use App\Models\RolloutPolicyDecision;
+use App\Models\RolloutScaleReadinessReview;
+use App\Models\RolloutSiteAssessment;
 use App\Models\ScreeningProtocol;
 use App\Models\StaffAssignment;
 use App\Models\User;
@@ -189,6 +193,8 @@ class DemoDataSeeder extends Seeder
                 'weight_kg' => 64.5,
             ],
         );
+
+        $this->rolloutDemoData($primaryCenter, $nbtsAdmin);
     }
 
     private function demoUser(
@@ -245,5 +251,113 @@ class DemoDataSeeder extends Seeder
                 'reason' => 'Local compatibility account for controlled construction and browser QA.',
             ],
         );
+    }
+
+    private function rolloutDemoData(BloodCenter $primaryCenter, User $owner): void
+    {
+        $assessment = RolloutSiteAssessment::query()->updateOrCreate(
+            ['assessment_reference' => 'P13-SITE-EAST-001'],
+            [
+                'blood_center_id' => $primaryCenter->id,
+                'assessed_by' => $owner->id,
+                'approved_by' => $owner->id,
+                'site_name' => 'Eastern Zone controlled rollout',
+                'site_type' => 'regional_center',
+                'workflow_map' => ['reception', 'screening', 'collection', 'inventory'],
+                'inventory_snapshot' => ['available_units' => 128, 'reserved_units' => 31],
+                'baseline_kpis' => ['daily_donations' => 42, 'screening_turnaround_minutes' => 18],
+                'risks' => ['legacy migration window', 'offline recovery rehearsal'],
+                'data_dictionary_scope' => ['donors', 'appointments', 'eligibility', 'inventory'],
+                'master_data_owners' => ['operations' => $owner->email, 'quality' => $owner->email],
+                'safety_case_reference' => 'SAFE-P13-001',
+                'target_process_reference' => 'PROC-P13-ROLL-001',
+                'pilot_scope' => ['one regional center', 'donor-to-inventory path'],
+                'prioritized_backlog' => ['critical' => ['identity card reconciliation'], 'must' => ['training roster signoff']],
+                'legal_and_policy_inputs' => ['privacy review complete', 'retention schedule confirmed'],
+                'operational_readiness' => ['staffing' => 'ready', 'connectivity' => 'ready', 'cold_chain' => 'ready'],
+                'status' => 'approved',
+                'assessed_at' => now()->subDays(9),
+                'approved_at' => now()->subDays(6),
+            ],
+        );
+
+        foreach ([
+            ['P13-POL-IDENTITY', 'identity', 'Secure donor identity model', 'Approved national donor identity rules, card recovery process, and audit evidence for rollout.'],
+            ['P13-POL-OFFLINE', 'offline_mode', 'Offline operating limits', 'Approved offline capture limits, reconciliation duty owner, and exception review path.'],
+            ['P13-POL-QUALITY', 'quality_release', 'Quality release controls', 'Approved release gates for testing, quarantine, disposal, and traceability evidence.'],
+            ['P13-POL-DATA', 'data_governance', 'Data governance scope', 'Approved master data ownership, retention schedule, access boundaries, and reporting controls.'],
+            ['P13-POL-TRAINING', 'training', 'Training and competency gate', 'Approved role-based training evidence required before each center goes live.'],
+        ] as [$code, $category, $title, $summary]) {
+            RolloutPolicyDecision::query()->updateOrCreate(
+                ['decision_code' => $code],
+                [
+                    'rollout_site_assessment_id' => $assessment->id,
+                    'owner_id' => $owner->id,
+                    'approved_by' => $owner->id,
+                    'category' => $category,
+                    'title' => $title,
+                    'decision_summary' => $summary,
+                    'options_considered' => ['controlled rollout', 'manual continuation'],
+                    'required_approvals' => ['operations', 'quality', 'ict'],
+                    'approval_evidence' => ['signed minute', 'risk acceptance'],
+                    'risk_acceptance' => ['accepted_by' => $owner->email, 'expires' => today()->addMonths(6)->toDateString()],
+                    'implementation_controls' => ['audit trail', 'role isolation', 'daily reconciliation'],
+                    'review_schedule' => ['cadence' => 'monthly'],
+                    'status' => 'approved',
+                    'due_at' => now()->addDays(14),
+                    'approved_at' => now()->subDays(4),
+                ],
+            );
+        }
+
+        $pilotReview = RolloutPilotReadinessReview::query()->updateOrCreate(
+            ['review_reference' => 'P13-PILOT-EAST-001'],
+            [
+                'rollout_site_assessment_id' => $assessment->id,
+                'reviewed_by' => $owner->id,
+                'approved_by' => $owner->id,
+                'pilot_name' => 'Eastern Zone donor-to-inventory pilot',
+                'pilot_sites' => ['Eastern Zone'],
+                'chain_coverage' => ['reception', 'eligibility', 'collection', 'inventory'],
+                'prerequisites' => ['policy approvals', 'training roster', 'backup operator'],
+                'validation_evidence' => ['browser QA pass', 'feature tests pass'],
+                'data_migration_evidence' => ['seeded demo', 'legacy references mapped'],
+                'training_evidence' => ['admin walkthrough', 'staff quick guide'],
+                'downtime_restore_evidence' => ['restore drill complete'],
+                'traceability_recall_evidence' => ['sample recall rehearsal'],
+                'open_defects' => [],
+                'signoffs' => ['operations' => $owner->email, 'quality' => $owner->email],
+                'exit_criteria' => ['zero critical defects', 'daily reconciliation signed'],
+                'status' => 'ready',
+                'reviewed_at' => now()->subDays(2),
+                'approved_at' => now()->subDay(),
+            ],
+        );
+
+        foreach ([
+            ['P13-SCALE-REG-001', 'regional', 'ready', []],
+            ['P13-SCALE-NAT-001', 'national', 'blocked', ['National helpdesk rota pending']],
+        ] as [$reference, $level, $status, $risks]) {
+            RolloutScaleReadinessReview::query()->updateOrCreate(
+                ['review_reference' => $reference],
+                [
+                    'rollout_pilot_readiness_review_id' => $pilotReview->id,
+                    'reviewed_by' => $owner->id,
+                    'approved_by' => $status === 'ready' ? $owner->id : null,
+                    'scale_level' => $level,
+                    'candidate_sites' => ['Eastern Zone', 'Muhimbili', 'Bugando'],
+                    'readiness_criteria' => ['training', 'connectivity', 'data owner', 'rollback plan'],
+                    'kpi_comparison' => ['turnaround' => 'stable', 'defects' => count($risks)],
+                    'monitoring_plan' => ['daily command review', 'weekly governance summary'],
+                    'support_model' => ['tier_one' => 'center super user', 'tier_two' => 'national ICT'],
+                    'operating_budget' => ['status' => 'within approved envelope'],
+                    'vendor_exit_plan' => ['source control', 'backup runbook', 'handover evidence'],
+                    'unresolved_risks' => $risks,
+                    'status' => $status,
+                    'reviewed_at' => now()->subDay(),
+                    'approved_at' => $status === 'ready' ? now() : null,
+                ],
+            );
+        }
     }
 }

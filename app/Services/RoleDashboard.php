@@ -25,7 +25,7 @@ use Illuminate\Database\Eloquent\Builder;
 use LogicException;
 
 /**
- * @phpstan-type DashboardLink array{workspace: string, tab: string, icon: string, permission: string}
+ * @phpstan-type DashboardLink array{workspace: string, tab: string, icon: string, permission: string, title?: string, description?: string}
  * @phpstan-type DashboardConfiguration array{title: string, description: string, eyebrow: string, accent: string, metrics: list<string>, links: list<DashboardLink>, readiness?: string}
  */
 final readonly class RoleDashboard
@@ -74,8 +74,8 @@ final readonly class RoleDashboard
                 continue;
             }
 
-            $titleKey = config('operations.workspaces.'.$link['workspace'].'.title');
-            $descriptionKey = config('operations.workspaces.'.$link['workspace'].'.description');
+            $titleKey = $link['title'] ?? config('operations.workspaces.'.$link['workspace'].'.title');
+            $descriptionKey = $link['description'] ?? config('operations.workspaces.'.$link['workspace'].'.description');
 
             $quickLinks[] = [
                 'title' => $this->translate(is_string($titleKey) ? $titleKey : $link['workspace']),
@@ -276,6 +276,8 @@ final readonly class RoleDashboard
                     'tab' => $link['tab'],
                     'icon' => $link['icon'],
                     'permission' => $link['permission'],
+                    ...(is_string($link['title'] ?? null) ? ['title' => $link['title']] : []),
+                    ...(is_string($link['description'] ?? null) ? ['description' => $link['description']] : []),
                 ];
             }
         }
