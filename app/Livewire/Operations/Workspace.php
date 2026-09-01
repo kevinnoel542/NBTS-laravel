@@ -1352,7 +1352,7 @@ class Workspace extends Component
         return app(ActiveCenterContext::class)->label($this->user(), $this->center);
     }
 
-    /** @return LengthAwarePaginator<int, covariant array{model_id: int, reference: string, primary: string, secondary: string, status: string, status_label: string, timestamp: string|null, can_open: bool}> */
+    /** @return LengthAwarePaginator<int, covariant array{model_id: int, reference: string, primary: string, secondary: string, status: string, status_label: string, status_tone: string, timestamp: string|null, can_open: bool}> */
     #[Computed]
     public function rows(): LengthAwarePaginator
     {
@@ -1435,6 +1435,71 @@ class Workspace extends Component
         return (int) ($this->search !== '')
             + (int) ($this->statusFilter !== 'all')
             + (int) ($this->dateFilter !== 'all');
+    }
+
+    /** @return array{metrics: list<array{label: string, value: string, detail: string, icon: string, tone: string}>, flow: list<array{label: string, value: string, detail: string, icon: string, tone: string}>, actions: list<array{label: string, detail: string, tab: string, icon: string}>, alert: array{label: string, detail: string, tone: string}} */
+    #[Computed]
+    public function appointmentCommand(): array
+    {
+        if ($this->workspace !== 'appointments') {
+            return [
+                'actions' => [],
+                'alert' => ['detail' => '', 'label' => '', 'tone' => 'neutral'],
+                'flow' => [],
+                'metrics' => [],
+            ];
+        }
+
+        $baseQuery = $this->appointmentBaseQuery();
+        $today = today();
+        $now = now();
+
+        $appointmentsToday = (clone $baseQuery)->whereDate('scheduled_at', $today)->count();
+        $pending = (clone $baseQuery)->where('status', AppointmentStatus::Pending)->count();
+        $confirmedToday = (clone $baseQuery)
+            ->whereDate('scheduled_at', $today)
+            ->where('status', AppointmentStatus::Confirmed)
+            ->count();
+        $checkedInToday = (clone $baseQuery)
+            ->whereDate('scheduled_at', $today)
+            ->where('status', AppointmentStatus::CheckedIn)
+            ->count();
+        $upcomingWeek = (clone $baseQuery)
+            ->whereBetween('scheduled_at', [$now, (clone $now)->addDays(7)])
+            ->count();
+        $missedToday = (clone $baseQuery)
+            ->whereDate('scheduled_at', $today)
+            ->where('status', AppointmentStatus::NoShow)
+            ->count();
+
+        return [
+            'actions' => [
+                $this->appointmentAction('today', 'today_action', 'today_action_detail', 'calendar-clock'),
+                $this->appointmentAction('pending', 'pending_action', 'pending_action_detail', 'list-checks'),
+                $this->appointmentAction('check_in', 'check_in_action', 'check_in_action_detail', 'user-round-check'),
+            ],
+            'alert' => [
+                'detail' => $missedToday > 0
+                    ? __('console.appointments.command.alert_missed_detail', ['count' => number_format($missedToday)])
+                    : __('console.appointments.command.alert_clear_detail'),
+                'label' => $missedToday > 0
+                    ? __('console.appointments.command.alert_missed')
+                    : __('console.appointments.command.alert_clear'),
+                'tone' => $missedToday > 0 ? 'warning' : 'success',
+            ],
+            'flow' => [
+                $this->appointmentMetric('pending_flow', number_format($pending), 'pending_flow_detail', 'list-checks', $pending > 0 ? 'warning' : 'neutral'),
+                $this->appointmentMetric('confirmed_flow', number_format($confirmedToday), 'confirmed_flow_detail', 'calendar-check', $confirmedToday > 0 ? 'primary' : 'neutral'),
+                $this->appointmentMetric('checked_in_flow', number_format($checkedInToday), 'checked_in_flow_detail', 'user-round-check', $checkedInToday > 0 ? 'success' : 'neutral'),
+                $this->appointmentMetric('upcoming_flow', number_format($upcomingWeek), 'upcoming_flow_detail', 'clock-3', 'neutral'),
+            ],
+            'metrics' => [
+                $this->appointmentMetric('today', number_format($appointmentsToday), 'today_detail', 'calendar-clock', 'primary'),
+                $this->appointmentMetric('pending', number_format($pending), 'pending_detail', 'list-checks', $pending > 0 ? 'warning' : 'neutral'),
+                $this->appointmentMetric('check_in_ready', number_format($confirmedToday), 'check_in_ready_detail', 'user-round-check', $confirmedToday > 0 ? 'success' : 'neutral'),
+                $this->appointmentMetric('upcoming_week', number_format($upcomingWeek), 'upcoming_week_detail', 'clock-3', 'neutral'),
+            ],
+        ];
     }
 
     /** @return list<array{label: string, value: string, detail: string, icon: string, tone: string}> */
@@ -1632,8 +1697,7 @@ class Workspace extends Component
     /** @return Builder<Appointment> */
     private function appointmentQuery(): Builder
     {
-        $query = Appointment::query()->visibleTo($this->user())->with(['donor', 'bloodCenter']);
-        $this->scopeDirectlyToCenter($query);
+        $query = $this->appointmentBaseQuery()->with(['donor', 'bloodCenter']);
 
         match ($this->tab) {
             'today', 'check_in' => $query->whereDate('scheduled_at', today()),
@@ -1647,6 +1711,15 @@ class Workspace extends Component
         }
 
         return $this->searchRelation($query, ['notes'], ['donor' => ['name', 'email', 'phone'], 'bloodCenter' => ['name']]);
+    }
+
+    /** @return Builder<Appointment> */
+    private function appointmentBaseQuery(): Builder
+    {
+        $query = Appointment::query()->visibleTo($this->user());
+        $this->scopeDirectlyToCenter($query);
+
+        return $query;
     }
 
     /** @return Builder<Appointment>|Builder<Deferral>|Builder<EligibilityRecord> */
@@ -2029,7 +2102,7 @@ class Workspace extends Component
         };
     }
 
-    /** @return Collection<int, covariant array{model_id: int, reference: string, primary: string, secondary: string, status: string, status_label: string, timestamp: string|null, can_open: bool}> */
+    /** @return Collection<int, covariant array{model_id: int, reference: string, primary: string, secondary: string, status: string, status_label: string, status_tone: string, timestamp: string|null, can_open: bool}> */
     private function exportableRows(): Collection
     {
         $query = $this->orderedQuery($this->applyTableFilters($this->sourceQuery()));
@@ -2042,7 +2115,7 @@ class Workspace extends Component
         return $query->limit(500)->get()->map(fn (Model $model): array => $this->formatRow($model));
     }
 
-    /** @return array{model_id: int, reference: string, primary: string, secondary: string, status: string, status_label: string, timestamp: string|null, can_open: bool} */
+    /** @return array{model_id: int, reference: string, primary: string, secondary: string, status: string, status_label: string, status_tone: string, timestamp: string|null, can_open: bool} */
     private function formatRow(Model $model): array
     {
         $row = match (true) {
@@ -2256,6 +2329,12 @@ class Workspace extends Component
         };
 
         $status = (string) $row['status'];
+        $statusTone = match ($status) {
+            'critical', 'failed', 'rejected', 'expired', 'discarded', 'inactive', 'no_show' => 'danger',
+            'pending', 'notified', 'testing', 'collected', 'not_yet_eligible', 'temporarily_deferred', 'permanently_deferred' => 'warning',
+            'available', 'completed', 'confirmed', 'checked_in', 'eligible', 'published', 'resolved', 'active', 'healthy', 'read', 'recorded' => 'success',
+            default => 'neutral',
+        };
 
         return [
             'model_id' => (int) $model->getKey(),
@@ -2266,6 +2345,7 @@ class Workspace extends Component
             'status_label' => trans()->has('operations.status.'.$status)
                 ? __('operations.status.'.$status)
                 : Str::headline($status),
+            'status_tone' => $statusTone,
             'timestamp' => $row['timestamp'],
             'can_open' => ! ($model instanceof AuditLog || $model instanceof NotificationDelivery),
         ];
@@ -2657,6 +2737,29 @@ class Workspace extends Component
             'label' => __('console.intelligence.'.$label),
             'tone' => $tone,
             'value' => $value,
+        ];
+    }
+
+    /** @return array{label: string, value: string, detail: string, icon: string, tone: string} */
+    private function appointmentMetric(string $label, string $value, string $detail, string $icon, string $tone): array
+    {
+        return [
+            'detail' => __('console.appointments.command.'.$detail),
+            'icon' => $icon,
+            'label' => __('console.appointments.command.'.$label),
+            'tone' => $tone,
+            'value' => $value,
+        ];
+    }
+
+    /** @return array{label: string, detail: string, tab: string, icon: string} */
+    private function appointmentAction(string $tab, string $label, string $detail, string $icon): array
+    {
+        return [
+            'detail' => __('console.appointments.command.'.$detail),
+            'icon' => $icon,
+            'label' => __('console.appointments.command.'.$label),
+            'tab' => $tab,
         ];
     }
 

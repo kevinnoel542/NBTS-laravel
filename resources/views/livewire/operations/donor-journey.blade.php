@@ -46,6 +46,30 @@
         @endforeach
     </section>
 
+    <section class="phase-six-intelligence" aria-label="{{ __('console.phase_six.aria.workflow_intelligence') }}">
+        <div class="phase-six-intelligence__lead">
+            <span><x-public.icon name="list-checks" :size="17" /></span>
+            <div>
+                <h2>{{ $this->workflowIntelligence['title'] }}</h2>
+                <p>{{ $this->workflowIntelligence['body'] }}</p>
+            </div>
+        </div>
+        <dl class="phase-six-intelligence__stats">
+            <div>
+                <dt>{{ $this->workflowIntelligence['primary_label'] }}</dt>
+                <dd>{{ $this->workflowIntelligence['primary_value'] }}</dd>
+            </div>
+            <div>
+                <dt>{{ $this->workflowIntelligence['secondary_label'] }}</dt>
+                <dd>{{ $this->workflowIntelligence['secondary_value'] }}</dd>
+            </div>
+            <div>
+                <dt>{{ $this->workflowIntelligence['tertiary_label'] }}</dt>
+                <dd>{{ $this->workflowIntelligence['tertiary_value'] }}</dd>
+            </div>
+        </dl>
+    </section>
+
     <nav class="operations-tabs" aria-label="{{ __('console.phase_six.aria.sections', ['workspace' => $page['title']]) }}">
         @foreach ($this->tabs as $key => $label)
             <button type="button" wire:click="selectTab('{{ $key }}')" @class(['is-active' => $tab === $key])>
@@ -183,6 +207,115 @@
                     @endforelse
                 </tbody>
             </table>
+        </div>
+
+        <div class="operations-mobile-list phase-six-mobile-list" aria-label="{{ __('console.phase_six.aria.mobile_worklist') }}">
+            @forelse ($this->records as $record)
+                @php($mobileRow = $this->recordPresentation($record))
+                <article wire:key="mobile-{{ $workspace }}-{{ $tab }}-{{ $mobileRow['key'] }}" class="operations-mobile-row phase-six-mobile-row" data-phase-six-mobile-record>
+                    <div class="phase-six-mobile-row__header">
+                        <div class="min-w-0">
+                            <span class="operations-reference">{{ $mobileRow['reference'] }}</span>
+                            <h3>{{ $mobileRow['title'] }}</h3>
+                            <p>{{ $mobileRow['subtitle'] }}</p>
+                        </div>
+                        <span class="operations-status operations-status--{{ $mobileRow['tone'] }}">{{ $mobileRow['status'] }}</span>
+                    </div>
+
+                    <dl class="phase-six-mobile-row__meta">
+                        <div>
+                            <dt>{{ __('console.phase_six.worklist.control_context') }}</dt>
+                            <dd>{{ $mobileRow['context'] }}</dd>
+                        </div>
+                        <div>
+                            <dt>{{ __('console.phase_six.worklist.current_stage') }}</dt>
+                            <dd>{{ $this->tabs[$tab] }}</dd>
+                        </div>
+                    </dl>
+
+                    <div class="phase-six-mobile-row__actions">
+                        @if ($record instanceof \App\Models\User)
+                            @can(\App\PermissionName::ConfirmDonorIdentity->value)
+                                <flux:button size="sm" variant="primary" icon="check-badge" wire:click="openIdentity({{ $record->id }})">{{ __('console.phase_six.actions.confirm_identity') }}</flux:button>
+                            @else
+                                <span>{{ __('console.phase_six.rows.view_only') }}</span>
+                            @endcan
+                        @elseif ($record instanceof \App\Models\DonorDuplicateCase)
+                            @if ($record->status === \App\DonorDuplicateCaseStatus::Pending)
+                                <flux:button size="sm" variant="primary" icon="document-duplicate" wire:click="openDuplicateReview({{ $record->id }})">{{ __('console.phase_six.actions.review') }}</flux:button>
+                            @else
+                                <span>{{ __('console.phase_six.rows.reviewed', ['time' => $record->reviewed_at?->diffForHumans()]) }}</span>
+                            @endif
+                        @elseif ($record instanceof \App\Models\Appointment)
+                            @if ($workspace === 'eligibility')
+                                <flux:button size="sm" variant="primary" icon="clipboard-document-check" wire:click="openScreening({{ $record->id }})">{{ __('console.phase_six.actions.screen') }}</flux:button>
+                            @else
+                                @can(\App\PermissionName::PrepareCollections->value)
+                                    <flux:button size="sm" variant="primary" icon="beaker" wire:click="openCollection({{ $record->id }})">{{ __('console.phase_six.actions.prepare') }}</flux:button>
+                                @else
+                                    <span>{{ __('console.phase_six.rows.view_only') }}</span>
+                                @endcan
+                            @endif
+                        @elseif ($record instanceof \App\Models\CollectionLabel)
+                            @php($currentEpisodeLabels = $record->collectionEpisode->labels->where('status', '!=', \App\CollectionLabelStatus::Voided))
+                            <a href="{{ route('operations.collection-label.barcode', $record) }}" target="_blank" class="operations-text-action"><x-public.icon name="barcode" :size="15" />{{ __('console.phase_six.actions.view') }}</a>
+                            @can(\App\PermissionName::ManageCollectionLabels->value)
+                                @if ($record->status === \App\CollectionLabelStatus::Generated)
+                                    <flux:button size="sm" variant="ghost" wire:click="printLabel({{ $record->id }})">{{ __('console.phase_six.actions.print') }}</flux:button>
+                                @elseif ($record->status === \App\CollectionLabelStatus::Printed)
+                                    <flux:button size="sm" variant="ghost" wire:click="applyLabel({{ $record->id }})">{{ __('console.phase_six.actions.scan_apply') }}</flux:button>
+                                @endif
+                                @if ($record->collectionEpisode->status === \App\CollectionEpisodeStatus::Prepared && $record->status !== \App\CollectionLabelStatus::Voided)
+                                    <flux:button size="sm" variant="ghost" icon="arrow-path" wire:click="openLabelReplacement({{ $record->id }})">{{ __('console.phase_six.actions.replace') }}</flux:button>
+                                @endif
+                            @endcan
+                            @if ($record->collectionEpisode->status === \App\CollectionEpisodeStatus::Prepared && $record->id === $currentEpisodeLabels->max('id') && $currentEpisodeLabels->isNotEmpty() && $currentEpisodeLabels->every(fn ($label) => $label->status === \App\CollectionLabelStatus::Applied))
+                                <flux:button size="sm" variant="primary" wire:click="startEpisode({{ $record->collection_episode_id }})">{{ __('console.phase_six.actions.start') }}</flux:button>
+                            @endif
+                        @elseif ($record instanceof \App\Models\Specimen)
+                            @if ($record->status === \App\SpecimenStatus::Expected)
+                                <flux:button size="sm" variant="primary" icon="qr-code" wire:click="collectSpecimen({{ $record->id }})">{{ __('console.phase_six.actions.scan_collected') }}</flux:button>
+                            @elseif ($record->status === \App\SpecimenStatus::Collected)
+                                <flux:button size="sm" variant="primary" icon="paper-airplane" wire:click="handOffSpecimen({{ $record->id }})">{{ __('console.phase_six.actions.handoff') }}</flux:button>
+                            @else
+                                <span>{{ __('console.phase_six.worklist.no_action') }}</span>
+                            @endif
+                        @elseif ($record instanceof \App\Models\OfflineCollectionDevice)
+                            @php($activeBatch = $record->identifierBatches->whereNull('revoked_at')->where('expires_at', '>', now())->sortByDesc('id')->first())
+                            @if ($activeBatch)
+                                <a class="operations-text-action" target="_blank" href="{{ route('operations.offline-batch.downtime-form', $activeBatch) }}"><x-public.icon name="printer" :size="15" />{{ __('console.phase_six.actions.form') }}</a>
+                            @endif
+                            @if ($record->status === \App\OfflineCollectionDeviceStatus::Active)
+                                <flux:button size="sm" variant="ghost" icon="ticket" wire:click="issueOfflineBatch({{ $record->id }})">{{ __('console.phase_six.actions.issue_ids') }}</flux:button>
+                                <flux:button size="sm" variant="ghost" icon="no-symbol" wire:click="openDeviceRevocation({{ $record->id }})">{{ __('console.phase_six.actions.revoke') }}</flux:button>
+                            @endif
+                        @elseif ($record instanceof \App\Models\OfflineCollectionSubmission)
+                            @if (in_array($record->status, [\App\OfflineCollectionSubmissionStatus::Received, \App\OfflineCollectionSubmissionStatus::Conflict], true))
+                                <flux:button size="sm" variant="ghost" icon="arrow-path" wire:click="reconcileOffline({{ $record->id }})">{{ __('console.phase_six.actions.reconcile') }}</flux:button>
+                                <flux:button size="sm" variant="ghost" icon="x-circle" wire:click="openOfflineRejection({{ $record->id }})">{{ __('console.phase_six.actions.reject') }}</flux:button>
+                            @else
+                                <span>{{ __('console.phase_six.worklist.no_action') }}</span>
+                            @endif
+                        @elseif ($record instanceof \App\Models\CollectionEpisode)
+                            <flux:button size="sm" variant="ghost" icon="heart" wire:click="openReaction({{ $record->id }})">{{ __('console.phase_six.actions.reaction') }}</flux:button>
+                            @if ($record->status === \App\CollectionEpisodeStatus::InProgress)
+                                <flux:button size="sm" variant="primary" icon="check-circle" wire:click="openCompletion({{ $record->id }})">{{ __('console.phase_six.actions.complete') }}</flux:button>
+                            @else
+                                <span>{{ $record->ended_at?->translatedFormat('d M, H:i') ?? $record->created_at->translatedFormat('d M, H:i') }}</span>
+                            @endif
+                        @else
+                            <span>{{ __('console.phase_six.worklist.no_action') }}</span>
+                        @endif
+                    </div>
+                </article>
+            @empty
+                <article class="operations-mobile-row phase-six-mobile-row" data-phase-six-empty-state>
+                    <div class="operations-empty-inline">
+                        <x-public.icon name="inbox" :size="22" />
+                        <span>{{ __('console.phase_six.worklist.empty') }}</span>
+                    </div>
+                </article>
+            @endforelse
         </div>
 
         @if ($this->records->hasPages())<div class="operations-pagination"><flux:pagination :paginator="$this->records" scroll-to="#phase-six-work-queue" /></div>@endif

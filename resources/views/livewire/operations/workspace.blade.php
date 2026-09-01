@@ -44,13 +44,71 @@
                 type="button"
                 wire:click="$set('tab', '{{ $workspaceTab }}')"
                 wire:key="tab-{{ $workspaceTab }}"
-                @class(['is-active' => $tab === $workspaceTab])
-                @if ($tab === $workspaceTab) aria-current="page" @endif
+                class="{{ $tab === $workspaceTab ? 'is-active' : '' }}"
+                aria-current="{{ $tab === $workspaceTab ? 'page' : 'false' }}"
             >
                 {{ __('console.tabs.'.$workspaceTab) }}
             </button>
         @endforeach
     </nav>
+
+    @if ($workspace === 'appointments')
+        @php($appointmentCommand = $this->appointmentCommand)
+        <section class="appointments-command" aria-labelledby="appointments-command-title">
+            <div class="appointments-command__lead">
+                <span class="operations-kicker">{{ __('console.appointments.command.kicker') }}</span>
+                <h2 id="appointments-command-title">{{ __('console.appointments.command.title') }}</h2>
+                <p>{{ __('console.appointments.command.description') }}</p>
+
+                <div class="{{ $appointmentCommand['alert']['tone'] === 'warning' ? 'appointments-command__alert is-warning' : 'appointments-command__alert' }}">
+                    <x-public.icon :name="$appointmentCommand['alert']['tone'] === 'warning' ? 'clock-3' : 'calendar-check'" :size="17" />
+                    <div>
+                        <strong>{{ $appointmentCommand['alert']['label'] }}</strong>
+                        <span>{{ $appointmentCommand['alert']['detail'] }}</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="appointments-command__metrics">
+                @foreach ($appointmentCommand['metrics'] as $metric)
+                    <article class="appointments-command__metric appointments-command__metric--{{ $metric['tone'] }}" wire:key="appointment-command-metric-{{ $metric['label'] }}">
+                        <span><x-public.icon :name="$metric['icon']" :size="18" /></span>
+                        <div>
+                            <strong>{{ $metric['value'] }}</strong>
+                            <p>{{ $metric['label'] }}</p>
+                            <small>{{ $metric['detail'] }}</small>
+                        </div>
+                    </article>
+                @endforeach
+            </div>
+
+            <div class="appointments-command__workflow" aria-label="{{ __('console.appointments.command.workflow_label') }}">
+                @foreach ($appointmentCommand['flow'] as $step)
+                    <article class="appointments-command__step appointments-command__step--{{ $step['tone'] }}" wire:key="appointment-command-flow-{{ $step['label'] }}">
+                        <span><x-public.icon :name="$step['icon']" :size="17" /></span>
+                        <div>
+                            <strong>{{ $step['label'] }}</strong>
+                            <p>{{ $step['detail'] }}</p>
+                        </div>
+                        <b>{{ $step['value'] }}</b>
+                    </article>
+                @endforeach
+            </div>
+
+            <div class="appointments-command__actions" aria-label="{{ __('console.appointments.command.actions_label') }}">
+                @foreach ($appointmentCommand['actions'] as $action)
+                    <button type="button" wire:click="$set('tab', '{{ $action['tab'] }}')" class="{{ $tab === $action['tab'] ? 'is-active' : '' }}" wire:key="appointment-command-action-{{ $action['tab'] }}">
+                        <x-public.icon :name="$action['icon']" :size="17" />
+                        <span>
+                            <strong>{{ $action['label'] }}</strong>
+                            <small>{{ $action['detail'] }}</small>
+                        </span>
+                        <x-public.icon name="arrow-right" :size="15" />
+                    </button>
+                @endforeach
+            </div>
+        </section>
+    @endif
 
     @if ($workspace === 'donor-reception' && $tab === 'scan')
         <section class="operations-scan-panel" x-data="nbtsQrScanner($wire)" x-on:livewire:navigating.window="stop()">
@@ -284,62 +342,52 @@
                 <thead>
                     <tr>
                         <th class="w-10"><span class="sr-only">{{ __('console.common.actions') }}</span></th>
-                        @if ($this->isColumnVisible('reference')) <th>{{ __('console.common.reference') }}</th> @endif
-                        @if ($this->isColumnVisible('record')) <th>{{ __('console.common.record') }}</th> @endif
-                        @if ($this->isColumnVisible('context')) <th>{{ __('console.common.context') }}</th> @endif
-                        @if ($this->isColumnVisible('status')) <th>{{ __('console.common.status') }}</th> @endif
-                        @if ($this->isColumnVisible('updated')) <th>{{ __('console.common.updated') }}</th> @endif
+                        <th class="{{ $this->isColumnVisible('reference') ? '' : 'hidden' }}">{{ __('console.common.reference') }}</th>
+                        <th class="{{ $this->isColumnVisible('record') ? '' : 'hidden' }}">{{ __('console.common.record') }}</th>
+                        <th class="{{ $this->isColumnVisible('context') ? '' : 'hidden' }}">{{ __('console.common.context') }}</th>
+                        <th class="{{ $this->isColumnVisible('status') ? '' : 'hidden' }}">{{ __('console.common.status') }}</th>
+                        <th class="{{ $this->isColumnVisible('updated') ? '' : 'hidden' }}">{{ __('console.common.updated') }}</th>
                         <th class="text-right">{{ __('console.common.actions') }}</th>
                     </tr>
                 </thead>
                 <tbody>
-                    @forelse ($this->rows as $row)
-                        @php
-                            $statusTone = match ($row['status']) {
-                                'critical', 'failed', 'rejected', 'expired', 'discarded', 'inactive', 'no_show' => 'danger',
-                                'pending', 'notified', 'testing', 'collected', 'not_yet_eligible', 'temporarily_deferred', 'permanently_deferred' => 'warning',
-                                'available', 'completed', 'confirmed', 'checked_in', 'eligible', 'published', 'resolved', 'active', 'healthy', 'read', 'recorded' => 'success',
-                                default => 'neutral',
-                            };
-                        @endphp
+                    @foreach ($this->rows as $row)
                         <tr wire:key="row-{{ $workspace }}-{{ $tab }}-{{ $row['model_id'] }}">
                             <td><flux:checkbox wire:model.live="selected" value="{{ $row['model_id'] }}" /></td>
-                            @if ($this->isColumnVisible('reference')) <td><span class="operations-reference">{{ $row['reference'] }}</span></td> @endif
-                            @if ($this->isColumnVisible('record')) <td><strong>{{ $row['primary'] }}</strong></td> @endif
-                            @if ($this->isColumnVisible('context')) <td><span>{{ $row['secondary'] ?: __('console.donors.not_recorded') }}</span></td> @endif
-                            @if ($this->isColumnVisible('status')) <td><span class="operations-status operations-status--{{ $statusTone }}">{{ $row['status_label'] }}</span></td> @endif
-                            @if ($this->isColumnVisible('updated'))
-                                <td>
-                                    @if ($row['timestamp'])
-                                        <time datetime="{{ $row['timestamp'] }}">{{ \Illuminate\Support\Carbon::parse($row['timestamp'])->translatedFormat('d M Y, H:i') }}</time>
-                                    @else
-                                        {{ __('console.donors.not_recorded') }}
-                                    @endif
-                                </td>
-                            @endif
+                            <td class="{{ $this->isColumnVisible('reference') ? '' : 'hidden' }}"><span class="operations-reference">{{ $row['reference'] }}</span></td>
+                            <td class="{{ $this->isColumnVisible('record') ? '' : 'hidden' }}"><strong>{{ $row['primary'] }}</strong></td>
+                            <td class="{{ $this->isColumnVisible('context') ? '' : 'hidden' }}"><span>{{ $row['secondary'] ?: __('console.donors.not_recorded') }}</span></td>
+                            <td class="{{ $this->isColumnVisible('status') ? '' : 'hidden' }}"><span class="operations-status operations-status--{{ $row['status_tone'] }}">{{ $row['status_label'] }}</span></td>
+                            <td class="{{ $this->isColumnVisible('updated') ? '' : 'hidden' }}">
+                                <time datetime="{{ $row['timestamp'] }}">{{ $row['timestamp'] ? \Illuminate\Support\Carbon::parse($row['timestamp'])->translatedFormat('d M Y, H:i') : __('console.donors.not_recorded') }}</time>
+                            </td>
                             <td class="text-right">
-                                @if ($row['can_open'])
-                                    <button type="button" class="operations-row-action" wire:click="openRecord({{ $row['model_id'] }})" aria-label="{{ __('console.common.open') }} {{ $row['primary'] }}">
-                                        <x-public.icon name="chevron-right" :size="17" />
-                                    </button>
-                                @else
-                                    <span class="text-zinc-300 dark:text-zinc-700">-</span>
-                                @endif
+                                <button type="button" class="operations-row-action" wire:click="openRecord({{ $row['model_id'] }})" aria-label="{{ __('console.common.open') }} {{ $row['primary'] }}">
+                                    <x-public.icon name="chevron-right" :size="17" />
+                                </button>
                             </td>
                         </tr>
-                    @empty
-                        <tr>
-                            <td colspan="{{ count($visibleColumns) + 2 }}">
-                                <div class="operations-empty-state">
-                                    <span><x-public.icon name="search-x" :size="26" /></span>
-                                    <h3>{{ __('console.common.empty_title') }}</h3>
-                                    <p>{{ __('console.common.empty_description') }}</p>
-                                </div>
-                            </td>
-                        </tr>
-                    @endforelse
+                    @endforeach
+
                 </tbody>
             </table>
+        </div>
+
+        <div class="{{ $this->rows->count() === 0 && $workspace === 'appointments' ? 'operations-empty-state operations-empty-state--appointments' : 'hidden' }}">
+            <span><x-public.icon name="calendar-clock" :size="26" /></span>
+            <h3>{{ __('console.appointments.command.empty_title') }}</h3>
+            <p>{{ __('console.appointments.command.empty_description') }}</p>
+            <div class="appointments-empty-actions">
+                <button type="button" wire:click="$set('tab', 'pending')">{{ __('console.tabs.pending') }}</button>
+                <button type="button" wire:click="$set('tab', 'upcoming')">{{ __('console.tabs.upcoming') }}</button>
+                <button type="button" wire:click="$set('tab', 'check_in')">{{ __('console.tabs.check_in') }}</button>
+            </div>
+        </div>
+
+        <div class="{{ $this->rows->count() === 0 && $workspace !== 'appointments' ? 'operations-empty-state' : 'hidden' }}">
+            <span><x-public.icon name="search-x" :size="26" /></span>
+            <h3>{{ __('console.common.empty_title') }}</h3>
+            <p>{{ __('console.common.empty_description') }}</p>
         </div>
 
         <div class="operations-mobile-list">
@@ -355,12 +403,24 @@
                     <p>{{ $row['secondary'] ?: __('console.donors.not_recorded') }}</p>
                     <div class="flex items-center justify-between gap-3">
                         <span class="operations-status">{{ $row['status_label'] }}</span>
-                        @if ($row['can_open'])
-                            <button type="button" class="operations-text-action" wire:click="openRecord({{ $row['model_id'] }})">{{ __('console.common.open') }}</button>
-                        @endif
+                        <button type="button" class="operations-text-action" wire:click="openRecord({{ $row['model_id'] }})">{{ __('console.common.open') }}</button>
                     </div>
                 </article>
             @endforeach
+
+            @if ($this->rows->count() === 0)
+                <article class="operations-mobile-row operations-mobile-row--empty">
+                    <span class="operations-reference">{{ __('console.tabs.'.$tab) }}</span>
+                    <h3>{{ $workspace === 'appointments' ? __('console.appointments.command.empty_title') : __('console.common.empty_title') }}</h3>
+                    <p>{{ $workspace === 'appointments' ? __('console.appointments.command.empty_description') : __('console.common.empty_description') }}</p>
+                    @if ($workspace === 'appointments')
+                        <div class="appointments-empty-actions">
+                            <button type="button" wire:click="$set('tab', 'pending')">{{ __('console.tabs.pending') }}</button>
+                            <button type="button" wire:click="$set('tab', 'upcoming')">{{ __('console.tabs.upcoming') }}</button>
+                        </div>
+                    @endif
+                </article>
+            @endif
         </div>
 
         @if ($this->rows->hasPages())

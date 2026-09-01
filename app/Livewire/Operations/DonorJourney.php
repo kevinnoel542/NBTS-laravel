@@ -50,6 +50,7 @@ use App\PermissionName;
 use App\RoleName;
 use App\Services\ActiveCenterContext;
 use App\Services\DonorCardQrService;
+use App\SpecimenStatus;
 use Carbon\CarbonImmutable;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Contracts\View\View;
@@ -798,6 +799,189 @@ final class DonorJourney extends Component
         return app(ActiveCenterContext::class)->label($this->user(), $this->center);
     }
 
+    /** @return array{title: string, body: string, primary_label: string, primary_value: string, secondary_label: string, secondary_value: string, tertiary_label: string, tertiary_value: string} */
+    #[Computed]
+    public function workflowIntelligence(): array
+    {
+        $primaryMetric = $this->metrics[0] ?? ['label' => __('console.phase_six.worklist.records'), 'value' => $this->records->total()];
+        $secondaryMetric = $this->metrics[1] ?? $primaryMetric;
+        $translationKey = 'console.phase_six.intelligence.'.$this->workspace.'.'.$this->tab;
+        $titleKey = $translationKey.'.title';
+        $bodyKey = $translationKey.'.body';
+
+        return [
+            'title' => __($titleKey) === $titleKey ? __('console.phase_six.intelligence.default.title') : __($titleKey),
+            'body' => __($bodyKey) === $bodyKey ? __('console.phase_six.intelligence.default.body') : __($bodyKey),
+            'primary_label' => (string) $primaryMetric['label'],
+            'primary_value' => number_format((int) $primaryMetric['value']),
+            'secondary_label' => (string) $secondaryMetric['label'],
+            'secondary_value' => number_format((int) $secondaryMetric['value']),
+            'tertiary_label' => __('console.phase_six.intelligence.current_view'),
+            'tertiary_value' => $this->tabs[$this->tab] ?? __('console.phase_six.intelligence.default.title'),
+        ];
+    }
+
+    /** @return array{key: string, reference: string, title: string, subtitle: string, context: string, status: string, tone: string} */
+    public function recordPresentation(Model $record): array
+    {
+        if ($record instanceof User) {
+            $requiresReview = (bool) $record->donorProfile?->identity_review_required;
+
+            return [
+                'key' => 'donor-'.$record->id,
+                'reference' => $record->donorProfile?->donor_id ?? __('console.phase_six.rows.pending'),
+                'title' => $record->name,
+                'subtitle' => $record->phone ?: $record->email ?: __('console.phase_six.rows.no_contact'),
+                'context' => $record->donorProfile?->preferredCenter?->name ?? __('console.phase_six.rows.center_unassigned'),
+                'status' => $requiresReview ? __('console.phase_six.rows.review_required') : __('console.phase_six.rows.ready_for_identity'),
+                'tone' => $requiresReview ? 'warning' : 'success',
+            ];
+        }
+
+        if ($record instanceof DonorDuplicateCase) {
+            return [
+                'key' => 'duplicate-'.$record->id,
+                'reference' => 'DUP-'.str_pad((string) $record->id, 6, '0', STR_PAD_LEFT),
+                'title' => $record->primaryDonor->name.' / '.$record->candidateDonor->name,
+                'subtitle' => $record->primaryDonor->donorProfile?->donor_id.' / '.$record->candidateDonor->donorProfile?->donor_id,
+                'context' => collect($record->match_signals)->filter()->keys()->map(fn ($key) => str($key)->replace('_', ' '))->implode(', ').' / '.number_format((float) $record->match_score).'%',
+                'status' => __('console.phase_six.statuses.'.$record->status->value),
+                'tone' => $this->statusTone($record->status->value),
+            ];
+        }
+
+        if ($record instanceof DonorIdentityCheck) {
+            return [
+                'key' => 'identity-'.$record->id,
+                'reference' => 'IDV-'.str_pad((string) $record->id, 6, '0', STR_PAD_LEFT),
+                'title' => $record->donor->name,
+                'subtitle' => $record->donor->donorProfile?->donor_id ?? __('console.phase_six.rows.pending'),
+                'context' => __('console.phase_six.methods.'.$record->method->value).' / '.($record->confirmer?->name ?? __('console.phase_six.rows.system')),
+                'status' => __('console.phase_six.statuses.'.$record->status->value),
+                'tone' => $this->statusTone($record->status->value),
+            ];
+        }
+
+        if ($record instanceof Appointment) {
+            return [
+                'key' => 'appointment-'.$record->id,
+                'reference' => 'APT-'.str_pad((string) $record->id, 6, '0', STR_PAD_LEFT),
+                'title' => $record->donor->name,
+                'subtitle' => ($record->donor->donorProfile?->donor_id ?? __('console.phase_six.rows.pending')).' / '.$record->donor->phone,
+                'context' => $record->bloodCenter->name.' / '.__('console.phase_six.rows.checked_in', ['time' => $record->checked_in_at?->diffForHumans()]),
+                'status' => __('console.phase_six.statuses.'.$record->status->value),
+                'tone' => $this->statusTone($record->status->value),
+            ];
+        }
+
+        if ($record instanceof EligibilityRecord) {
+            return [
+                'key' => 'screening-'.$record->id,
+                'reference' => 'SCR-'.str_pad((string) $record->id, 6, '0', STR_PAD_LEFT),
+                'title' => $record->donor->name,
+                'subtitle' => $record->donor->donorProfile?->donor_id ?? __('console.phase_six.rows.pending'),
+                'context' => ($record->screeningProtocol?->code ?? __('console.phase_six.rows.legacy_protocol')).' / '.$record->checker?->name,
+                'status' => __('console.phase_six.statuses.'.$record->status->value),
+                'tone' => $this->statusTone($record->status->value),
+            ];
+        }
+
+        if ($record instanceof Deferral) {
+            return [
+                'key' => 'deferral-'.$record->id,
+                'reference' => 'DEF-'.str_pad((string) $record->id, 6, '0', STR_PAD_LEFT),
+                'title' => $record->donor->name,
+                'subtitle' => $record->donor->donorProfile?->donor_id ?? __('console.phase_six.rows.pending'),
+                'context' => $record->reason,
+                'status' => $record->is_active ? __('console.phase_six.rows.active') : __('console.phase_six.rows.closed'),
+                'tone' => $record->is_active ? 'warning' : 'neutral',
+            ];
+        }
+
+        if ($record instanceof ScreeningProtocol) {
+            return [
+                'key' => 'protocol-'.$record->id,
+                'reference' => $record->code.'@'.$record->version,
+                'title' => $record->title,
+                'subtitle' => __('console.phase_six.rows.protocol_counts', ['questions' => count($record->questionnaire), 'rules' => count($record->rules)]),
+                'context' => $record->is_construction_only ? __('console.phase_six.rows.construction_only') : __('console.phase_six.rows.approved_protocol'),
+                'status' => __('console.phase_six.statuses.'.$record->status->value),
+                'tone' => $this->statusTone($record->status->value),
+            ];
+        }
+
+        if ($record instanceof CollectionLabel) {
+            return [
+                'key' => 'label-'.$record->id,
+                'reference' => $record->label_identifier,
+                'title' => $record->collectionEpisode->donor->name,
+                'subtitle' => __('console.phase_six.rows.label', ['type' => $record->specimen?->specimen_type ?? $record->collectionContainer?->kind]),
+                'context' => $record->template_version.' / '.$record->symbology,
+                'status' => __('console.phase_six.statuses.'.$record->status->value),
+                'tone' => $this->statusTone($record->status->value),
+            ];
+        }
+
+        if ($record instanceof Specimen) {
+            return [
+                'key' => 'specimen-'.$record->id,
+                'reference' => $record->specimen_identifier,
+                'title' => __('console.phase_six.rows.specimen', ['type' => str($record->specimen_type)->upper()]),
+                'subtitle' => $record->collectionEpisode->donor->name,
+                'context' => $record->volume_ml ? __('console.phase_six.rows.volume', ['volume' => $record->volume_ml]) : __('console.phase_six.rows.volume_pending'),
+                'status' => __('console.phase_six.statuses.'.$record->status->value),
+                'tone' => $this->statusTone($record->status->value),
+            ];
+        }
+
+        if ($record instanceof DonorReaction) {
+            return [
+                'key' => 'reaction-'.$record->id,
+                'reference' => 'REA-'.str_pad((string) $record->id, 6, '0', STR_PAD_LEFT),
+                'title' => $record->donor->name,
+                'subtitle' => $record->reaction_type.' / '.collect($record->symptoms)->implode(', '),
+                'context' => ($record->treatment ?: __('console.phase_six.rows.no_treatment')).' / '.$record->recorder?->name,
+                'status' => __('console.phase_six.statuses.'.$record->severity->value),
+                'tone' => $this->statusTone($record->severity->value),
+            ];
+        }
+
+        if ($record instanceof OfflineCollectionDevice) {
+            return [
+                'key' => 'device-'.$record->id,
+                'reference' => $record->device_uuid,
+                'title' => $record->name,
+                'subtitle' => $record->assignee?->name ?? __('console.phase_six.rows.unassigned_operator'),
+                'context' => __('console.phase_six.rows.device_batches', ['count' => $record->identifierBatches->whereNull('revoked_at')->count(), 'time' => $record->last_synced_at?->diffForHumans() ?? __('console.phase_six.rows.never')]),
+                'status' => __('console.phase_six.statuses.'.$record->status->value),
+                'tone' => $this->statusTone($record->status->value),
+            ];
+        }
+
+        if ($record instanceof OfflineCollectionSubmission) {
+            return [
+                'key' => 'offline-'.$record->id,
+                'reference' => $record->donation_identifier,
+                'title' => $record->device->name,
+                'subtitle' => $record->client_submission_id,
+                'context' => $record->conflict_codes ? collect($record->conflict_codes)->implode(', ') : __('console.phase_six.rows.encrypted_payload'),
+                'status' => __('console.phase_six.statuses.'.$record->status->value),
+                'tone' => $this->statusTone($record->status->value),
+            ];
+        }
+
+        /** @var CollectionEpisode $record */
+        return [
+            'key' => 'episode-'.$record->id,
+            'reference' => $record->donation_identifier,
+            'title' => $record->donor->name,
+            'subtitle' => ($record->donor->donorProfile?->donor_id ?? __('console.phase_six.rows.pending')).' / '.__('console.phase_six.bag_types.'.$record->bag_type),
+            'context' => __('console.phase_six.rows.specimen_progress', ['complete' => $record->specimens->whereIn('status', [SpecimenStatus::Collected, SpecimenStatus::HandedOff])->count(), 'total' => $record->specimens->count(), 'source' => $record->source_mode]),
+            'status' => __('console.phase_six.statuses.'.$record->status->value),
+            'tone' => $this->statusTone($record->status->value),
+        ];
+    }
+
     /** @return array<string, string> */
     protected function validationAttributes(): array
     {
@@ -1095,6 +1279,16 @@ final class DonorJourney extends Component
                 ->orWhere('phone', 'like', $term)
                 ->orWhere('email', 'like', $term)
                 ->orWhereHas('donorProfile', fn (Builder $profileQuery) => $profileQuery->where('donor_id', 'like', $term)));
+    }
+
+    private function statusTone(string $status): string
+    {
+        return match ($status) {
+            'active', 'applied', 'checked_in', 'collected', 'completed', 'confirmed', 'eligible', 'handed_off', 'healthy', 'printed', 'reconciled' => 'success',
+            'cancelled', 'critical', 'failed', 'missing', 'permanently_deferred', 'rejected', 'revoked', 'severe', 'voided' => 'danger',
+            'conflict', 'draft', 'expected', 'generated', 'in_progress', 'interrupted', 'moderate', 'not_yet_eligible', 'pending', 'prepared', 'quarantined', 'received', 'suspended', 'temporarily_deferred' => 'warning',
+            default => 'neutral',
+        };
     }
 
     /** @template TModel of \Illuminate\Database\Eloquent\Model
